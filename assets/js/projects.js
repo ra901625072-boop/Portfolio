@@ -10,7 +10,7 @@ const PROJECTS_DATA = [
     date: "July 2026",
     role: "Independent Creator",
     demoUrl: "#",
-    githubUrl: "#",
+    githubUrl: "https://github.com/ra901625072-boop/Jarvis-Voice-Assistant",
     description: `A voice- and text-mode automation agent capable of executing complex workflows by orchestrating multiple specialized sub-agents (coding, research, and planning agents).`,
     body: `
       <h4>The Challenge</h4>
@@ -37,7 +37,7 @@ const PROJECTS_DATA = [
     date: "March 2026",
     role: "Full-Stack Freelance Developer",
     demoUrl: "#",
-    githubUrl: "#",
+    githubUrl: "https://github.com/ra901625072-boop/pali",
     description: `A localized web application built to track beneficiary enrollment and validation for the Central Bank Digital Currency (CBDC) rollout in Pali, featuring secure administrative analytics.`,
     body: `
       <h4>The Challenge</h4>
@@ -64,7 +64,7 @@ const PROJECTS_DATA = [
     date: "May 2026",
     role: "Full-Stack Freelance Developer",
     demoUrl: "#",
-    githubUrl: "#",
+    githubUrl: "https://github.com/ra901625072-boop/Glossary-Mart",
     description: `An inventory and supplier management system paired with an executive dashboard tracking metrics, revenue, and stock levels, alongside a customer-facing digital storefront.`,
     body: `
       <h4>The Challenge</h4>
@@ -91,7 +91,7 @@ const PROJECTS_DATA = [
     date: "January 2026",
     role: "Full-Stack Developer",
     demoUrl: "#",
-    githubUrl: "#",
+    githubUrl: "https://github.com/ra901625072-boop/FamDoc",
     description: `A private document-sharing portal modeled after Google Drive. Families join using a unique family code, making uploaded documents instantly viewable and downloadable by all members.`,
     body: `
       <h4>The Challenge</h4>
@@ -118,7 +118,7 @@ const PROJECTS_DATA = [
     date: "April 2026",
     role: "Full-Stack Creator",
     demoUrl: "#",
-    githubUrl: "#",
+    githubUrl: "https://github.com/ra901625072-boop/Resume-Maker",
     description: `A web application targeting students and design novices. Users enter their credentials and layout preferences to generate and download professional, formatted resumes.`,
     body: `
       <h4>The Challenge</h4>
