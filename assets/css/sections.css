@@ -1993,41 +1993,17 @@ footer {
     animation-play-state: paused;
   }
   
-  /* Simulated Code Mockup Editor & Overlay for mobile resume */
+  /* Actual Resume Iframe Preview on mobile */
   .resume-iframe {
-    display: none;
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    transform: scale(1) !important;
+    transform-origin: top left !important;
+    pointer-events: auto !important;
   }
   .mockup-code-preview {
-    display: block;
-    padding: 1.5rem;
-    font-family: monospace;
-    font-size: 0.8rem;
-    line-height: 1.6;
-    color: #e2e8f0;
-    background: #090a0f;
-    height: 100%;
-    overflow-y: auto;
-    text-align: left;
-  }
-  .code-line {
-    display: flex;
-    margin-bottom: 0.2rem;
-  }
-  .line-num {
-    width: 25px;
-    color: #4b5563;
-    user-select: none;
-    flex-shrink: 0;
-  }
-  .code-keyword {
-    color: #ff7b72;
-    font-weight: 600;
-  }
-  .code-variable {
-    color: #7ee787;
-  }
-  .code-string {
-    color: #a5d6ff;
+    display: none !important;
   }
   
   .mockup-overlay {
