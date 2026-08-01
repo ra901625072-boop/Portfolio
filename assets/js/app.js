@@ -14,24 +14,32 @@ function initHeaderScroll() {
 function initMobileMenu() {
   const hamburger = document.querySelector(".hamburger");
   const navMenu = document.querySelector(".nav-menu");
+  const navOverlay = document.getElementById("nav-overlay");
   const navLinks = document.querySelectorAll(".nav-link");
   if (!hamburger || !navMenu) return;
 
-  hamburger.addEventListener("click", () => {
+  function toggleMenu() {
     const isActive = hamburger.classList.toggle("active");
     navMenu.classList.toggle("active");
+    if (navOverlay) navOverlay.classList.toggle("active");
     
     if (isActive) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
     }
-  });
+  }
+
+  hamburger.addEventListener("click", toggleMenu);
+  if (navOverlay) {
+    navOverlay.addEventListener("click", toggleMenu);
+  }
 
   navLinks.forEach(link => {
     link.addEventListener("click", () => {
       hamburger.classList.remove("active");
       navMenu.classList.remove("active");
+      if (navOverlay) navOverlay.classList.remove("active");
       document.body.style.overflow = "";
     });
   });

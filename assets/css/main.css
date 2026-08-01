@@ -132,6 +132,7 @@ a {
 .section {
   padding: clamp(4rem, 8vw, 8rem) 0;
   position: relative;
+  overflow: hidden;
 }
 
 .section-header {
@@ -409,10 +410,13 @@ a {
     grid-template-columns: 1fr;
   }
   .container {
-    padding: 0 1.5rem;
+    padding: 0 1.25rem; /* slightly tighter margin for compact phones */
   }
   .section {
-    padding: 6rem 0;
+    padding: 3.5rem 0;
+  }
+  .glass-card {
+    padding: 1.5rem;
   }
   .custom-cursor, .custom-cursor-dot {
     display: none; /* Hide on mobile touch devices */
