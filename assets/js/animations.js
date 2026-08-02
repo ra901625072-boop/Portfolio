@@ -166,17 +166,42 @@ function initScrollReveals() {
 function animateSkillsBars() {
   const bars = document.querySelectorAll(".skill-bar-fill");
   bars.forEach(bar => {
-    const percent = bar.dataset.percentage;
-    bar.style.width = `${percent}%`;
+    const percent = parseInt(bar.dataset.percentage, 10);
+    if (isNaN(percent)) return;
     
-    // Add dynamically rendered glowing tooltip if not already present
+    // Reset to 0 first to prepare for animation
+    bar.style.transition = "none";
+    bar.style.width = "0%";
+    
+    const wrapper = bar.closest(".skill-bar-wrapper");
+    const labelPct = wrapper ? wrapper.querySelector(".skill-percentage") : null;
+    
     let tooltip = bar.querySelector(".skill-tooltip");
     if (!tooltip) {
       tooltip = document.createElement("span");
       tooltip.className = "skill-tooltip";
-      tooltip.innerText = `${percent}%`;
       bar.appendChild(tooltip);
     }
+    tooltip.innerText = "0%";
+    if (labelPct) labelPct.innerText = "0%";
+    
+    // Force reflow
+    bar.getBoundingClientRect();
+    
+    setTimeout(() => {
+      bar.style.transition = "width 1.5s cubic-bezier(0.1, 0.8, 0.2, 1)";
+      bar.style.width = `${percent}%`;
+      
+      if (window.animatePercentageText) {
+        window.animatePercentageText(tooltip, percent);
+        if (labelPct) {
+          window.animatePercentageText(labelPct, percent);
+        }
+      } else {
+        tooltip.innerText = `${percent}%`;
+        if (labelPct) labelPct.innerText = `${percent}%`;
+      }
+    }, 50);
   });
 }
 

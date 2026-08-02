@@ -75,35 +75,193 @@ function initSkillsTabs() {
   const tabBtns = document.querySelectorAll(".tab-btn");
   const tabPanes = document.querySelectorAll(".skills-pane");
 
+  const categoryIcons = {
+    design: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>`,
+    frontend: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M3 5V19A9 3 0 0 0 21 19V5"></path><path d="M3 12A9 3 0 0 0 21 12"></path></svg>`,
+    tools: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>`
+  };
+
+  function animatePercentageText(tooltip, targetVal) {
+    let current = 0;
+    const duration = 1000; // Matches progress ring animation speed
+    const startTime = performance.now();
+    
+    function update(now) {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const ease = progress * (2 - progress); // easeOutQuad
+      current = Math.round(ease * targetVal);
+      tooltip.innerText = `${current}%`;
+      if (progress < 1) {
+        requestAnimationFrame(update);
+      }
+    }
+    requestAnimationFrame(update);
+  }
+
+  function animateProgressRing(container) {
+    const fill = container.querySelector(".progress-ring-fill");
+    const tooltip = container.querySelector(".tab-tooltip");
+    const pct = parseInt(container.dataset.percentage, 10);
+    
+    if (fill && !isNaN(pct)) {
+      const radius = 14;
+      const circumference = 2 * Math.PI * radius; // ~88px
+      
+      fill.style.strokeDasharray = circumference;
+      fill.style.transition = "none";
+      fill.style.strokeDashoffset = circumference;
+      
+      // Force reflow
+      fill.getBoundingClientRect();
+      
+      fill.style.transition = "stroke-dashoffset 1s cubic-bezier(0.25, 0.8, 0.25, 1)";
+      const offset = circumference - (pct / 100) * circumference;
+      fill.style.strokeDashoffset = offset;
+      
+      if (tooltip) {
+        animatePercentageText(tooltip, pct);
+      }
+    }
+  }
+
+  // Calculate and inject average percentage progress rings dynamically
   tabBtns.forEach(btn => {
-    btn.addEventListener("click", () => {
-      const targetTab = btn.dataset.tab;
-
-      // Update active button
-      tabBtns.forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-
-      // Show/Hide Panes
-      tabPanes.forEach(pane => {
-        pane.classList.remove("active");
-        if (pane.id === `${targetTab}-skills`) {
-          pane.classList.add("active");
-          // Re-trigger bar fill animations for newly shown panel
-          setTimeout(() => {
-            const fills = pane.querySelectorAll(".skill-bar-fill");
-            fills.forEach(f => {
-              f.style.width = `${f.dataset.percentage}%`;
-              let tooltip = f.querySelector(".skill-tooltip");
-              if (!tooltip) {
-                tooltip = document.createElement("span");
-                tooltip.className = "skill-tooltip";
-                tooltip.innerText = `${f.dataset.percentage}%`;
-                f.appendChild(tooltip);
-              }
-            });
-          }, 50);
+    const targetTab = btn.dataset.tab;
+    const pane = document.getElementById(`${targetTab}-skills`);
+    if (pane) {
+      const fills = pane.querySelectorAll(".skill-bar-fill");
+      let total = 0;
+      let count = 0;
+      fills.forEach(f => {
+        const pct = parseInt(f.dataset.percentage, 10);
+        if (!isNaN(pct)) {
+          total += pct;
+          count++;
         }
       });
+      if (count > 0) {
+        const avg = Math.round(total / count);
+        
+        // Find existing svg chevron
+        const svg = btn.querySelector("svg");
+        
+        // Create side wrapper
+        const wrapper = document.createElement("span");
+        wrapper.className = "tab-side-wrapper";
+        
+        // Create progress circle container
+        const circleContainer = document.createElement("div");
+        circleContainer.className = "tab-progress-circle";
+        circleContainer.dataset.percentage = avg;
+        
+        circleContainer.innerHTML = `
+          <svg class="progress-ring" width="36" height="36">
+            <circle class="progress-ring-bg" stroke="rgba(255,255,255,0.06)" stroke-width="2.5" fill="transparent" r="14" cx="18" cy="18" />
+            <circle class="progress-ring-fill" stroke="rgba(230, 57, 70, 0.45)" stroke-width="2.5" stroke-linecap="round" fill="transparent" r="14" cx="18" cy="18" />
+          </svg>
+          <div class="tab-icon">
+            ${categoryIcons[targetTab] || ""}
+          </div>
+          <span class="tab-tooltip">0%</span>
+        `;
+        
+        wrapper.appendChild(circleContainer);
+        if (svg) {
+          wrapper.appendChild(svg); // Automatically moves the SVG inside the wrapper
+        }
+        
+        btn.appendChild(wrapper);
+      }
+    }
+  });
+
+  // Trigger initial animation for all progress rings
+  setTimeout(() => {
+    document.querySelectorAll(".tab-progress-circle").forEach(container => {
+      animateProgressRing(container);
+    });
+  }, 150);
+
+  // Expose to window so animations.js can synchronize animations
+  window.animatePercentageText = animatePercentageText;
+
+  function switchTab(btn) {
+    if (btn.classList.contains("active")) return;
+    const targetTab = btn.dataset.tab;
+
+    // Update active button
+    tabBtns.forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+
+    // Show/Hide Panes
+    tabPanes.forEach(pane => {
+      pane.classList.remove("active");
+      if (pane.id === `${targetTab}-skills`) {
+        pane.classList.add("active");
+        
+        // Find skill bars in active pane
+        const fills = pane.querySelectorAll(".skill-bar-fill");
+        
+        // Reset widths and label/tooltip text to 0 to prepare for animation
+        fills.forEach(f => {
+          const targetPct = parseInt(f.dataset.percentage, 10);
+          if (isNaN(targetPct)) return;
+          
+          f.style.transition = "none";
+          f.style.width = "0%";
+          
+          const wrapper = f.closest(".skill-bar-wrapper");
+          const labelPct = wrapper ? wrapper.querySelector(".skill-percentage") : null;
+          
+          let tooltip = f.querySelector(".skill-tooltip");
+          if (!tooltip) {
+            tooltip = document.createElement("span");
+            tooltip.className = "skill-tooltip";
+            f.appendChild(tooltip);
+          }
+          tooltip.innerText = "0%";
+          if (labelPct) labelPct.innerText = "0%";
+        });
+        
+        // Force reflow
+        pane.offsetHeight;
+        
+        // Trigger smooth draw-in and count-up animations
+        setTimeout(() => {
+          fills.forEach(f => {
+            const targetPct = parseInt(f.dataset.percentage, 10);
+            if (isNaN(targetPct)) return;
+            
+            f.style.transition = "width 1.5s cubic-bezier(0.1, 0.8, 0.2, 1)";
+            f.style.width = `${targetPct}%`;
+            
+            const wrapper = f.closest(".skill-bar-wrapper");
+            const labelPct = wrapper ? wrapper.querySelector(".skill-percentage") : null;
+            const tooltip = f.querySelector(".skill-tooltip");
+            
+            if (tooltip) {
+              animatePercentageText(tooltip, targetPct);
+            }
+            if (labelPct) {
+              animatePercentageText(labelPct, targetPct);
+            }
+          });
+        }, 50);
+      }
+    });
+  }
+
+  tabBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      switchTab(btn);
+    });
+    btn.addEventListener("mouseenter", () => {
+      switchTab(btn);
+      const container = btn.querySelector(".tab-progress-circle");
+      if (container) {
+        animateProgressRing(container);
+      }
     });
   });
 }
@@ -225,6 +383,9 @@ function initContactForm() {
     }
 
     const name = form.querySelector("#name").value.trim();
+    const email = form.querySelector("#email").value.trim();
+    const subject = form.querySelector("#subject").value.trim();
+    const message = form.querySelector("#message").value.trim();
 
     // Set loading state
     if (submitBtn) {
@@ -233,8 +394,27 @@ function initContactForm() {
     }
     if (btnText) btnText.innerText = "Sending Message...";
 
-    // Mock API request
-    setTimeout(() => {
+    // Real API request to FormSubmit AJAX endpoint
+    fetch("https://formsubmit.co/ajax/ra901625072@gmail.com", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      body: JSON.stringify({
+        Name: name,
+        Email: email,
+        Subject: subject,
+        Message: message
+      })
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      return response.json();
+    })
+    .then(data => {
       // Reset button
       if (submitBtn) {
         submitBtn.style.pointerEvents = "auto";
@@ -243,7 +423,7 @@ function initContactForm() {
       if (btnText) btnText.innerText = "Send Message";
 
       // Show Success Toast
-      showToast("Message Sent!", `Thank you, ${name}. Your message has been received.`);
+      showToast("Message Sent!", `Thank you, ${name}. Your message has been forwarded.`);
 
       form.reset();
       
@@ -254,8 +434,20 @@ function initContactForm() {
           input.classList.remove("is-valid", "is-invalid");
         }
       });
-      
-    }, 1500);
+    })
+    .catch(error => {
+      console.error("FormSubmit Error:", error);
+
+      // Reset button
+      if (submitBtn) {
+        submitBtn.style.pointerEvents = "auto";
+        submitBtn.style.opacity = "1";
+      }
+      if (btnText) btnText.innerText = "Send Message";
+
+      // Show Error Toast
+      showToast("Send Failed", "Could not route message. Please try again later.");
+    });
   });
 }
 

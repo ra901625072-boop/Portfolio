@@ -585,16 +585,104 @@ header.scrolled {
   box-shadow: 0 10px 20px -10px color-mix(in srgb, var(--color-primary) 20%, transparent);
 }
 
-.tab-btn svg {
+.tab-btn > svg,
+.tab-side-wrapper > svg {
   opacity: 0.5;
   transition: var(--trans-normal);
 }
 
-.tab-btn.active svg {
+.tab-btn.active > svg,
+.tab-btn.active .tab-side-wrapper > svg {
   color: var(--color-secondary);
   opacity: 1;
   transform: translateX(4px);
 }
+
+.tab-side-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.tab-progress-circle {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.progress-ring {
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+  display: block;
+}
+
+.progress-ring-fill {
+  stroke-dasharray: 88;
+  stroke-dashoffset: 88;
+  stroke: rgba(230, 57, 70, 0.45);
+  transition: stroke-dashoffset 1s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.tab-btn:hover .progress-ring-fill,
+.tab-btn.active .progress-ring-fill {
+  stroke: var(--color-primary);
+  filter: drop-shadow(0 0 3px rgba(230, 57, 70, 0.6));
+}
+
+.tab-icon {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  transition: var(--trans-normal);
+  pointer-events: none;
+}
+
+.tab-icon svg {
+  opacity: 0.7 !important;
+  transform: none !important;
+  color: inherit !important;
+  transition: var(--trans-normal) !important;
+}
+
+.tab-btn:hover .tab-icon,
+.tab-btn.active .tab-icon {
+  color: var(--color-primary);
+  transform: scale(1.1);
+}
+
+.tab-btn:hover .tab-icon svg,
+.tab-btn.active .tab-icon svg {
+  opacity: 1 !important;
+}
+
+.tab-tooltip {
+  position: absolute;
+  top: -32px;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 7px;
+  border-radius: 4px;
+  opacity: 0;
+  transform: translateY(5px);
+  transition: opacity 0.3s var(--trans-spring), transform 0.3s var(--trans-spring);
+  pointer-events: none;
+  box-shadow: 0 4px 10px rgba(var(--color-primary-rgb), 0.3);
+  z-index: 10;
+}
+
+.tab-btn:hover .tab-tooltip,
+.tab-btn.active .tab-tooltip {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 
 .skills-content {
   position: relative;
@@ -1343,6 +1431,12 @@ header.scrolled {
   font-size: 1.05rem;
   color: var(--text-primary);
   font-weight: 600;
+  transition: var(--trans-fast);
+  text-decoration: none;
+}
+
+a.detail-value:hover {
+  color: var(--color-primary);
 }
 
 .contact-socials {
@@ -1378,7 +1472,7 @@ header.scrolled {
 .contact-form {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.85rem;
 }
 
 .form-group {
@@ -1448,14 +1542,17 @@ textarea.form-control {
 
 .form-control:focus ~ .form-label,
 .form-control:not(:placeholder-shown) ~ .form-label {
-  top: -0.6rem;
-  left: 1rem;
+  top: -1.15rem;
+  left: 0.5rem;
   font-size: 0.75rem;
-  color: var(--color-secondary);
-  background: var(--bg-secondary);
-  padding: 0 0.5rem;
-  border-radius: 4px;
+  color: var(--text-muted);
+  background: transparent;
+  padding: 0;
   font-weight: 600;
+}
+
+.form-control:focus ~ .form-label {
+  color: var(--color-primary) !important;
 }
 
 /* --- TOAST SYSTEM --- */
