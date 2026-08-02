@@ -174,8 +174,13 @@ function initScrollReveals() {
         if (entry.target.id === "about") {
           animateStatsCounters();
         }
+      } else {
+        entry.target.classList.remove("active");
         
-        observer.unobserve(entry.target);
+        // Reset animation states on exit so they run again on re-entry
+        if (entry.target.id === "about") {
+          statsAnimated = false;
+        }
       }
     });
   };
