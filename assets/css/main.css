@@ -495,3 +495,27 @@ a {
     display: none; /* Hide on mobile touch devices */
   }
 }
+
+/* --- SMOOTH THEME TRANSITION SYSTEM --- */
+body,
+header,
+footer,
+.timeline-content-inner,
+.project-card,
+.project-browser-header,
+.filter-btn,
+.contact-detail-card,
+.hero-floating-badge,
+.tab-btn,
+.social-circle,
+.scroll-top-btn,
+.logo,
+.nav-link {
+  transition: 
+    background-color 0.5s var(--ease-out-expo), 
+    color 0.5s var(--ease-out-expo), 
+    border-color 0.5s var(--ease-out-expo), 
+    box-shadow 0.5s var(--ease-out-expo), 
+    text-stroke 0.5s var(--ease-out-expo),
+    -webkit-text-stroke 0.5s var(--ease-out-expo);
+}
