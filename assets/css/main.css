@@ -472,14 +472,23 @@ a {
 }
 
 /* --- MEDIA QUERIES --- */
+@media (max-width: 1200px) {
+  .nav-menu {
+    gap: 1.25rem;
+  }
+}
+
 @media (max-width: 1024px) {
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
   .grid-3 {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (max-width: 768px) {
-  .grid-2, .grid-3 {
+  .grid-3 {
     grid-template-columns: 1fr;
   }
   .container {
