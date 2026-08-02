@@ -2306,10 +2306,10 @@ footer {
     padding: 1.25rem !important;
   }
 
-  /* Skill bar tooltips persistently active on touch screen scroll */
-  .skill-tooltip {
-    opacity: 1 !important;
-    transform: translateY(0) !important;
+  /* Hide skill bar and tab average tooltips on mobile to prevent layout overlaps and clutter */
+  .skill-tooltip,
+  .tab-tooltip {
+    display: none !important;
   }
 
   /* Compact and overflow-safe contact details card */
@@ -2345,11 +2345,19 @@ footer {
     -webkit-mask-image: linear-gradient(to right, transparent, black 4%, black 96%, transparent) !important;
   }
 
-  /* Align empty input placeholder label with mobile padding */
+  /* Align empty input placeholder label with mobile padding and float properly on focus/value */
   .form-label {
     top: 0.85rem !important;
     left: 1.25rem !important;
     font-size: 0.9rem !important;
+  }
+
+  .form-control:focus ~ .form-label,
+  .form-control:not(:placeholder-shown) ~ .form-label,
+  .form-control:-webkit-autofill ~ .form-label {
+    top: -1.15rem !important;
+    left: 0.5rem !important;
+    font-size: 0.75rem !important;
   }
 
   /* Stack modal buttons vertically on mobile touch bounds */
