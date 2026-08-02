@@ -634,17 +634,21 @@ header.scrolled {
   display: block;
 }
 
+.progress-ring-bg {
+  stroke: rgba(255, 255, 255, 0.06);
+}
+
 .progress-ring-fill {
   stroke-dasharray: 88;
   stroke-dashoffset: 88;
-  stroke: rgba(230, 57, 70, 0.45);
+  stroke: rgba(var(--color-primary-rgb), 0.45);
   transition: stroke-dashoffset 1s var(--ease-out-expo);
 }
 
 .tab-btn:hover .progress-ring-fill,
 .tab-btn.active .progress-ring-fill {
   stroke: var(--color-primary);
-  filter: drop-shadow(0 0 3px rgba(230, 57, 70, 0.6));
+  filter: drop-shadow(0 0 3px rgba(var(--color-primary-rgb), 0.6));
 }
 
 .tab-icon {
@@ -1231,8 +1235,8 @@ header.scrolled {
   justify-content: center;
   width: 38px;
   height: 38px;
-  background: rgba(229, 9, 20, 0.08); /* 8% primary red tint */
-  border: 1px solid rgba(229, 9, 20, 0.15);
+  background: rgba(var(--color-primary-rgb), 0.08); /* 8% primary tint */
+  border: 1px solid rgba(var(--color-primary-rgb), 0.15);
   color: var(--color-primary);
   border-radius: 8px;
   flex-shrink: 0;
@@ -2593,3 +2597,334 @@ footer {
 .skills-pane.active .skill-bar-wrapper:nth-child(1) { animation-delay: 0.05s; }
 .skills-pane.active .skill-bar-wrapper:nth-child(2) { animation-delay: 0.1s; }
 .skills-pane.active .skill-bar-wrapper:nth-child(3) { animation-delay: 0.15s; }
+
+/* --- THEME TOGGLE BUTTON --- */
+.theme-toggle-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-light);
+  color: var(--text-primary);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1002;
+  transition: transform 0.4s var(--ease-out-expo), background-color 0.4s var(--ease-out-expo), border-color 0.4s var(--ease-out-expo), color 0.4s var(--ease-out-expo);
+  position: relative;
+  overflow: hidden;
+}
+
+.theme-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--color-secondary);
+  transform: scale(1.05);
+}
+
+.theme-toggle-btn .sun-icon {
+  opacity: 0;
+  transform: scale(0.6) rotate(90deg);
+  transition: opacity 0.4s var(--ease-out-expo), transform 0.4s var(--ease-out-expo);
+  position: absolute;
+}
+
+.theme-toggle-btn .moon-icon {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+  transition: opacity 0.4s var(--ease-out-expo), transform 0.4s var(--ease-out-expo);
+  position: absolute;
+}
+
+/* Toggle icon states in light mode */
+body.light-mode .theme-toggle-btn .sun-icon {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+}
+
+body.light-mode .theme-toggle-btn .moon-icon {
+  opacity: 0;
+  transform: scale(0.6) rotate(-90deg);
+}
+
+/* --- LIGHT MODE SPECIFIC COMPONENT OVERRIDES --- */
+body.light-mode {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+body.light-mode header {
+  background: transparent;
+}
+
+body.light-mode header.scrolled {
+  background: rgba(248, 250, 252, 0.8) !important;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06) !important;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.03) !important;
+}
+
+body.light-mode .nav-menu {
+  background: #ffffff;
+}
+
+@media (max-width: 768px) {
+  body.light-mode .nav-menu {
+    background: rgba(255, 255, 255, 0.96) !important;
+    border-left: 1px solid rgba(15, 23, 42, 0.08) !important;
+  }
+}
+
+body.light-mode .bg-text-watermark {
+  -webkit-text-stroke: 1px rgba(15, 23, 42, 0.025) !important;
+  text-stroke: 1px rgba(15, 23, 42, 0.025) !important;
+}
+
+body.light-mode .blueprint-ruler-h {
+  border-left-color: rgba(15, 23, 42, 0.12) !important;
+  border-right-color: rgba(15, 23, 42, 0.12) !important;
+}
+
+body.light-mode .blueprint-ruler-h::before {
+  background: rgba(15, 23, 42, 0.12) !important;
+}
+
+body.light-mode .blueprint-ruler-h::after {
+  color: var(--text-muted) !important;
+}
+
+body.light-mode .blueprint-ruler-v {
+  border-top-color: rgba(15, 23, 42, 0.12) !important;
+  border-bottom-color: rgba(15, 23, 42, 0.12) !important;
+}
+
+body.light-mode .hero-coordinate-label {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(var(--color-primary-rgb), 0.4) !important;
+  box-shadow: 0 4px 15px rgba(15, 23, 42, 0.08) !important;
+}
+
+body.light-mode .form-control {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(15, 23, 42, 0.12) !important;
+  color: var(--text-primary) !important;
+}
+
+body.light-mode .form-control:focus {
+  background-image: linear-gradient(#ffffff, #ffffff), var(--grad-primary) !important;
+  box-shadow: 0 0 20px rgba(var(--color-primary-rgb), 0.1) !important;
+}
+
+body.light-mode .form-label {
+  color: var(--text-muted) !important;
+}
+
+body.light-mode .form-control:focus ~ .form-label {
+  color: var(--color-primary) !important;
+}
+
+body.light-mode .btn-secondary {
+  background: rgba(15, 23, 42, 0.04) !important;
+  color: var(--text-primary) !important;
+  border-color: rgba(15, 23, 42, 0.08) !important;
+}
+
+body.light-mode .btn-secondary:hover {
+  background: rgba(15, 23, 42, 0.08) !important;
+  border-color: rgba(15, 23, 42, 0.2) !important;
+}
+
+body.light-mode footer {
+  background: #f1f5f9 !important;
+}
+
+body.light-mode .footer-bottom {
+  border-top-color: rgba(15, 23, 42, 0.05) !important;
+}
+
+body.light-mode .social-circle {
+  background: rgba(15, 23, 42, 0.03) !important;
+  border-color: rgba(15, 23, 42, 0.06) !important;
+  color: var(--text-secondary) !important;
+}
+
+body.light-mode .social-circle:hover {
+  background: var(--grad-primary) !important;
+  border-color: transparent !important;
+  color: white !important;
+}
+
+body.light-mode .tab-btn {
+  background: rgba(15, 23, 42, 0.03) !important;
+  border-color: rgba(15, 23, 42, 0.06) !important;
+  color: var(--text-secondary) !important;
+}
+
+body.light-mode .tab-btn:hover {
+  background: rgba(15, 23, 42, 0.06) !important;
+  border-color: rgba(15, 23, 42, 0.12) !important;
+  color: var(--text-primary) !important;
+}
+
+body.light-mode .tab-btn.active {
+  background: color-mix(in srgb, var(--color-primary) 5%, #ffffff) !important;
+  border-color: var(--color-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+body.light-mode .tab-progress-circle svg .progress-ring-bg {
+  stroke: rgba(15, 23, 42, 0.04) !important;
+}
+
+body.light-mode .skill-bar-track {
+  background: rgba(15, 23, 42, 0.04) !important;
+}
+
+body.light-mode .skill-bar-fill::after {
+  box-shadow: 0 0 8px rgba(15, 23, 42, 0.15), 0 0 3px #fff !important;
+}
+
+body.light-mode .timeline::before,
+body.light-mode .timeline-progress-line {
+  background: rgba(15, 23, 42, 0.06) !important;
+}
+
+body.light-mode .timeline-dot {
+  background: #ffffff !important;
+  border-color: rgba(15, 23, 42, 0.15) !important;
+}
+
+body.light-mode .timeline-dot.active {
+  border-color: var(--color-primary) !important;
+}
+
+body.light-mode .timeline-dot::after {
+  background: rgba(15, 23, 42, 0.15) !important;
+}
+
+body.light-mode .timeline-dot.active::after {
+  background: var(--color-primary) !important;
+}
+
+body.light-mode .timeline-item.illuminated .timeline-content-inner {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(var(--color-primary-rgb), 0.25) !important;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04) !important;
+}
+
+body.light-mode .toast {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(var(--color-primary-rgb), 0.25) !important;
+  box-shadow: 0 15px 35px rgba(15, 23, 42, 0.08), 0 0 15px rgba(var(--color-primary-rgb), 0.05) !important;
+  color: var(--text-primary) !important;
+}
+
+body.light-mode .toast-message {
+  color: var(--text-secondary) !important;
+}
+
+body.light-mode .about-resume-mockup {
+  background: rgba(255, 255, 255, 0.6) !important;
+  border-color: rgba(15, 23, 42, 0.08) !important;
+  box-shadow: 0 20px 45px -10px rgba(15, 23, 42, 0.1) !important;
+}
+
+body.light-mode .mockup-header {
+  background: rgba(241, 245, 249, 0.9) !important;
+  border-bottom-color: rgba(15, 23, 42, 0.06) !important;
+}
+
+body.light-mode .mockup-title {
+  color: var(--text-secondary) !important;
+}
+
+body.light-mode .project-card {
+  background: rgba(255, 255, 255, 0.75) !important;
+  border-color: var(--border-light) !important;
+  box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.05) !important;
+}
+
+body.light-mode .project-browser-header {
+  background: rgba(241, 245, 249, 0.9) !important;
+  border-bottom-color: rgba(15, 23, 42, 0.06) !important;
+}
+
+body.light-mode .timeline-content-inner {
+  background: rgba(255, 255, 255, 0.6) !important;
+  border-color: var(--border-light) !important;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.02) !important;
+}
+
+body.light-mode .modal-wrapper {
+  background: var(--bg-secondary) !important;
+  border-color: var(--border-light) !important;
+  box-shadow: 0 25px 60px -12px rgba(15, 23, 42, 0.08) !important;
+}
+
+body.light-mode .modal-close-btn {
+  background: rgba(15, 23, 42, 0.04) !important;
+  border-color: rgba(15, 23, 42, 0.08) !important;
+  color: var(--text-primary) !important;
+}
+
+body.light-mode .modal-close-btn:hover {
+  background: rgba(15, 23, 42, 0.08) !important;
+  border-color: rgba(15, 23, 42, 0.15) !important;
+}
+
+body.light-mode .filter-btn {
+  background: rgba(15, 23, 42, 0.04) !important;
+  border-color: rgba(15, 23, 42, 0.08) !important;
+  color: var(--text-secondary) !important;
+}
+
+body.light-mode .filter-btn:hover {
+  background: rgba(15, 23, 42, 0.08) !important;
+  border-color: rgba(15, 23, 42, 0.15) !important;
+  color: var(--text-primary) !important;
+}
+
+body.light-mode .filter-btn.active {
+  background: var(--grad-primary) !important;
+  color: white !important;
+  border-color: transparent !important;
+  box-shadow: 0 4px 15px rgba(var(--color-primary-rgb), 0.25) !important;
+}
+
+body.light-mode .scroll-top-btn {
+  background: rgba(15, 23, 42, 0.04) !important;
+  border-color: rgba(15, 23, 42, 0.08) !important;
+  color: var(--text-primary) !important;
+}
+
+body.light-mode .scroll-top-btn:hover {
+  background: var(--grad-primary) !important;
+  border-color: transparent !important;
+  color: white !important;
+}
+
+.nav-theme-toggle-li {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+body.light-mode .hero-floating-badge {
+  background: rgba(255, 255, 255, 0.8) !important;
+  border-color: var(--border-light) !important;
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.04) !important;
+}
+
+body.light-mode .hero-floating-badge svg {
+  color: var(--color-primary) !important;
+}
+
+body.light-mode .contact-detail-card {
+  background: rgba(255, 255, 255, 0.75) !important;
+  border-color: var(--border-light) !important;
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.03) !important;
+}
+
+body.light-mode .contact-detail-card:hover {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-color: color-mix(in srgb, var(--color-primary) 30%, transparent) !important;
+}

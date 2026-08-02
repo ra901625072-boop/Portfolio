@@ -76,6 +76,61 @@ function initScrollSpy() {
   sections.forEach(section => observer.observe(section));
 }
 
+// --- THEME MANAGEMENT SYSTEM (Light/Dark Mode) ---
+function initTheme() {
+  const themeToggle = document.getElementById("theme-toggle");
+  if (!themeToggle) return;
+  
+  const savedTheme = localStorage.getItem("portfolio-theme") || "dark";
+  const iframe = document.querySelector(".resume-iframe");
+  
+  // Set initial state based on saved preferences
+  if (savedTheme === "light") {
+    document.body.classList.add("light-mode");
+    if (iframe) iframe.src = "assets/info/Resume.html?theme=light";
+    
+    const btnDark = document.getElementById("dot-theme-dark");
+    const btnLight = document.getElementById("dot-theme-light");
+    if (btnDark && btnLight) {
+      btnLight.classList.add("active");
+      btnDark.classList.remove("active");
+    }
+  } else {
+    document.body.classList.remove("light-mode");
+    if (iframe) iframe.src = "assets/info/Resume.html?theme=dark";
+  }
+
+  // Handle click on the main toggle button
+  themeToggle.addEventListener("click", () => {
+    const isLight = document.body.classList.toggle("light-mode");
+    localStorage.setItem("portfolio-theme", isLight ? "light" : "dark");
+    
+    // Sync resume preview iframe
+    if (iframe) {
+      iframe.src = `assets/info/Resume.html?theme=${isLight ? "light" : "dark"}`;
+    }
+    
+    // Sync resume mockup buttons
+    const btnDark = document.getElementById("dot-theme-dark");
+    const btnLight = document.getElementById("dot-theme-light");
+    if (btnDark && btnLight) {
+      if (isLight) {
+        btnLight.classList.add("active");
+        btnDark.classList.remove("active");
+      } else {
+        btnDark.classList.add("active");
+        btnLight.classList.remove("active");
+      }
+    }
+
+    // Gentle rotate and scale animations on click
+    themeToggle.style.transform = "scale(0.85) rotate(180deg)";
+    setTimeout(() => {
+      themeToggle.style.transform = "";
+    }, 250);
+  });
+}
+
 // --- RESUME MOCKUP THEME SWITCHING ---
 function initResumeThemeToggle() {
   const btnDark = document.getElementById("dot-theme-dark");
@@ -183,8 +238,8 @@ function initSkillsTabs() {
         
         circleContainer.innerHTML = `
           <svg class="progress-ring" width="36" height="36">
-            <circle class="progress-ring-bg" stroke="rgba(255,255,255,0.06)" stroke-width="2.5" fill="transparent" r="14" cx="18" cy="18" />
-            <circle class="progress-ring-fill" stroke="rgba(230, 57, 70, 0.45)" stroke-width="2.5" stroke-linecap="round" fill="transparent" r="14" cx="18" cy="18" />
+            <circle class="progress-ring-bg" stroke-width="2.5" fill="transparent" r="14" cx="18" cy="18" />
+            <circle class="progress-ring-fill" stroke-width="2.5" stroke-linecap="round" fill="transparent" r="14" cx="18" cy="18" />
           </svg>
           <div class="tab-icon">
             ${categoryIcons[targetTab] || ""}
@@ -521,6 +576,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initHeaderScroll();
   initMobileMenu();
   initScrollSpy();
+  initTheme();
   initResumeThemeToggle();
   initSkillsTabs();
   initContactForm();
