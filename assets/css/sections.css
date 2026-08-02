@@ -1753,6 +1753,41 @@ footer {
   color: var(--text-muted);
 }
 
+.visitor-counter {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(15, 21, 36, 0.4);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-full);
+  padding: 0.425rem 1rem;
+  color: var(--text-secondary);
+  font-family: var(--font-heading);
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: border-color var(--trans-fast), box-shadow var(--trans-fast), transform var(--trans-fast);
+}
+
+.visitor-counter:hover {
+  border-color: rgba(var(--color-primary-rgb), 0.35);
+  box-shadow: 0 0 15px rgba(var(--color-primary-rgb), 0.15);
+  transform: translateY(-1px);
+}
+
+.visitor-icon {
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+}
+
+.visitor-count {
+  color: var(--text-primary);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
 .scroll-top-btn {
   background: rgba(15, 21, 36, 0.45);
   border: 1px solid var(--border-light);
@@ -2944,4 +2979,15 @@ body.light-mode .contact-detail-card {
 body.light-mode .contact-detail-card:hover {
   background: rgba(255, 255, 255, 0.95) !important;
   border-color: color-mix(in srgb, var(--color-primary) 30%, transparent) !important;
+}
+
+body.light-mode .visitor-counter {
+  background: rgba(255, 255, 255, 0.7) !important;
+  border-color: rgba(15, 23, 42, 0.08) !important;
+  box-shadow: 0 4px 15px rgba(15, 23, 42, 0.02) !important;
+  color: var(--color-secondary) !important;
+}
+
+body.light-mode .visitor-count {
+  color: var(--text-primary) !important;
 }
