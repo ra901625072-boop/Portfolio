@@ -32,11 +32,11 @@ const PROJECTS_DATA = [
     title: "Pali CBDC Portal",
     category: "full-stack",
     tags: ["Python", "FastAPI", "SQL", "Dashboard"],
-    image: "assets/images/pali_cbdc_portal.jpg",
+    image: "assets/images/CBDC Pali.png",
     client: "Panchayat Office (Pali)",
     date: "March 2026",
     role: "Full-Stack Freelance Developer",
-    demoUrl: "#",
+    demoUrl: "https://pali-omega.vercel.app",
     githubUrl: "https://github.com/ra901625072-boop/pali",
     description: `A localized web application built to track beneficiary enrollment and validation for the Central Bank Digital Currency (CBDC) rollout in Pali, featuring secure administrative analytics.`,
     body: `
@@ -59,11 +59,11 @@ const PROJECTS_DATA = [
     title: "e-Grossary Mart",
     category: "full-stack",
     tags: ["Python", "FastAPI", "SQL", "E-commerce"],
-    image: "assets/images/e_grocery_mart.jpg",
+    image: "assets/images/e-grossary.png",
     client: "Retail Grocery Client",
     date: "May 2026",
     role: "Full-Stack Freelance Developer",
-    demoUrl: "#",
+    demoUrl: "https://glossary-mart.onrender.com",
     githubUrl: "https://github.com/ra901625072-boop/Glossary-Mart",
     description: `An inventory and supplier management system paired with an executive dashboard tracking metrics, revenue, and stock levels, alongside a customer-facing digital storefront.`,
     body: `
@@ -86,11 +86,11 @@ const PROJECTS_DATA = [
     title: "FamDoc (Family Document Manager)",
     category: "full-stack",
     tags: ["Python", "APIs", "SQL", "Cloud Storage"],
-    image: "assets/images/famdoc_manager.jpg",
+    image: "assets/images/FamDoc.png",
     client: "Personal Project",
     date: "January 2026",
     role: "Full-Stack Developer",
-    demoUrl: "#",
+    demoUrl: "https://famdoc-b51u.onrender.com",
     githubUrl: "https://github.com/ra901625072-boop/FamDoc",
     description: `A private document-sharing portal modeled after Google Drive. Families join using a unique family code, making uploaded documents instantly viewable and downloadable by all members.`,
     body: `
@@ -113,11 +113,11 @@ const PROJECTS_DATA = [
     title: "Resume Maker",
     category: "frontend",
     tags: ["Python", "HTML/CSS/JS", "SQL", "Templates"],
-    image: "assets/images/resume_maker.jpg",
+    image: "assets/images/Resume Maker.png",
     client: "Student Project",
     date: "April 2026",
     role: "Full-Stack Creator",
-    demoUrl: "#",
+    demoUrl: "https://resume-maker-zhcq.onrender.com",
     githubUrl: "https://github.com/ra901625072-boop/Resume-Maker",
     description: `A web application targeting students and design novices. Users enter their credentials and layout preferences to generate and download professional, formatted resumes.`,
     body: `
@@ -173,25 +173,36 @@ function renderProjects(filterValue = "all") {
     ? PROJECTS_DATA 
     : PROJECTS_DATA.filter(p => p.category === filterValue);
     
-  filtered.forEach(project => {
+  filtered.forEach((project, index) => {
     const card = document.createElement("div");
     card.className = "project-card glass-card spotlight-card";
     card.dataset.id = project.id;
     card.setAttribute("tabindex", "0");
     card.setAttribute("aria-label", `View details for project: ${project.title}`);
     
+    // Add cascading stagger delay
+    card.style.animationDelay = `${index * 0.08}s`;
+    
     const tagsHtml = project.tags
       .map(tag => `<span class="project-tag">${tag}</span>`)
       .join("");
       
     card.innerHTML = `
-      <div class="project-img-container">
-        <img src="${project.image}" alt="${project.title}">
-        <div class="project-overlay">
-          <div class="project-tags">${tagsHtml}</div>
-          <h3 class="project-card-title">${project.title}</h3>
-          <p class="project-card-desc">${project.description}</p>
+      <div class="project-browser-header">
+        <div class="browser-dots">
+          <span class="browser-dot"></span>
+          <span class="browser-dot"></span>
+          <span class="browser-dot"></span>
         </div>
+        <div class="browser-title">${project.title}</div>
+      </div>
+      <div class="project-img-container">
+        <img src="${project.image}" alt="${project.title}" loading="lazy">
+      </div>
+      <div class="project-card-content">
+        <div class="project-tags">${tagsHtml}</div>
+        <h3 class="project-card-title">${project.title}</h3>
+        <p class="project-card-desc">${project.description}</p>
       </div>
     `;
     
@@ -255,20 +266,40 @@ function openCaseStudy(projectId) {
       
       <div class="modal-meta-grid">
         <div class="meta-item">
-          <h5>Client</h5>
-          <p>${project.client}</p>
+          <div class="meta-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+          </div>
+          <div class="meta-text">
+            <h5>Client</h5>
+            <p>${project.client}</p>
+          </div>
         </div>
         <div class="meta-item">
-          <h5>Timeline</h5>
-          <p>${project.date}</p>
+          <div class="meta-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          </div>
+          <div class="meta-text">
+            <h5>Timeline</h5>
+            <p>${project.date}</p>
+          </div>
         </div>
         <div class="meta-item">
-          <h5>My Role</h5>
-          <p>${project.role}</p>
+          <div class="meta-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          </div>
+          <div class="meta-text">
+            <h5>My Role</h5>
+            <p>${project.role}</p>
+          </div>
         </div>
         <div class="meta-item">
-          <h5>Core Focus</h5>
-          <p>${project.tags[0]}</p>
+          <div class="meta-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+          </div>
+          <div class="meta-text">
+            <h5>Core Focus</h5>
+            <p>${project.tags[0]}</p>
+          </div>
         </div>
       </div>
       
@@ -400,13 +431,23 @@ function initCarouselControls() {
 function initializeSpotlightEffects() {
   const cards = document.querySelectorAll(".spotlight-card");
   cards.forEach(card => {
+    let rect = null;
+    
+    card.addEventListener("mouseenter", () => {
+      rect = card.getBoundingClientRect();
+    });
+    
     card.addEventListener("mousemove", (e) => {
-      const rect = card.getBoundingClientRect();
+      if (!rect) rect = card.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
       
       card.style.setProperty("--mouse-x", `${x}px`);
       card.style.setProperty("--mouse-y", `${y}px`);
+    });
+    
+    card.addEventListener("mouseleave", () => {
+      rect = null;
     });
   });
 }

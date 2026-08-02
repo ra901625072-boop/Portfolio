@@ -9,6 +9,7 @@ function initCustomCursor() {
   let cursorX = 0, cursorY = 0;
   let dotX = 0, dotY = 0;
   let snappedEl = null;
+  let cachedRect = null;
 
   // Check if touch device - do not activate custom cursor followers
   const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
@@ -18,62 +19,54 @@ function initCustomCursor() {
     return;
   }
 
+  // Global mouse position tracking (no reflows)
   window.addEventListener("mousemove", (e) => {
     mouseX = e.clientX;
     mouseY = e.clientY;
-    
-    // Magnetic snap checking
-    let nearestDist = 55; // snapping distance limit in pixels
-    let nearestEl = null;
+  });
 
-    const magnetics = document.querySelectorAll(".social-circle, .btn, .tab-btn, .filter-btn, .nav-link, .hamburger, .scroll-top-btn");
-    magnetics.forEach(el => {
-      const rect = el.getBoundingClientRect();
-      const elX = rect.left + rect.width / 2;
-      const elY = rect.top + rect.height / 2;
-      const dist = Math.hypot(mouseX - elX, mouseY - elY);
-      
-      if (dist < nearestDist) {
-        nearestDist = dist;
-        nearestEl = el;
-      }
+  // Attach magnetic snap listeners directly to interactive elements
+  const magnetics = document.querySelectorAll(".social-circle, .btn, .filter-btn, .nav-link, .hamburger, .scroll-top-btn");
+  magnetics.forEach(el => {
+    el.addEventListener("mouseenter", () => {
+      cachedRect = el.getBoundingClientRect();
+      snappedEl = el;
+      cursor.classList.add("snapped");
     });
 
-    if (nearestEl) {
-      if (snappedEl !== nearestEl) {
-        if (snappedEl) {
-          snappedEl.style.transform = '';
-        }
-        snappedEl = nearestEl;
-        cursor.classList.add("snapped");
-      }
-      
-      // Pull the element slightly towards mouse (magnetic effect)
-      const rect = snappedEl.getBoundingClientRect();
-      const elX = rect.left + rect.width / 2;
-      const elY = rect.top + rect.height / 2;
-      const pullX = (mouseX - elX) * 0.25;
-      const pullY = (mouseY - elY) * 0.25;
-      snappedEl.style.transform = `translate3d(${pullX}px, ${pullY}px, 0)`;
-      snappedEl.style.transition = 'none'; // disable transition while pulling
-    } else {
-      if (snappedEl) {
-        snappedEl.style.transform = '';
-        snappedEl.style.transition = 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
-        snappedEl = null;
-        cursor.classList.remove("snapped");
-      }
+    el.addEventListener("mousemove", (e) => {
+      if (!cachedRect) cachedRect = el.getBoundingClientRect();
+      const elX = cachedRect.left + cachedRect.width / 2;
+      const elY = cachedRect.top + cachedRect.height / 2;
+      const pullX = (e.clientX - elX) * 0.25;
+      const pullY = (e.clientY - elY) * 0.25;
+      el.style.transform = `translate3d(${pullX}px, ${pullY}px, 0)`;
+      el.style.transition = 'none';
+    });
+
+    el.addEventListener("mouseleave", () => {
+      el.style.transform = '';
+      el.style.transition = 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+      cachedRect = null;
+      snappedEl = null;
+      cursor.classList.remove("snapped");
+    });
+  });
+
+  // Recalculate dimensions on scroll to prevent offset errors
+  window.addEventListener("scroll", () => {
+    if (snappedEl) {
+      cachedRect = snappedEl.getBoundingClientRect();
     }
   });
 
   // Lerp cursor movement
   function animateCursor() {
-    if (snappedEl) {
-      const rect = snappedEl.getBoundingClientRect();
-      const targetWidth = rect.width + 10;
-      const targetHeight = rect.height + 10;
-      const targetX = rect.left + rect.width / 2;
-      const targetY = rect.top + rect.height / 2;
+    if (snappedEl && cachedRect) {
+      const targetWidth = cachedRect.width + 10;
+      const targetHeight = cachedRect.height + 10;
+      const targetX = cachedRect.left + cachedRect.width / 2;
+      const targetY = cachedRect.top + cachedRect.height / 2;
 
       cursorX += (targetX - cursorX) * 0.25;
       cursorY += (targetY - cursorY) * 0.25;

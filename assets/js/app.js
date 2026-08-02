@@ -49,24 +49,50 @@ function initMobileMenu() {
 function initScrollSpy() {
   const sections = document.querySelectorAll("section[id]");
   const navLinks = document.querySelectorAll(".nav-link");
+  if (sections.length === 0 || navLinks.length === 0) return;
 
-  window.addEventListener("scroll", () => {
-    let scrollY = window.scrollY;
+  const observerOptions = {
+    root: null,
+    rootMargin: "-25% 0px -65% 0px",
+    threshold: 0
+  };
 
-    sections.forEach(section => {
-      const sectionHeight = section.offsetHeight;
-      const sectionTop = section.offsetTop - 150;
-      const sectionId = section.getAttribute("id");
-
-      if (scrollY > sectionTop && scrollY <= sectionTop + sectionHeight) {
+  const observerCallback = (entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.getAttribute("id");
         navLinks.forEach(link => {
-          link.classList.remove("active");
-          if (link.getAttribute("href") === `#${sectionId}`) {
+          if (link.getAttribute("href") === `#${id}`) {
             link.classList.add("active");
+          } else {
+            link.classList.remove("active");
           }
         });
       }
     });
+  };
+
+  const observer = new IntersectionObserver(observerCallback, observerOptions);
+  sections.forEach(section => observer.observe(section));
+}
+
+// --- RESUME MOCKUP THEME SWITCHING ---
+function initResumeThemeToggle() {
+  const btnDark = document.getElementById("dot-theme-dark");
+  const btnLight = document.getElementById("dot-theme-light");
+  const iframe = document.querySelector(".resume-iframe");
+  if (!btnDark || !btnLight || !iframe) return;
+
+  btnDark.addEventListener("click", () => {
+    btnDark.classList.add("active");
+    btnLight.classList.remove("active");
+    iframe.src = "assets/info/Resume.html?theme=dark";
+  });
+
+  btnLight.addEventListener("click", () => {
+    btnLight.classList.add("active");
+    btnDark.classList.remove("active");
+    iframe.src = "assets/info/Resume.html?theme=light";
   });
 }
 
@@ -470,6 +496,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initHeaderScroll();
   initMobileMenu();
   initScrollSpy();
+  initResumeThemeToggle();
   initSkillsTabs();
   initContactForm();
 

@@ -188,28 +188,15 @@
             <div class="about-resume-mockup">
               <div class="mockup-header">
                 <div class="mockup-dots">
-                  <span class="dot dot-close"></span>
-                  <span class="dot dot-minimize"></span>
-                  <span class="dot dot-expand"></span>
+                  <button class="dot dot-dark active" id="dot-theme-dark" aria-label="Show resume in dark mode"></button>
+                  <button class="dot dot-light" id="dot-theme-light" aria-label="Show resume in light mode"></button>
                 </div>
                 <div class="mockup-title">Resume_Preview.html</div>
               </div>
               <div class="mockup-viewport">
-                <iframe src="info/Resume.html" class="resume-iframe" title="Akshaysinh Rajput Resume" scrolling="no"></iframe>
-                <div class="mockup-code-preview" id="mockup-code-preview">
-                  <div class="code-line"><span class="line-num">1</span><span class="code-keyword">const</span> <span class="code-variable">developer</span> = {</div>
-                  <div class="code-line"><span class="line-num">2</span>  name: <span class="code-string">"Akshaysinh Rajput"</span>,</div>
-                  <div class="code-line"><span class="line-num">3</span>  role: <span class="code-string">"Python & Full-Stack"</span>,</div>
-                  <div class="code-line"><span class="line-num">4</span>  education: <span class="code-string">"MCA @ Gokul University"</span>,</div>
-                  <div class="code-line"><span class="line-num">5</span>  specialties: [</div>
-                  <div class="code-line"><span class="line-num">6</span>    <span class="code-string">"FastAPI"</span>, <span class="code-string">"React"</span>, <span class="code-string">"SQL"</span>,</div>
-                  <div class="code-line"><span class="line-num">7</span>    <span class="code-string">"AI Automations"</span></div>
-                  <div class="code-line"><span class="line-num">8</span>  ],</div>
-                  <div class="code-line"><span class="line-num">9</span>  experience: <span class="code-string">"Freelance & Intern"</span></div>
-                  <div class="code-line"><span class="line-num">10</span>};</div>
-                </div>
+                <iframe src="assets/info/Resume.html" class="resume-iframe show" title="Akshaysinh Rajput Resume" scrolling="no"></iframe>
                 <div class="mockup-overlay">
-                  <a href="info/Resume.html" target="_blank" class="btn btn-secondary btn-sm">
+                  <a href="assets/info/Resume.html" target="_blank" class="btn btn-secondary btn-sm">
                     Open Live Resume
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
                   </a>
@@ -246,7 +233,7 @@
               </div>
             </div>
             
-            <a href="info/Resume.pdf" class="btn btn-primary" id="download-cv" download="Akshaysinh_Rajput_Resume.pdf">
+            <a href="assets/info/Resume.pdf" class="btn btn-primary" id="download-cv" download="Akshaysinh_Rajput_Resume.pdf">
               Download Resume (.pdf)
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
             </a>
@@ -551,15 +538,6 @@
         <div class="achievements-carousel">
           <div class="carousel-track" id="carousel-track">
             <!-- Dynamically populated by projects.js -->
-          </div>
-          
-          <div class="carousel-controls">
-            <button class="carousel-btn" id="carousel-prev" aria-label="Previous slide">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-            </button>
-            <button class="carousel-btn" id="carousel-next" aria-label="Next slide">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-            </button>
           </div>
         </div>
       </div>
