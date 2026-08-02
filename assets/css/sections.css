@@ -2372,6 +2372,43 @@ footer {
     width: 100% !important;
     justify-content: center !important;
   }
+
+  /* Mobile footer scrolling marquee */
+  .footer-links-marquee-wrapper {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    padding: 0.5rem 0;
+    mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+  }
+  
+  .footer-links-marquee-wrapper .footer-links {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 0 !important; /* using margin-right on items instead for seamless looping */
+    width: max-content !important;
+    will-change: transform;
+    animation: footer-links-marquee 20s linear infinite;
+  }
+  
+  .footer-links-marquee-wrapper .footer-links:hover {
+    animation-play-state: paused;
+  }
+  
+  .footer-links-marquee-wrapper .footer-links li {
+    margin-right: 3rem !important;
+    flex-shrink: 0 !important;
+  }
+  
+  @keyframes footer-links-marquee {
+    0% {
+      transform: translate3d(0, 0, 0);
+    }
+    100% {
+      transform: translate3d(-50%, 0, 0);
+    }
+  }
 }
 
 /* --- PHONE TOAST POSITIONING --- */

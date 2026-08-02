@@ -490,6 +490,31 @@ function initScrollProgress() {
   });
 }
 
+// --- MOBILE FOOTER MARQUEE EFFECT ---
+function initMobileFooterMarquee() {
+  const isMobile = window.innerWidth <= 768;
+  if (!isMobile) return;
+  
+  const linksList = document.querySelector(".footer-links");
+  if (!linksList) return;
+  
+  if (linksList.classList.contains("marquee-initialized")) return;
+  linksList.classList.add("marquee-initialized");
+  
+  // Wrap list in a scrolling marquee wrapper
+  const wrapper = document.createElement("div");
+  wrapper.className = "footer-links-marquee-wrapper";
+  linksList.parentNode.insertBefore(wrapper, linksList);
+  wrapper.appendChild(linksList);
+  
+  // Clone items once for a seamless infinite loop
+  const items = linksList.querySelectorAll("li");
+  items.forEach(item => {
+    const clone = item.cloneNode(true);
+    linksList.appendChild(clone);
+  });
+}
+
 // --- MAIN RUNNER ---
 document.addEventListener("DOMContentLoaded", () => {
   initScrollProgress();
@@ -499,6 +524,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initResumeThemeToggle();
   initSkillsTabs();
   initContactForm();
+  initMobileFooterMarquee();
 
   // Load dynamically generated projects & achievements data
   if (typeof renderProjects === "function") {
