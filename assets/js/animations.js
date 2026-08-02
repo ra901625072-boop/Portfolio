@@ -133,7 +133,7 @@ function initCustomCursor() {
   animateCursor();
 
   // Hover states for generic clickable elements
-  const hoverables = document.querySelectorAll("a, button, .project-card, .form-control");
+  const hoverables = document.querySelectorAll("a, button, .project-card, .form-control, .visitor-counter");
   hoverables.forEach(el => {
     el.addEventListener("mouseenter", () => {
       if (!cursor.classList.contains("snapped")) {
