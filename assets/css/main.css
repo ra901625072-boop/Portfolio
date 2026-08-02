@@ -35,11 +35,18 @@
   --border-light: rgba(255, 255, 255, 0.05);
   --border-glow: rgba(var(--color-primary-rgb), 0.3);
 
+  /* Unified Cubic Beziers (Premium physical easing curves) */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);       /* apple-like fluid decel */
+  --ease-out-spring: cubic-bezier(0.34, 1.56, 0.64, 1);  /* spring overshoot bounce */
+  --ease-out-back: cubic-bezier(0.175, 0.885, 0.32, 1.1); /* subtle overshoot */
+  --ease-in-out-cubic: cubic-bezier(0.65, 0, 0.35, 1);  /* balanced transition */
+
   /* Transitions */
-  --trans-spring: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  --trans-fast: 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
-  --trans-normal: 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-  --trans-slow: 0.7s cubic-bezier(0.25, 0.8, 0.25, 1);
+  --trans-spring: 0.5s var(--ease-out-spring);
+  --trans-spring-subtle: 0.35s var(--ease-out-back);
+  --trans-fast: 0.2s var(--ease-out-expo);
+  --trans-normal: 0.4s var(--ease-out-expo);
+  --trans-slow: 0.75s var(--ease-out-expo);
 }
 
 /* --- RESET & BASE --- */
@@ -301,7 +308,7 @@ a {
   z-index: 99999;
   box-shadow: 0 0 8px rgba(var(--color-primary-rgb), 0.5);
   pointer-events: none;
-  transition: width 0.05s ease-out;
+  transition: width 0.25s var(--ease-out-expo);
 }
 
 /* --- CUSTOM CURSOR --- */
@@ -318,7 +325,13 @@ a {
   z-index: 10000;
   mix-blend-mode: difference;
   will-change: transform, width, height, border-color, background-color;
-  transition: width 0.3s var(--trans-spring), height 0.3s var(--trans-spring), border-color 0.3s ease, background-color 0.3s ease;
+  transition: 
+    width 0.35s var(--ease-out-spring), 
+    height 0.35s var(--ease-out-spring), 
+    border-radius 0.35s var(--ease-out-spring),
+    border-color 0.35s var(--ease-out-expo), 
+    background-color 0.35s var(--ease-out-expo),
+    opacity 0.3s var(--ease-out-expo);
 }
 
 .custom-cursor-dot {

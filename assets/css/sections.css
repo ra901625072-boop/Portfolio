@@ -305,7 +305,7 @@ header.scrolled {
   border-radius: var(--radius-lg);
   border: 1px solid var(--border-light);
   box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.4);
-  transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.6s ease;
+  transition: transform 0.6s var(--ease-out-expo), box-shadow 0.6s var(--ease-out-expo);
 }
 
 @media (hover: hover) {
@@ -327,7 +327,7 @@ header.scrolled {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.6s ease;
+  transition: transform 0.6s var(--ease-out-expo), box-shadow 0.6s var(--ease-out-expo);
 }
 
 @media (hover: hover) {
@@ -578,7 +578,7 @@ header.scrolled {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), background 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+  transition: transform 0.3s var(--ease-out-expo), background 0.3s var(--ease-out-expo), border-color 0.3s var(--ease-out-expo), color 0.3s var(--ease-out-expo), box-shadow 0.3s var(--ease-out-expo);
 }
 
 .tab-btn:hover {
@@ -638,7 +638,7 @@ header.scrolled {
   stroke-dasharray: 88;
   stroke-dashoffset: 88;
   stroke: rgba(230, 57, 70, 0.45);
-  transition: stroke-dashoffset 1s cubic-bezier(0.25, 0.8, 0.25, 1);
+  transition: stroke-dashoffset 1s var(--ease-out-expo);
 }
 
 .tab-btn:hover .progress-ring-fill,
@@ -760,7 +760,7 @@ header.scrolled {
   background: var(--grad-primary);
   width: 0;
   border-radius: var(--radius-full);
-  transition: width 1.5s cubic-bezier(0.1, 0.8, 0.2, 1);
+  transition: width 1.5s var(--ease-out-expo);
   box-shadow: 0 0 10px rgba(var(--color-primary-rgb), 0.5);
   position: relative;
   overflow: visible;
@@ -978,7 +978,7 @@ header.scrolled {
   flex-direction: column;
   background: rgba(18, 19, 28, 0.45);
   border: 1px solid var(--border-light);
-  animation: card-fade-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: card-fade-in 0.6s var(--ease-out-expo) forwards;
 }
 
 @keyframes card-fade-in {
@@ -1122,7 +1122,7 @@ header.scrolled {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transition: opacity 0.4s ease, visibility 0.4s ease;
+  transition: opacity 0.4s var(--ease-out-expo), visibility 0.4s var(--ease-out-expo);
   padding: 2rem;
 }
 
@@ -1143,7 +1143,7 @@ header.scrolled {
   position: relative;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.55);
   transform: scale(0.9) translateY(20px);
-  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.4s var(--ease-out-expo);
 }
 
 .modal-overlay.active .modal-wrapper {
@@ -1888,7 +1888,7 @@ footer {
     padding: 5rem 2rem 2.5rem;
     overflow-y: auto;
     z-index: 1000;
-    transition: right 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: right 0.45s var(--ease-out-expo);
   }
   
   .nav-menu.active {
@@ -1899,7 +1899,7 @@ footer {
   .nav-menu li {
     opacity: 0;
     transform: translateX(30px);
-    transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: opacity 0.4s var(--ease-out-expo), transform 0.4s var(--ease-out-expo);
     width: 100%;
     text-align: center;
   }
@@ -2502,3 +2502,49 @@ footer {
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   opacity: 0.25;
 }
+
+/* --- REUSABLE STAGGER REVEAL SYSTEM --- */
+.reveal-stagger {
+  --stagger-delay: 0.08s;
+  --base-delay: 0.1s;
+}
+
+.reveal-stagger > * {
+  opacity: 0 !important;
+  transform: translateY(20px) scale(0.98) !important;
+  transition: opacity 0.8s var(--ease-out-expo), transform 0.8s var(--ease-out-expo) !important;
+  will-change: transform, opacity;
+}
+
+.reveal.active .reveal-stagger > * {
+  opacity: 1 !important;
+  transform: translateY(0) scale(1) !important;
+}
+
+/* Stagger item delays */
+.reveal.active .reveal-stagger > *:nth-child(1) { transition-delay: calc(var(--base-delay) + 1 * var(--stagger-delay)) !important; }
+.reveal.active .reveal-stagger > *:nth-child(2) { transition-delay: calc(var(--base-delay) + 2 * var(--stagger-delay)) !important; }
+.reveal.active .reveal-stagger > *:nth-child(3) { transition-delay: calc(var(--base-delay) + 3 * var(--stagger-delay)) !important; }
+.reveal.active .reveal-stagger > *:nth-child(4) { transition-delay: calc(var(--base-delay) + 4 * var(--stagger-delay)) !important; }
+.reveal.active .reveal-stagger > *:nth-child(5) { transition-delay: calc(var(--base-delay) + 5 * var(--stagger-delay)) !important; }
+.reveal.active .reveal-stagger > *:nth-child(6) { transition-delay: calc(var(--base-delay) + 6 * var(--stagger-delay)) !important; }
+.reveal.active .reveal-stagger > *:nth-child(7) { transition-delay: calc(var(--base-delay) + 7 * var(--stagger-delay)) !important; }
+.reveal.active .reveal-stagger > *:nth-child(8) { transition-delay: calc(var(--base-delay) + 8 * var(--stagger-delay)) !important; }
+
+/* Skills pane active stagger animation */
+.skills-pane.active .skill-bar-wrapper {
+  opacity: 0;
+  transform: translateY(15px);
+  animation: skill-item-fade 0.6s var(--ease-out-expo) forwards;
+}
+
+@keyframes skill-item-fade {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.skills-pane.active .skill-bar-wrapper:nth-child(1) { animation-delay: 0.05s; }
+.skills-pane.active .skill-bar-wrapper:nth-child(2) { animation-delay: 0.1s; }
+.skills-pane.active .skill-bar-wrapper:nth-child(3) { animation-delay: 0.15s; }

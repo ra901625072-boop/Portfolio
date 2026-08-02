@@ -227,13 +227,31 @@ function renderProjects(filterValue = "all") {
 // --- INITIALIZE FILTER BUTTONS ---
 function initProjectFilters() {
   const filterButtons = document.querySelectorAll(".filter-btn");
+  const grid = document.getElementById("projects-grid");
+  
   filterButtons.forEach(btn => {
     btn.addEventListener("click", (e) => {
+      if (btn.classList.contains("active")) return;
+      
       filterButtons.forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
       
       const filterValue = btn.dataset.filter;
-      renderProjects(filterValue);
+      
+      if (grid) {
+        // Smooth fade-out and translation shift before rendering
+        grid.style.transition = "opacity 0.22s var(--ease-out-expo), transform 0.22s var(--ease-out-expo)";
+        grid.style.opacity = "0";
+        grid.style.transform = "translateY(12px)";
+        
+        setTimeout(() => {
+          renderProjects(filterValue);
+          grid.style.opacity = "1";
+          grid.style.transform = "translateY(0)";
+        }, 220);
+      } else {
+        renderProjects(filterValue);
+      }
     });
   });
 }

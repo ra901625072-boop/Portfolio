@@ -10,6 +10,10 @@ function initCustomCursor() {
   let dotX = 0, dotY = 0;
   let snappedEl = null;
   let cachedRect = null;
+  
+  // Magnetic snapping coordinate interpolation
+  let targetPullX = 0, targetPullY = 0;
+  let currentPullX = 0, currentPullY = 0;
 
   // Check if touch device - do not activate custom cursor followers
   const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
@@ -31,6 +35,7 @@ function initCustomCursor() {
     el.addEventListener("mouseenter", () => {
       cachedRect = el.getBoundingClientRect();
       snappedEl = el;
+      el.style.transition = 'none';
       cursor.classList.add("snapped");
     });
 
@@ -38,18 +43,42 @@ function initCustomCursor() {
       if (!cachedRect) cachedRect = el.getBoundingClientRect();
       const elX = cachedRect.left + cachedRect.width / 2;
       const elY = cachedRect.top + cachedRect.height / 2;
-      const pullX = (e.clientX - elX) * 0.25;
-      const pullY = (e.clientY - elY) * 0.25;
-      el.style.transform = `translate3d(${pullX}px, ${pullY}px, 0)`;
-      el.style.transition = 'none';
+      // Define target pull coordinates
+      targetPullX = (e.clientX - elX) * 0.32;
+      targetPullY = (e.clientY - elY) * 0.32;
     });
 
     el.addEventListener("mouseleave", () => {
-      el.style.transform = '';
-      el.style.transition = 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
-      cachedRect = null;
+      const releasingEl = snappedEl;
+      let releasePullX = currentPullX;
+      let releasePullY = currentPullY;
+
+      // Elastic release animation back to (0,0)
+      function animateRelease() {
+        if (snappedEl === releasingEl) return; // cancel if mouse re-enters
+        
+        releasePullX += (0 - releasePullX) * 0.16;
+        releasePullY += (0 - releasePullY) * 0.16;
+
+        if (Math.abs(releasePullX) < 0.05 && Math.abs(releasePullY) < 0.05) {
+          releasingEl.style.transform = '';
+          releasingEl.style.transition = '';
+        } else {
+          releasingEl.style.transform = `translate3d(${releasePullX}px, ${releasePullY}px, 0)`;
+          requestAnimationFrame(animateRelease);
+        }
+      }
+
       snappedEl = null;
+      cachedRect = null;
+      targetPullX = 0;
+      targetPullY = 0;
+      currentPullX = 0;
+      currentPullY = 0;
       cursor.classList.remove("snapped");
+      
+      releasingEl.style.transition = 'none';
+      requestAnimationFrame(animateRelease);
     });
   });
 
@@ -68,29 +97,34 @@ function initCustomCursor() {
       const targetX = cachedRect.left + cachedRect.width / 2;
       const targetY = cachedRect.top + cachedRect.height / 2;
 
-      cursorX += (targetX - cursorX) * 0.25;
-      cursorY += (targetY - cursorY) * 0.25;
+      cursorX += (targetX - cursorX) * 0.22;
+      cursorY += (targetY - cursorY) * 0.22;
       
       cursor.style.width = `${targetWidth}px`;
       cursor.style.height = `${targetHeight}px`;
       cursor.style.borderRadius = getComputedStyle(snappedEl).borderRadius;
       cursor.style.transform = `translate3d(${cursorX}px, ${cursorY}px, 0) translate3d(-50%, -50%, 0)`;
 
-      dotX += (mouseX - dotX) * 0.4;
-      dotY += (mouseY - dotY) * 0.4;
+      // Lerp magnetic pull displacement
+      currentPullX += (targetPullX - currentPullX) * 0.2;
+      currentPullY += (targetPullY - currentPullY) * 0.2;
+      snappedEl.style.transform = `translate3d(${currentPullX}px, ${currentPullY}px, 0)`;
+
+      dotX += (mouseX - dotX) * 0.38;
+      dotY += (mouseY - dotY) * 0.38;
       dot.style.transform = `translate3d(${dotX}px, ${dotY}px, 0) translate3d(-50%, -50%, 0)`;
     } else {
       // Normal cursor behavior
-      cursorX += (mouseX - cursorX) * 0.15;
-      cursorY += (mouseY - cursorY) * 0.15;
+      cursorX += (mouseX - cursorX) * 0.14;
+      cursorY += (mouseY - cursorY) * 0.14;
       
       cursor.style.width = '';
       cursor.style.height = '';
       cursor.style.borderRadius = '';
       cursor.style.transform = `translate3d(${cursorX}px, ${cursorY}px, 0) translate3d(-50%, -50%, 0)`;
 
-      dotX += (mouseX - dotX) * 0.35;
-      dotY += (mouseY - dotY) * 0.35;
+      dotX += (mouseX - dotX) * 0.32;
+      dotY += (mouseY - dotY) * 0.32;
       dot.style.transform = `translate3d(${dotX}px, ${dotY}px, 0) translate3d(-50%, -50%, 0)`;
     }
 
