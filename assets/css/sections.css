@@ -2341,9 +2341,10 @@ footer {
   
   .timeline-item:nth-child(even) .timeline-dot,
   .timeline-item:nth-child(odd) .timeline-dot {
-    left: 12px !important;
+    left: 20px !important;
     right: auto !important;
-    top: 2rem !important;
+    top: 2.25rem !important;
+    transform: translate(-50%, -50%) !important;
   }
   
   .projects-grid {
