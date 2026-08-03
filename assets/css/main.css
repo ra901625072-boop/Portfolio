@@ -680,7 +680,7 @@ footer,
   font-family: var(--font-heading);
   font-size: 3.5rem;
   font-weight: 800;
-  color: var(--text-primary);
+  color: #e63946;
   display: flex;
   align-items: center;
   gap: 0.25rem;
@@ -696,7 +696,7 @@ footer,
 .preloader-logo-text .logo-dot {
   width: 14px;
   height: 14px;
-  background-color: var(--color-primary);
+  background-color: #e63946;
   border-radius: 50%;
   display: inline-block;
   align-self: flex-end;

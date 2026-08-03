@@ -768,36 +768,6 @@ function animateVisitorCountUp(element, target) {
   requestAnimationFrame(update);
 }
 
-// --- TYPING ANIMATION FOR PRELOADER LOGIC ---
-function typePreloaderText(text, element, speed, callback) {
-  element.innerHTML = "";
-  
-  const textNode = document.createElement("span");
-  textNode.className = "preloader-logo-text-inner";
-  element.appendChild(textNode);
-  
-  const dotNode = document.createElement("span");
-  dotNode.className = "logo-dot";
-  element.appendChild(dotNode);
-  
-  let index = 0;
-  const timer = setInterval(() => {
-    if (index < text.length) {
-      textNode.textContent += text.charAt(index);
-      index++;
-    } else {
-      clearInterval(timer);
-      
-      // Pop the red dot in using spring curve scale
-      dotNode.style.transform = "scale(1)";
-      
-      setTimeout(() => {
-        if (callback) callback();
-      }, 350);
-    }
-  }, speed);
-}
-
 // --- FLIP LOGO TAKEOVER TRANSITION ---
 function runLogoTakeover(preloader, preloaderLogo, callback) {
   const navLogo = document.getElementById("nav-logo");
@@ -812,7 +782,6 @@ function runLogoTakeover(preloader, preloaderLogo, callback) {
   if (progressContainer) progressContainer.style.opacity = "0";
 
   if (!navLogo) {
-    // Fallback if header logo is missing
     preloader.classList.add("fade-out");
     document.documentElement.style.overflow = "";
     document.body.style.overflow = "";
@@ -853,13 +822,21 @@ function runLogoTakeover(preloader, preloaderLogo, callback) {
   navLogo.style.zIndex = "100001"; // Draw on top of preloader
   navLogo.style.opacity = "1";
   
+  // Match the red color of preloader logo temporarily during transition
+  navLogo.style.color = "#e63946";
+  const dot = navLogo.querySelector(".logo-dot");
+  if (dot) {
+    dot.style.transition = "none";
+    dot.style.backgroundColor = "#e63946";
+  }
+
   // Make header active instantly but keep logo offset
   header.style.opacity = "1";
   header.style.transform = "none";
 
   // Hide preloader text instantly to make it seem like the same text is moving
   preloaderLogo.style.opacity = "0";
-  preloaderLogo.style.transition = "opacity 0.1s ease";
+  preloaderLogo.style.transition = "opacity 0.15s ease";
 
   // Force reflow
   navLogo.offsetHeight;
@@ -872,8 +849,14 @@ function runLogoTakeover(preloader, preloaderLogo, callback) {
   document.body.style.overflow = "";
 
   // Play the takeover translation!
-  navLogo.style.transition = "transform 1.1s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.8s ease-out";
+  navLogo.style.transition = "transform 1.1s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.8s ease-out, color 1.1s ease-out";
   navLogo.style.transform = "translate3d(0, 0, 0) scale(1)";
+  navLogo.style.color = ""; // return to CSS styled theme colors
+  
+  if (dot) {
+    dot.style.transition = "background-color 1.1s ease-out, transform 0.4s ease";
+    dot.style.backgroundColor = ""; // return to CSS styled theme colors
+  }
 
   setTimeout(() => {
     preloader.remove();
@@ -882,11 +865,16 @@ function runLogoTakeover(preloader, preloaderLogo, callback) {
     navLogo.style.transformOrigin = "";
     navLogo.style.transition = "";
     navLogo.style.zIndex = "";
+    navLogo.style.color = "";
+    if (dot) {
+      dot.style.transition = "";
+      dot.style.backgroundColor = "";
+    }
     if (callback) callback();
   }, 1200);
 }
 
-// --- INITIALIZE PRELOADER LOGIC ---
+// --- INITIALIZE PRELOADER LOGIC (Synced Typing & Progress) ---
 function initPreloader(callback) {
   const preloader = document.getElementById("preloader");
   const preloaderLogo = document.getElementById("preloader-logo-text");
@@ -900,39 +888,66 @@ function initPreloader(callback) {
     return;
   }
 
-  let currentPercent = 0;
-  const logoText = "Akshay";
+  // Create text container inside preloader text
+  preloaderLogo.innerHTML = "";
+  const textNode = document.createElement("span");
+  textNode.className = "preloader-logo-text-inner";
+  preloaderLogo.appendChild(textNode);
   
-  // Start by typing "Akshay" logo first
-  typePreloaderText(logoText, preloaderLogo, 90, () => {
-    // Fill the percentage progress bar to 100%
-    const duration = 1000;
-    const start = performance.now();
+  const dotNode = document.createElement("span");
+  dotNode.className = "logo-dot";
+  dotNode.style.display = "inline-block";
+  dotNode.style.width = "14px";
+  dotNode.style.height = "14px";
+  dotNode.style.transform = "scale(0)";
+  preloaderLogo.appendChild(dotNode);
 
-    function updateProgress(now) {
-      const elapsed = now - start;
-      const progress = Math.min(elapsed / duration, 1);
-      
-      const ease = 1 - Math.pow(1 - progress, 3);
-      currentPercent = Math.floor(ease * 100);
+  const logoText = "Akshay";
+  const duration = 1800; // 1.8s duration for both typing & loading progress
+  const start = performance.now();
 
-      if (percentEl) {
-        percentEl.innerText = String(currentPercent).padStart(2, '0');
-      }
-      if (progressBar) {
-        progressBar.style.width = `${currentPercent}%`;
-      }
+  function updateProgress(now) {
+    const elapsed = now - start;
+    const progress = Math.min(elapsed / duration, 1);
+    
+    // Smooth ease-out-cubic curve for percentage feel
+    const ease = 1 - Math.pow(1 - progress, 3);
+    const currentPercent = Math.floor(ease * 100);
 
-      if (progress < 1) {
-        requestAnimationFrame(updateProgress);
-      } else {
-        // Run FLIP transition logo takeover
-        runLogoTakeover(preloader, preloaderLogo, callback);
-      }
+    if (percentEl) {
+      percentEl.innerText = String(currentPercent).padStart(2, '0');
+    }
+    if (progressBar) {
+      progressBar.style.width = `${currentPercent}%`;
     }
 
-    requestAnimationFrame(updateProgress);
-  });
+    // Sync typing animation characters to progress (complete typing by 82%)
+    const typeProgress = Math.min(progress / 0.82, 1);
+    const charIndex = Math.floor(typeProgress * (logoText.length + 1));
+    textNode.textContent = logoText.slice(0, charIndex);
+
+    // Sync dot scaling (scale dot from 82% to 100% progress)
+    if (progress >= 0.82) {
+      const dotProgress = (progress - 0.82) / 0.18;
+      // Spring elastic curve feel for dot pop-in
+      const scaleVal = Math.min(1.2, dotProgress * 1.3);
+      dotNode.style.transform = `scale(${scaleVal})`;
+    } else {
+      dotNode.style.transform = "scale(0)";
+    }
+
+    if (progress < 1) {
+      requestAnimationFrame(updateProgress);
+    } else {
+      // Complete: pop dot back to standard scale(1) and start FLIP transition
+      dotNode.style.transform = "scale(1)";
+      setTimeout(() => {
+        runLogoTakeover(preloader, preloaderLogo, callback);
+      }, 150);
+    }
+  }
+
+  requestAnimationFrame(updateProgress);
 }
 
 // --- MAIN RUNNER ---
