@@ -4,7 +4,7 @@ import {
   renderAchievements,
   initializeSpotlightEffects
 } from "./modules/projects.js";
-import { initAnimations, animatePercentageText } from "./modules/animations.js";
+import { initAnimations, animatePercentageText, triggerPageTransition, updateNavIndicator } from "./modules/animations.js";
 
 // Lock scroll immediately on script execution to prevent layout jumping during loading
 document.documentElement.style.overflow = "hidden";
@@ -44,8 +44,10 @@ function initMobileMenu() {
     hamburger.setAttribute("aria-expanded", isActive ? "true" : "false");
     
     if (isActive) {
+      document.documentElement.style.overflow = "hidden";
       document.body.style.overflow = "hidden";
     } else {
+      document.documentElement.style.overflow = "";
       document.body.style.overflow = "";
     }
   }
@@ -60,6 +62,7 @@ function initMobileMenu() {
       hamburger.classList.remove("active");
       navMenu.classList.remove("active");
       if (navOverlay) navOverlay.classList.remove("active");
+      document.documentElement.style.overflow = "";
       document.body.style.overflow = "";
     });
   });
@@ -84,7 +87,10 @@ function initScrollSpy() {
       if (entry.isIntersecting) {
         navLinks.forEach(link => link.classList.remove("active"));
         const activeLink = linkMap.get(entry.target.id);
-        if (activeLink) activeLink.classList.add("active");
+        if (activeLink) {
+          activeLink.classList.add("active");
+          updateNavIndicator();
+        }
       }
     });
   };
@@ -179,6 +185,9 @@ function initTheme() {
 
   // Handle click on the main toggle button (fluid circular reveal)
   themeToggle.addEventListener("click", (event) => {
+    themeToggle.classList.add("clicked");
+    setTimeout(() => themeToggle.classList.remove("clicked"), 650);
+    
     const isLightNow = document.body.classList.contains("light-mode");
     const targetLight = !isLightNow;
 
@@ -925,6 +934,50 @@ function initPreloader(callback) {
   requestAnimationFrame(updateProgress);
 }
 
+// --- DYNAMIC NAVIGATION TRANSITIONS ---
+function initNavTransitions() {
+  const links = document.querySelectorAll('a[href^="#"]');
+  const hamburger = document.querySelector(".hamburger");
+  const navMenu = document.querySelector(".nav-menu");
+  const navOverlay = document.getElementById("nav-overlay");
+
+  links.forEach(link => {
+    if (link.getAttribute("href") === "#") return;
+    if (link.classList.contains("skip-to-content")) return;
+    if (link.id === "scroll-top") return;
+    
+    link.addEventListener("click", (e) => {
+      e.preventDefault();
+      const targetId = link.getAttribute("href").substring(1);
+      
+      // Collapse mobile drawer if active
+      if (hamburger && hamburger.classList.contains("active")) {
+        hamburger.classList.remove("active");
+        navMenu.classList.remove("active");
+        if (navOverlay) navOverlay.classList.remove("active");
+        document.documentElement.style.overflow = "";
+        document.body.style.overflow = "";
+      }
+      
+      triggerPageTransition(targetId, () => {
+        setTimeout(updateNavIndicator, 50);
+      });
+    });
+  });
+}
+
+// --- GLOBAL SKELETON SHIMMER DISMISSAL ---
+function initShimmerDismissal() {
+  document.addEventListener("load", (e) => {
+    if (e.target && e.target.tagName === "IMG") {
+      const wrapper = e.target.closest(".shimmer-wrapper");
+      if (wrapper) {
+        wrapper.classList.add("loaded");
+      }
+    }
+  }, true); // Use capture phase
+}
+
 // --- MAIN RUNNER ---
 document.addEventListener("DOMContentLoaded", () => {
   initPreloader(() => {
@@ -951,9 +1004,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
   initVisitorCounter();
 
+  // Initialize new premium transitions and skeleton listeners
+  initNavTransitions();
+  initShimmerDismissal();
+
   // Load dynamically generated projects & achievements data
   renderProjects("all");
   initProjectFilters();
   renderAchievements();
   initializeSpotlightEffects();
+
+  // Trigger recalculation of layout offsets once dynamic templates have rendered in the DOM
+  window.dispatchEvent(new CustomEvent("recalc-offsets"));
 });

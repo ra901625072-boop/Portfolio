@@ -17,7 +17,6 @@ export function renderProjects(filterValue = "all") {
     card.dataset.id = project.id;
     card.setAttribute("tabindex", "0");
     card.setAttribute("aria-label", `View details for project: ${project.title}`);
-    card.setAttribute("data-cursor-text", "VIEW");
     
     // Add cascading stagger delay
     card.style.animationDelay = `${index * 0.08}s`;
@@ -35,8 +34,8 @@ export function renderProjects(filterValue = "all") {
         </div>
         <div class="browser-title">${project.title}</div>
       </div>
-      <div class="project-img-container">
-        <img src="${project.image}" alt="${project.title}" loading="lazy">
+      <div class="project-img-container shimmer-wrapper">
+        <img src="${project.image}" alt="${project.title}" loading="lazy" onload="this.closest('.shimmer-wrapper').classList.add('loaded')">
       </div>
       <div class="project-card-content">
         <div class="project-tags">${tagsHtml}</div>
@@ -87,9 +86,11 @@ export function initProjectFilters() {
           renderProjects(filterValue);
           grid.style.opacity = "1";
           grid.style.transform = "translateY(0)";
+          window.dispatchEvent(new CustomEvent("recalc-offsets"));
         }, 220);
       } else {
         renderProjects(filterValue);
+        window.dispatchEvent(new CustomEvent("recalc-offsets"));
       }
     });
   });
@@ -121,7 +122,9 @@ export function openCaseStudy(projectId) {
     <button class="modal-close-btn" id="modal-close" aria-label="Close modal">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
     </button>
-    <img src="${project.image}" alt="${project.title}" class="modal-cover-img">
+    <div class="modal-cover-wrapper shimmer-wrapper">
+      <img src="${project.image}" alt="${project.title}" class="modal-cover-img" onload="this.closest('.shimmer-wrapper').classList.add('loaded')">
+    </div>
     <div class="modal-content-inner">
       <div class="modal-tags">${tagsHtml}</div>
       <h2 class="modal-title" tabindex="0">${project.title}</h2>
@@ -286,7 +289,6 @@ export function renderAchievements() {
   items.forEach(a => {
     const card = document.createElement("div");
     card.className = "achievement-card glass-card spotlight-card";
-    card.setAttribute("data-cursor-text", "AWARD");
     
     card.innerHTML = `
       <div class="achievement-icon">${a.icon}</div>

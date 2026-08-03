@@ -203,7 +203,9 @@ function initCustomCursor() {
 let skillsAnimated = false;
 
 function initScrollReveals() {
-  const reveals = document.querySelectorAll(".reveal");
+  const reveals = document.querySelectorAll(
+    ".reveal, .reveal-up, .reveal-down, .reveal-left, .reveal-right, .reveal-scale, .reveal-fade"
+  );
   
   const revealCallback = (entries, observer) => {
     entries.forEach(entry => {
@@ -218,6 +220,11 @@ function initScrollReveals() {
         // If about section, trigger stats counters
         if (entry.target.id === "about") {
           animateStatsCounters();
+        }
+
+        // If experience section, trigger timeline offset recalculation after layout has settled
+        if (entry.target.id === "experience") {
+          window.dispatchEvent(new CustomEvent("recalc-offsets"));
         }
       } else {
         entry.target.classList.remove("active");
@@ -235,8 +242,8 @@ function initScrollReveals() {
 
   const revealObserver = new IntersectionObserver(revealCallback, {
     root: null,
-    threshold: 0.15,
-    rootMargin: "0px 0px -50px 0px"
+    threshold: 0.1,
+    rootMargin: "0px 0px -40px 0px"
   });
 
   reveals.forEach(el => revealObserver.observe(el));
@@ -452,9 +459,10 @@ function initTimelineScrollHighlight() {
   // Initial calculation
   calculateOffsets();
 
-  // Recalculate on resize and load to preserve accuracy
+  // Recalculate on resize, load, and custom layout shifts to preserve accuracy
   window.addEventListener("resize", calculateOffsets, { passive: true });
   window.addEventListener("load", calculateOffsets, { passive: true });
+  window.addEventListener("recalc-offsets", calculateOffsets, { passive: true });
 
   let isTimelineScrolling = false;
   window.addEventListener("scroll", () => {
@@ -495,11 +503,13 @@ function initTimelineScrollHighlight() {
 }
 
 // --- HERO DESIGNER COORDINATE CROSSHAIR ---
+// --- HERO DESIGNER COORDINATE CROSSHAIR ---
 function initDesignerGrid() {
   const hero = document.getElementById("hero");
   const crosshairH = document.getElementById("crosshair-h");
   const crosshairV = document.getElementById("crosshair-v");
   const label = document.getElementById("coordinate-label");
+  const gridContainer = document.querySelector(".hero-designer-grid");
   if (!hero || !crosshairH || !crosshairV || !label) return;
 
   let rect = null;
@@ -511,6 +521,32 @@ function initDesignerGrid() {
   window.addEventListener("resize", () => { if (rect) updateRect(); }, { passive: true });
   window.addEventListener("scroll", () => { if (rect) updateRect(); }, { passive: true });
 
+  const snapTargets = [
+    { selector: ".hero-avatar-card", label: "AVATAR" },
+    { selector: ".badge-1", label: "EXP_BADGE" },
+    { selector: ".badge-2", label: "PROJECTS_BADGE" },
+    { selector: ".logo", label: "NAV_LOGO" },
+    { selector: ".hero-badge", label: "AVAILABILITY" },
+    { selector: ".hero-actions .btn-primary", label: "PROJECTS_LINK" },
+    { selector: ".hero-actions .btn-secondary", label: "CONTACT_LINK" }
+  ];
+
+  function getSnapPoints() {
+    if (!rect) rect = hero.getBoundingClientRect();
+    const points = [];
+    snapTargets.forEach(target => {
+      const el = document.querySelector(target.selector);
+      if (el) {
+        const elRect = el.getBoundingClientRect();
+        // Compute center relative to hero wrapper bounding box
+        const px = elRect.left - rect.left + elRect.width / 2;
+        const py = elRect.top - rect.top + elRect.height / 2;
+        points.push({ x: px, y: py, label: target.label });
+      }
+    });
+    return points;
+  }
+
   let isGridMouseMoving = false;
   hero.addEventListener("mousemove", (e) => {
     if (!isGridMouseMoving) {
@@ -518,8 +554,25 @@ function initDesignerGrid() {
       const clientY = e.clientY;
       requestAnimationFrame(() => {
         if (!rect) updateRect();
-        const x = clientX - rect.left;
-        const y = clientY - rect.top;
+        let x = clientX - rect.left;
+        let y = clientY - rect.top;
+        
+        const snapRadius = 45;
+        const points = getSnapPoints();
+        let snapped = false;
+        let snapLabel = "";
+        
+        for (let i = 0; i < points.length; i++) {
+          const pt = points[i];
+          const dist = Math.hypot(x - pt.x, y - pt.y);
+          if (dist < snapRadius) {
+            x = pt.x;
+            y = pt.y;
+            snapped = true;
+            snapLabel = pt.label;
+            break;
+          }
+        }
         
         // Position tracking lines with GPU translate3d
         crosshairH.style.transform = `translate3d(0, ${y}px, 0)`;
@@ -527,7 +580,16 @@ function initDesignerGrid() {
         
         // Coordinate label floating alongside
         label.style.transform = `translate3d(${x + 15}px, ${y + 15}px, 0)`;
-        label.innerText = `X: ${Math.round(x)}px | Y: ${Math.round(y)}px`;
+        
+        if (snapped) {
+          if (gridContainer) gridContainer.classList.add("snapped");
+          label.classList.add("snapped");
+          label.innerText = `SNAP [${snapLabel}] X: ${Math.round(x)}px | Y: ${Math.round(y)}px`;
+        } else {
+          if (gridContainer) gridContainer.classList.remove("snapped");
+          label.classList.remove("snapped");
+          label.innerText = `X: ${Math.round(x)}px | Y: ${Math.round(y)}px`;
+        }
 
         // Update custom properties for dynamic grid spotlight glow
         hero.style.setProperty("--global-mouse-x", `${x}px`);
@@ -540,6 +602,8 @@ function initDesignerGrid() {
 
   hero.addEventListener("mouseleave", () => {
     rect = null;
+    if (gridContainer) gridContainer.classList.remove("snapped");
+    label.classList.remove("snapped");
   });
 }
 
@@ -577,15 +641,122 @@ function initWatermarkParallax() {
   updateParallax();
 }
 
+// --- SLIDING CAPSULE NAV INDICATOR ---
+export function updateNavIndicator() {
+  const navMenu = document.querySelector(".nav-menu");
+  const indicator = document.querySelector(".nav-indicator-pill");
+  if (!navMenu || !indicator) return;
+
+  const isMobile = window.innerWidth <= 1024;
+  if (isMobile) {
+    indicator.style.opacity = '0';
+    return;
+  }
+
+  const activeLink = navMenu.querySelector(".nav-link.active");
+  if (activeLink) {
+    const menuRect = navMenu.getBoundingClientRect();
+    const linkRect = activeLink.getBoundingClientRect();
+
+    indicator.style.width = `${linkRect.width}px`;
+    indicator.style.height = `${linkRect.height}px`;
+    indicator.style.left = `${linkRect.left - menuRect.left}px`;
+    indicator.style.top = `${linkRect.top - menuRect.top}px`;
+    indicator.style.opacity = '1';
+  } else {
+    indicator.style.opacity = '0';
+  }
+}
+
+function initNavIndicator() {
+  const navMenu = document.querySelector(".nav-menu");
+  if (!navMenu) return;
+
+  let indicator = navMenu.querySelector(".nav-indicator-pill");
+  if (!indicator) {
+    indicator = document.createElement("div");
+    indicator.className = "nav-indicator-pill";
+    navMenu.appendChild(indicator);
+  }
+
+  const navLinks = navMenu.querySelectorAll(".nav-link");
+
+  navLinks.forEach(link => {
+    link.addEventListener("mouseenter", () => {
+      const isMobile = window.innerWidth <= 1024;
+      if (isMobile) return;
+
+      const menuRect = navMenu.getBoundingClientRect();
+      const linkRect = link.getBoundingClientRect();
+
+      indicator.style.width = `${linkRect.width}px`;
+      indicator.style.height = `${linkRect.height}px`;
+      indicator.style.left = `${linkRect.left - menuRect.left}px`;
+      indicator.style.top = `${linkRect.top - menuRect.top}px`;
+      indicator.style.opacity = '1';
+    });
+  });
+
+  navMenu.addEventListener("mouseleave", () => {
+    updateNavIndicator();
+  });
+
+  setTimeout(updateNavIndicator, 200);
+
+  window.addEventListener("resize", updateNavIndicator, { passive: true });
+}
+
+// --- PAGE TRANSITION CURTAIN ---
+export function triggerPageTransition(targetId, callback) {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const target = document.getElementById(targetId);
+    if (target) {
+      target.scrollIntoView({ behavior: 'auto' });
+    }
+    if (callback) callback();
+    return;
+  }
+
+  let curtain = document.querySelector(".transition-curtain");
+  if (!curtain) {
+    curtain = document.createElement("div");
+    curtain.className = "transition-curtain";
+    document.body.appendChild(curtain);
+  }
+
+  curtain.getBoundingClientRect(); // force layout flush
+
+  curtain.classList.remove("active-out");
+  curtain.classList.add("active-in");
+
+  setTimeout(() => {
+    const target = document.getElementById(targetId);
+    if (target) {
+      const html = document.documentElement;
+      html.style.scrollBehavior = "auto";
+      target.scrollIntoView();
+      html.style.scrollBehavior = "";
+    }
+
+    if (callback) callback();
+
+    curtain.classList.remove("active-in");
+    curtain.classList.add("active-out");
+
+    setTimeout(() => {
+      curtain.classList.remove("active-out");
+    }, 750);
+  }, 750);
+}
+
 // --- INITIALIZE ALL ANIMATIONS ---
 export function initAnimations() {
-  // Listen for preloader completion to trigger initial entrance animations
   document.addEventListener("site-loaded", () => {
     document.body.classList.add("site-loaded");
   });
 
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    document.body.classList.add("site-loaded"); // Ensure layout displays instantly
+    document.body.classList.add("site-loaded");
     animateSkillsBars();
     animateStatsCounters();
     initTypingEffect();
@@ -599,4 +770,5 @@ export function initAnimations() {
   initTimelineScrollHighlight();
   initDesignerGrid();
   initWatermarkParallax();
+  initNavIndicator();
 }
