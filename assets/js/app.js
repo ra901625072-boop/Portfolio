@@ -772,14 +772,6 @@ function animateVisitorCountUp(element, target) {
 function runLogoTakeover(preloader, preloaderLogo, callback) {
   const navLogo = document.getElementById("nav-logo");
   const header = document.querySelector("header");
-  const percentEl = document.getElementById("preloader-percent");
-  const progressContainer = document.querySelector(".preloader-progress-container");
-
-  // Fade out percentage and bar first
-  if (percentEl) percentEl.style.transition = "opacity 0.4s ease";
-  if (progressContainer) progressContainer.style.transition = "opacity 0.4s ease";
-  if (percentEl) percentEl.style.opacity = "0";
-  if (progressContainer) progressContainer.style.opacity = "0";
 
   if (!navLogo) {
     preloader.classList.add("fade-out");
@@ -874,12 +866,10 @@ function runLogoTakeover(preloader, preloaderLogo, callback) {
   }, 1200);
 }
 
-// --- INITIALIZE PRELOADER LOGIC (Synced Typing & Progress) ---
+// --- INITIALIZE PRELOADER LOGIC (Logo Typing only) ---
 function initPreloader(callback) {
   const preloader = document.getElementById("preloader");
   const preloaderLogo = document.getElementById("preloader-logo-text");
-  const percentEl = document.getElementById("preloader-percent");
-  const progressBar = document.getElementById("preloader-progress-bar");
   
   if (!preloader || !preloaderLogo) {
     document.documentElement.style.overflow = "";
@@ -903,33 +893,21 @@ function initPreloader(callback) {
   preloaderLogo.appendChild(dotNode);
 
   const logoText = "Akshay";
-  const duration = 1800; // 1.8s duration for both typing & loading progress
+  const duration = 1200; // Snappy 1.2s total logo reveal duration
   const start = performance.now();
 
   function updateProgress(now) {
     const elapsed = now - start;
     const progress = Math.min(elapsed / duration, 1);
     
-    // Smooth ease-out-cubic curve for percentage feel
-    const ease = 1 - Math.pow(1 - progress, 3);
-    const currentPercent = Math.floor(ease * 100);
-
-    if (percentEl) {
-      percentEl.innerText = String(currentPercent).padStart(2, '0');
-    }
-    if (progressBar) {
-      progressBar.style.width = `${currentPercent}%`;
-    }
-
-    // Sync typing animation characters to progress (complete typing by 82%)
-    const typeProgress = Math.min(progress / 0.82, 1);
+    // Type characters dynamically up to 75% of duration
+    const typeProgress = Math.min(progress / 0.75, 1);
     const charIndex = Math.floor(typeProgress * (logoText.length + 1));
     textNode.textContent = logoText.slice(0, charIndex);
 
-    // Sync dot scaling (scale dot from 82% to 100% progress)
-    if (progress >= 0.82) {
-      const dotProgress = (progress - 0.82) / 0.18;
-      // Spring elastic curve feel for dot pop-in
+    // Scale dot up from 75% to 100% of duration
+    if (progress >= 0.75) {
+      const dotProgress = (progress - 0.75) / 0.25;
       const scaleVal = Math.min(1.2, dotProgress * 1.3);
       dotNode.style.transform = `scale(${scaleVal})`;
     } else {
@@ -939,11 +917,11 @@ function initPreloader(callback) {
     if (progress < 1) {
       requestAnimationFrame(updateProgress);
     } else {
-      // Complete: pop dot back to standard scale(1) and start FLIP transition
+      // Complete! Ensure dot is at scale(1) and trigger takeover
       dotNode.style.transform = "scale(1)";
       setTimeout(() => {
         runLogoTakeover(preloader, preloaderLogo, callback);
-      }, 150);
+      }, 100);
     }
   }
 
