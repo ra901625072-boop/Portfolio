@@ -158,17 +158,34 @@ function initCustomCursor() {
   }
   startCursorLoop();
 
-  // Hover states for generic clickable elements
-  const hoverables = document.querySelectorAll("a, button, .project-card, .form-control, .visitor-counter");
-  hoverables.forEach(el => {
-    el.addEventListener("mouseenter", () => {
-      if (!cursor.classList.contains("snapped")) {
+  // Dynamic Event Delegation for Clickable and Action-Text Elements
+  document.addEventListener("mouseover", (e) => {
+    const hoverable = e.target.closest("a, button, .project-card, .achievement-card, .form-control, .visitor-counter, .tab-btn, .filter-btn");
+    if (!hoverable) return;
+    
+    const cursorText = hoverable.getAttribute("data-cursor-text");
+    if (cursorText) {
+      cursor.classList.add("has-text");
+      const textSpan = cursor.querySelector(".custom-cursor-text");
+      if (textSpan) textSpan.innerText = cursorText;
+    } else {
+      if (!cursor.classList.contains("snapped") && !cursor.classList.contains("has-text")) {
         cursor.classList.add("hovered");
       }
-    });
-    el.addEventListener("mouseleave", () => {
-      cursor.classList.remove("hovered");
-    });
+    }
+  });
+
+  document.addEventListener("mouseout", (e) => {
+    const hoverable = e.target.closest("a, button, .project-card, .achievement-card, .form-control, .visitor-counter, .tab-btn, .filter-btn");
+    if (!hoverable) return;
+    
+    // Ignore if transitioning internally between child elements
+    const related = e.relatedTarget;
+    if (related && hoverable.contains(related)) return;
+
+    cursor.classList.remove("hovered", "has-text");
+    const textSpan = cursor.querySelector(".custom-cursor-text");
+    if (textSpan) textSpan.innerText = "";
   });
   
   // Hide on mouseleave/show on mouseenter document window
@@ -526,9 +543,49 @@ function initDesignerGrid() {
   });
 }
 
+// --- WATERMARK SCROLL PARALLAX ---
+function initWatermarkParallax() {
+  const watermarks = document.querySelectorAll(".bg-text-watermark");
+  if (watermarks.length === 0) return;
+  
+  let isScrolling = false;
+  
+  function updateParallax() {
+    const scrollY = window.scrollY;
+    const winHeight = window.innerHeight;
+    
+    watermarks.forEach(wm => {
+      const rect = wm.getBoundingClientRect();
+      const elemTop = rect.top + scrollY;
+      
+      // Calculate offset relative to viewport center
+      const relativeScroll = (scrollY + winHeight / 2) - elemTop;
+      const translateY = relativeScroll * 0.12; // Subtle movement rate
+      
+      wm.style.transform = `translate3d(0, ${translateY}px, 0)`;
+    });
+    isScrolling = false;
+  }
+  
+  window.addEventListener("scroll", () => {
+    if (!isScrolling) {
+      requestAnimationFrame(updateParallax);
+      isScrolling = true;
+    }
+  }, { passive: true });
+  
+  updateParallax();
+}
+
 // --- INITIALIZE ALL ANIMATIONS ---
 export function initAnimations() {
+  // Listen for preloader completion to trigger initial entrance animations
+  document.addEventListener("site-loaded", () => {
+    document.body.classList.add("site-loaded");
+  });
+
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.body.classList.add("site-loaded"); // Ensure layout displays instantly
     animateSkillsBars();
     animateStatsCounters();
     initTypingEffect();
@@ -541,4 +598,5 @@ export function initAnimations() {
   initAvatarParallax();
   initTimelineScrollHighlight();
   initDesignerGrid();
+  initWatermarkParallax();
 }

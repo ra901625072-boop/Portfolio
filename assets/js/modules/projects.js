@@ -17,6 +17,7 @@ export function renderProjects(filterValue = "all") {
     card.dataset.id = project.id;
     card.setAttribute("tabindex", "0");
     card.setAttribute("aria-label", `View details for project: ${project.title}`);
+    card.setAttribute("data-cursor-text", "VIEW");
     
     // Add cascading stagger delay
     card.style.animationDelay = `${index * 0.08}s`;
@@ -285,6 +286,7 @@ export function renderAchievements() {
   items.forEach(a => {
     const card = document.createElement("div");
     card.className = "achievement-card glass-card spotlight-card";
+    card.setAttribute("data-cursor-text", "AWARD");
     
     card.innerHTML = `
       <div class="achievement-icon">${a.icon}</div>
@@ -305,6 +307,8 @@ export function initializeSpotlightEffects() {
     
     card.addEventListener("mouseenter", () => {
       rect = card.getBoundingClientRect();
+      // Apply short interpolation during mouse tracking
+      card.style.transition = "transform 0.12s cubic-bezier(0.25, 0.8, 0.25, 1), border-color 0.2s ease, box-shadow 0.2s ease";
     });
     
     card.addEventListener("mousemove", (e) => {
@@ -314,10 +318,24 @@ export function initializeSpotlightEffects() {
       
       card.style.setProperty("--mouse-x", `${x}px`);
       card.style.setProperty("--mouse-y", `${y}px`);
+      
+      // Calculate 3D Tilt angles (maximum 5.5 degrees)
+      const w = rect.width;
+      const h = rect.height;
+      const dx = x - w / 2;
+      const dy = y - h / 2;
+      
+      const rotateY = (dx / (w / 2)) * 5.5;
+      const rotateX = -(dy / (h / 2)) * 5.5;
+      
+      card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translate3d(0, 0, 15px) scale(1.02)`;
     });
     
     card.addEventListener("mouseleave", () => {
       rect = null;
+      // Spring reset on mouse exit
+      card.style.transition = "transform 0.75s var(--ease-out-spring), border-color 0.4s ease, box-shadow 0.4s ease";
+      card.style.transform = "";
     });
   });
 }
