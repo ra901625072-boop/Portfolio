@@ -76,6 +76,55 @@ function initScrollSpy() {
   sections.forEach(section => observer.observe(section));
 }
 
+// Updates the resume iframe theme dynamically without reloading
+function updateIframeTheme(isLight) {
+  const iframe = document.querySelector(".resume-iframe");
+  if (!iframe) return;
+  
+  try {
+    if (iframe.contentDocument && iframe.contentDocument.body) {
+      if (isLight) {
+        iframe.contentDocument.body.classList.add("light-theme");
+        iframe.contentDocument.body.classList.remove("dark-theme");
+      } else {
+        iframe.contentDocument.body.classList.add("dark-theme");
+        iframe.contentDocument.body.classList.remove("light-theme");
+      }
+      // Sync URL parameter silently (without reloading iframe)
+      const url = new URL(iframe.contentWindow.location.href);
+      if (url.searchParams.get("theme") !== (isLight ? "light" : "dark")) {
+        url.searchParams.set("theme", isLight ? "light" : "dark");
+        iframe.contentWindow.history.replaceState(null, "", url.toString());
+      }
+    } else {
+      // Fallback: If document body is not ready, update source
+      iframe.src = `assets/info/Resume.html?theme=${isLight ? "light" : "dark"}`;
+    }
+  } catch (e) {
+    // Cross-origin fallback (should not trigger for same-origin)
+    iframe.src = `assets/info/Resume.html?theme=${isLight ? "light" : "dark"}`;
+  }
+}
+
+// Syncs iframe, localStorage, and mockup buttons when theme changes
+function updateThemeSideEffects(isLight) {
+  localStorage.setItem("portfolio-theme", isLight ? "light" : "dark");
+  
+  updateIframeTheme(isLight);
+  
+  const btnDark = document.getElementById("dot-theme-dark");
+  const btnLight = document.getElementById("dot-theme-light");
+  if (btnDark && btnLight) {
+    if (isLight) {
+      btnLight.classList.add("active");
+      btnDark.classList.remove("active");
+    } else {
+      btnDark.classList.add("active");
+      btnLight.classList.remove("active");
+    }
+  }
+}
+
 // --- THEME MANAGEMENT SYSTEM (Light/Dark Mode) ---
 function initTheme() {
   const themeToggle = document.getElementById("theme-toggle");
@@ -84,7 +133,7 @@ function initTheme() {
   const savedTheme = localStorage.getItem("portfolio-theme") || "dark";
   const iframe = document.querySelector(".resume-iframe");
   
-  // Set initial state based on saved preferences
+  // Set initial state silently based on saved preferences
   if (savedTheme === "light") {
     document.body.classList.add("light-mode");
     if (iframe) iframe.src = "assets/info/Resume.html?theme=light";
@@ -100,34 +149,75 @@ function initTheme() {
     if (iframe) iframe.src = "assets/info/Resume.html?theme=dark";
   }
 
-  // Handle click on the main toggle button
-  themeToggle.addEventListener("click", () => {
-    const isLight = document.body.classList.toggle("light-mode");
-    localStorage.setItem("portfolio-theme", isLight ? "light" : "dark");
-    
-    // Sync resume preview iframe
-    if (iframe) {
-      iframe.src = `assets/info/Resume.html?theme=${isLight ? "light" : "dark"}`;
-    }
-    
-    // Sync resume mockup buttons
-    const btnDark = document.getElementById("dot-theme-dark");
-    const btnLight = document.getElementById("dot-theme-light");
-    if (btnDark && btnLight) {
-      if (isLight) {
-        btnLight.classList.add("active");
-        btnDark.classList.remove("active");
+  // Handle click on the main toggle button (fluid circular reveal)
+  themeToggle.addEventListener("click", (event) => {
+    const isLightNow = document.body.classList.contains("light-mode");
+    const targetLight = !isLightNow;
+
+    // State change is handled declaratively in CSS via classes
+
+    const toggleTheme = () => {
+      if (targetLight) {
+        document.body.classList.add("light-mode");
       } else {
-        btnDark.classList.add("active");
-        btnLight.classList.remove("active");
+        document.body.classList.remove("light-mode");
       }
+      updateThemeSideEffects(targetLight);
+    };
+
+    // If View Transitions API is not supported, just toggle instantly (with CSS transition fallback)
+    if (!document.startViewTransition) {
+      toggleTheme();
+      return;
     }
 
-    // Gentle rotate and scale animations on click
-    themeToggle.style.transform = "scale(0.85) rotate(180deg)";
-    setTimeout(() => {
-      themeToggle.style.transform = "";
-    }, 250);
+    // Get the click position, or fallback to the button's center
+    const x = event.clientX ?? (themeToggle.getBoundingClientRect().left + themeToggle.clientWidth / 2);
+    const y = event.clientY ?? (themeToggle.getBoundingClientRect().top + themeToggle.clientHeight / 2);
+    
+    // Calculate distance to the furthest corner of the viewport
+    const endRadius = Math.hypot(
+      Math.max(x, window.innerWidth - x),
+      Math.max(y, window.innerHeight - y)
+    );
+
+    // Disable CSS transitions temporarily to capture clean start/end states in screenshots
+    const css = document.createElement("style");
+    css.id = "theme-transition-disable";
+    css.appendChild(document.createTextNode(`
+      *, *::before, *::after {
+        transition: none !important;
+        transition-duration: 0s !important;
+        animation-duration: 0s !important;
+      }
+    `));
+    document.head.appendChild(css);
+
+    const transition = document.startViewTransition(() => {
+      toggleTheme();
+    });
+
+    transition.ready.then(() => {
+      // Remove style tag to restore transitions for live interaction
+      const cssEl = document.getElementById("theme-transition-disable");
+      if (cssEl) cssEl.remove();
+
+      const clipPath = [
+        `circle(0px at ${x}px ${y}px)`,
+        `circle(${endRadius}px at ${x}px ${y}px)`
+      ];
+
+      document.documentElement.animate(
+        {
+          clipPath: clipPath
+        },
+        {
+          duration: 650,
+          easing: "cubic-bezier(0.16, 1, 0.3, 1)", // Fluid Apple-like decel curve
+          pseudoElement: "::view-transition-new(root)"
+        }
+      );
+    });
   });
 }
 
@@ -135,19 +225,18 @@ function initTheme() {
 function initResumeThemeToggle() {
   const btnDark = document.getElementById("dot-theme-dark");
   const btnLight = document.getElementById("dot-theme-light");
-  const iframe = document.querySelector(".resume-iframe");
-  if (!btnDark || !btnLight || !iframe) return;
+  if (!btnDark || !btnLight) return;
 
   btnDark.addEventListener("click", () => {
     btnDark.classList.add("active");
     btnLight.classList.remove("active");
-    iframe.src = "assets/info/Resume.html?theme=dark";
+    updateIframeTheme(false);
   });
 
   btnLight.addEventListener("click", () => {
     btnLight.classList.add("active");
     btnDark.classList.remove("active");
-    iframe.src = "assets/info/Resume.html?theme=light";
+    updateIframeTheme(true);
   });
 }
 

@@ -2663,28 +2663,46 @@ footer {
   justify-content: center;
   cursor: pointer;
   z-index: 1002;
-  transition: transform 0.4s var(--ease-out-expo), background-color 0.4s var(--ease-out-expo), border-color 0.4s var(--ease-out-expo), color 0.4s var(--ease-out-expo);
   position: relative;
   overflow: hidden;
+  view-transition-name: theme-toggle-btn;
+  
+  /* Smooth scale and rotation variables */
+  --theme-toggle-rotation: 0deg;
+  --theme-toggle-scale: 1;
+  transform: rotate(var(--theme-toggle-rotation)) scale(var(--theme-toggle-scale));
+  transition: 
+    transform 0.5s var(--ease-out-spring), 
+    background-color 0.4s var(--ease-out-expo), 
+    border-color 0.4s var(--ease-out-expo), 
+    color 0.4s var(--ease-out-expo);
+}
+
+body.light-mode .theme-toggle-btn {
+  --theme-toggle-rotation: 180deg;
 }
 
 .theme-toggle-btn:hover {
   background: rgba(255, 255, 255, 0.08);
   border-color: var(--color-secondary);
-  transform: scale(1.05);
+  --theme-toggle-scale: 1.05;
+}
+
+.theme-toggle-btn:active {
+  --theme-toggle-scale: 0.9;
 }
 
 .theme-toggle-btn .sun-icon {
   opacity: 0;
   transform: scale(0.6) rotate(90deg);
-  transition: opacity 0.4s var(--ease-out-expo), transform 0.4s var(--ease-out-expo);
+  transition: opacity 0.5s var(--ease-out-spring), transform 0.5s var(--ease-out-spring);
   position: absolute;
 }
 
 .theme-toggle-btn .moon-icon {
   opacity: 1;
   transform: scale(1) rotate(0deg);
-  transition: opacity 0.4s var(--ease-out-expo), transform 0.4s var(--ease-out-expo);
+  transition: opacity 0.5s var(--ease-out-spring), transform 0.5s var(--ease-out-spring);
   position: absolute;
 }
 

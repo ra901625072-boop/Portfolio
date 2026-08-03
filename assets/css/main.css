@@ -314,6 +314,10 @@ a {
   border: none;
 }
 
+.btn svg {
+  transition: transform var(--trans-fast);
+}
+
 .btn-primary {
   background: var(--grad-primary);
   color: white;
@@ -354,6 +358,10 @@ a {
     background: rgba(255, 255, 255, 0.1);
     border-color: var(--color-secondary);
     transform: translateY(-2px);
+  }
+
+  .btn:hover svg {
+    transform: translateX(4px);
   }
 }
 
@@ -519,7 +527,24 @@ footer,
 .social-circle,
 .scroll-top-btn,
 .logo,
-.nav-link {
+.nav-link,
+.glass-card,
+.glass-card::before,
+.about-resume-mockup,
+.mockup-header,
+.mockup-title,
+.bg-text-watermark,
+.blueprint-ruler-h,
+.blueprint-ruler-h::before,
+.blueprint-ruler-h::after,
+.blueprint-ruler-v,
+.hero-coordinate-label,
+.form-control,
+.form-label,
+.btn-secondary,
+.footer-bottom,
+.nav-menu,
+.bg-glow-orb {
   transition: 
     background-color 0.5s var(--ease-out-expo), 
     color 0.5s var(--ease-out-expo), 
@@ -528,3 +553,43 @@ footer,
     text-stroke 0.5s var(--ease-out-expo),
     -webkit-text-stroke 0.5s var(--ease-out-expo);
 }
+
+/* --- VIEW TRANSITION RIPPLE ANIMATION --- */
+/* Custom View Transition styles for the ripple effect */
+::view-transition-group(root) {
+  animation-duration: 0.65s;
+}
+
+::view-transition-image-pair(root) {
+  isolation: auto;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+  display: block;
+}
+
+/* Ensure the new view is on top so its clip-path reveal works */
+::view-transition-new(root) {
+  z-index: 2;
+}
+
+::view-transition-old(root) {
+  z-index: 1;
+}
+
+/* Animate the theme toggle button group independently */
+::view-transition-group(theme-toggle-btn) {
+  animation-duration: 0.65s;
+  animation-timing-function: var(--ease-out-spring);
+}
+
+
+
+
+
+
+
+

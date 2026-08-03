@@ -257,6 +257,11 @@ function initProjectFilters() {
 }
 
 // --- OPEN & MANAGE CASE STUDY MODAL ---
+// Scrollbar compensation helpers to prevent layout shift when modals lock scroll
+function getScrollbarWidth() {
+  return window.innerWidth - document.documentElement.clientWidth;
+}
+
 let previouslyFocusedElement = null;
 let modalKeydownHandler = null;
 
@@ -339,8 +344,16 @@ function openCaseStudy(projectId) {
     </div>
   `;
   
-  // Show modal overlay
+  // Show modal overlay & prevent background shifting
   previouslyFocusedElement = document.activeElement;
+  const sbWidth = getScrollbarWidth();
+  if (sbWidth > 0) {
+    document.body.style.paddingRight = `${sbWidth}px`;
+    const header = document.querySelector("header");
+    if (header) {
+      header.style.paddingRight = `${sbWidth}px`;
+    }
+  }
   document.body.style.overflow = "hidden"; // Disable body scroll
   modalOverlay.classList.add("active");
   
@@ -395,7 +408,14 @@ function closeCaseStudy() {
   if (!modalOverlay) return;
   
   modalOverlay.classList.remove("active");
+  
+  // Restore scroll and remove padding offsets
   document.body.style.overflow = ""; // Restore scrolling
+  document.body.style.paddingRight = "";
+  const header = document.querySelector("header");
+  if (header) {
+    header.style.paddingRight = "";
+  }
 
   // Clean listeners
   if (modalKeydownHandler) {

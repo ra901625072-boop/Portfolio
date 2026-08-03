@@ -10,6 +10,7 @@ function initCustomCursor() {
   let dotX = 0, dotY = 0;
   let snappedEl = null;
   let cachedRect = null;
+  let cachedBorderRadius = '';
   
   // Magnetic snapping coordinate interpolation
   let targetPullX = 0, targetPullY = 0;
@@ -35,6 +36,7 @@ function initCustomCursor() {
     el.addEventListener("mouseenter", () => {
       cachedRect = el.getBoundingClientRect();
       snappedEl = el;
+      cachedBorderRadius = window.getComputedStyle(el).borderRadius;
       el.style.transition = 'none';
       cursor.classList.add("snapped");
     });
@@ -71,6 +73,7 @@ function initCustomCursor() {
 
       snappedEl = null;
       cachedRect = null;
+      cachedBorderRadius = '';
       targetPullX = 0;
       targetPullY = 0;
       currentPullX = 0;
@@ -102,7 +105,7 @@ function initCustomCursor() {
       
       cursor.style.width = `${targetWidth}px`;
       cursor.style.height = `${targetHeight}px`;
-      cursor.style.borderRadius = getComputedStyle(snappedEl).borderRadius;
+      cursor.style.borderRadius = cachedBorderRadius || '';
       cursor.style.transform = `translate3d(${cursorX}px, ${cursorY}px, 0) translate3d(-50%, -50%, 0)`;
 
       // Lerp magnetic pull displacement
@@ -157,6 +160,8 @@ function initCustomCursor() {
 }
 
 // --- SCROLL REVEAL ANIMATIONS ---
+let skillsAnimated = false;
+
 function initScrollReveals() {
   const reveals = document.querySelectorAll(".reveal");
   
@@ -181,6 +186,9 @@ function initScrollReveals() {
         if (entry.target.id === "about") {
           statsAnimated = false;
         }
+        if (entry.target.id === "skills") {
+          skillsAnimated = false;
+        }
       }
     });
   };
@@ -196,12 +204,13 @@ function initScrollReveals() {
 
 // --- SKILL BAR FILLING ---
 function animateSkillsBars() {
+  if (skillsAnimated) return;
+  skillsAnimated = true;
+
   const bars = document.querySelectorAll(".skill-bar-fill");
+  
+  // 1. Reset all bars first
   bars.forEach(bar => {
-    const percent = parseInt(bar.dataset.percentage, 10);
-    if (isNaN(percent)) return;
-    
-    // Reset to 0 first to prepare for animation
     bar.style.transition = "none";
     bar.style.width = "0%";
     
@@ -216,25 +225,36 @@ function animateSkillsBars() {
     }
     tooltip.innerText = "0%";
     if (labelPct) labelPct.innerText = "0%";
-    
-    // Force reflow
-    bar.getBoundingClientRect();
-    
-    setTimeout(() => {
+  });
+  
+  // 2. Force a single reflow on the parent container to flush layout writes
+  const skillsContent = document.querySelector(".skills-content");
+  if (skillsContent) {
+    skillsContent.offsetHeight; // layout flush
+  }
+  
+  // 3. Trigger smooth draw-in and count-up animations
+  setTimeout(() => {
+    bars.forEach(bar => {
+      const percent = parseInt(bar.dataset.percentage, 10);
+      if (isNaN(percent)) return;
+      
       bar.style.transition = "width 1.5s cubic-bezier(0.1, 0.8, 0.2, 1)";
       bar.style.width = `${percent}%`;
       
+      const wrapper = bar.closest(".skill-bar-wrapper");
+      const labelPct = wrapper ? wrapper.querySelector(".skill-percentage") : null;
+      const tooltip = bar.querySelector(".skill-tooltip");
+      
       if (window.animatePercentageText) {
-        window.animatePercentageText(tooltip, percent);
-        if (labelPct) {
-          window.animatePercentageText(labelPct, percent);
-        }
+        if (tooltip) window.animatePercentageText(tooltip, percent);
+        if (labelPct) window.animatePercentageText(labelPct, percent);
       } else {
-        tooltip.innerText = `${percent}%`;
+        if (tooltip) tooltip.innerText = `${percent}%`;
         if (labelPct) labelPct.innerText = `${percent}%`;
       }
-    }, 50);
-  });
+    });
+  }, 50);
 }
 
 // --- STATS COUNT-UP EFFECT ---
@@ -321,8 +341,17 @@ function initAvatarParallax() {
   const card = document.querySelector(".hero-avatar-card");
   if (!visual || !card) return;
 
+  let rect = null;
+  function updateRect() {
+    rect = visual.getBoundingClientRect();
+  }
+
+  visual.addEventListener("mouseenter", updateRect);
+  window.addEventListener("resize", () => { if (rect) updateRect(); }, { passive: true });
+  window.addEventListener("scroll", () => { if (rect) updateRect(); }, { passive: true });
+
   visual.addEventListener("mousemove", (e) => {
-    const rect = visual.getBoundingClientRect();
+    if (!rect) updateRect();
     const x = e.clientX - rect.left - rect.width / 2;
     const y = e.clientY - rect.top - rect.height / 2;
     
@@ -331,6 +360,7 @@ function initAvatarParallax() {
   });
 
   visual.addEventListener("mouseleave", () => {
+    rect = null;
     card.style.transform = '';
     card.style.transition = 'transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1)';
   });
@@ -383,8 +413,17 @@ function initDesignerGrid() {
   const label = document.getElementById("coordinate-label");
   if (!hero || !crosshairH || !crosshairV || !label) return;
 
+  let rect = null;
+  function updateRect() {
+    rect = hero.getBoundingClientRect();
+  }
+
+  hero.addEventListener("mouseenter", updateRect);
+  window.addEventListener("resize", () => { if (rect) updateRect(); }, { passive: true });
+  window.addEventListener("scroll", () => { if (rect) updateRect(); }, { passive: true });
+
   hero.addEventListener("mousemove", (e) => {
-    const rect = hero.getBoundingClientRect();
+    if (!rect) updateRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     
@@ -395,6 +434,10 @@ function initDesignerGrid() {
     // Coordinate label floating alongside
     label.style.transform = `translate3d(${x + 15}px, ${y + 15}px, 0)`;
     label.innerText = `X: ${Math.round(x)}px | Y: ${Math.round(y)}px`;
+  });
+
+  hero.addEventListener("mouseleave", () => {
+    rect = null;
   });
 }
 
