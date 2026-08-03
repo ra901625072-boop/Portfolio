@@ -814,13 +814,7 @@ function runLogoTakeover(preloader, preloaderLogo, callback) {
   navLogo.style.zIndex = "100001"; // Draw on top of preloader
   navLogo.style.opacity = "1";
   
-  // Match the red color of preloader logo temporarily during transition
-  navLogo.style.color = "#e63946";
   const dot = navLogo.querySelector(".logo-dot");
-  if (dot) {
-    dot.style.transition = "none";
-    dot.style.backgroundColor = "#e63946";
-  }
 
   // Make header active instantly but keep logo offset
   header.style.opacity = "1";
@@ -841,14 +835,8 @@ function runLogoTakeover(preloader, preloaderLogo, callback) {
   document.body.style.overflow = "";
 
   // Play the takeover translation with a very soft, long deceleration tail (Apple style ease)
-  navLogo.style.transition = "transform 1.35s cubic-bezier(0.2, 1, 0.2, 1), opacity 0.8s ease-out, color 1.35s ease-out";
+  navLogo.style.transition = "transform 1.35s cubic-bezier(0.2, 1, 0.2, 1), opacity 0.8s ease-out";
   navLogo.style.transform = "translate3d(0, 0, 0) scale(1)";
-  navLogo.style.color = ""; // return to CSS styled theme colors
-  
-  if (dot) {
-    dot.style.transition = "background-color 1.35s ease-out, transform 0.4s ease";
-    dot.style.backgroundColor = ""; // return to CSS styled theme colors
-  }
 
   setTimeout(() => {
     preloader.remove();
@@ -857,11 +845,6 @@ function runLogoTakeover(preloader, preloaderLogo, callback) {
     navLogo.style.transformOrigin = "";
     navLogo.style.transition = "";
     navLogo.style.zIndex = "";
-    navLogo.style.color = "";
-    if (dot) {
-      dot.style.transition = "";
-      dot.style.backgroundColor = "";
-    }
     if (callback) callback();
   }, 1450);
 }
