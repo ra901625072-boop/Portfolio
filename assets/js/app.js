@@ -866,7 +866,7 @@ function runLogoTakeover(preloader, preloaderLogo, callback) {
   }, 1450);
 }
 
-// --- INITIALIZE PRELOADER LOGIC (Logo Typing only) ---
+// --- INITIALIZE PRELOADER LOGIC (Logo Typing with Staggered Character Slide-Up) ---
 function initPreloader(callback) {
   const preloader = document.getElementById("preloader");
   const preloaderLogo = document.getElementById("preloader-logo-text");
@@ -878,12 +878,20 @@ function initPreloader(callback) {
     return;
   }
 
-  // Create text container inside preloader text
+  // Clear previous contents and construct letter spans
   preloaderLogo.innerHTML = "";
-  const textNode = document.createElement("span");
-  textNode.className = "preloader-logo-text-inner";
-  preloaderLogo.appendChild(textNode);
+  const logoText = "Akshay";
+  const letterSpans = [];
+
+  for (let i = 0; i < logoText.length; i++) {
+    const span = document.createElement("span");
+    span.className = "letter";
+    span.textContent = logoText.charAt(i);
+    preloaderLogo.appendChild(span);
+    letterSpans.push(span);
+  }
   
+  // Create final baseline dot
   const dotNode = document.createElement("span");
   dotNode.className = "logo-dot";
   dotNode.style.display = "inline-block";
@@ -892,23 +900,29 @@ function initPreloader(callback) {
   dotNode.style.transform = "scale(0)";
   preloaderLogo.appendChild(dotNode);
 
-  const logoText = "Akshay";
-  const duration = 1200; // Snappy 1.2s total logo reveal duration
+  const duration = 1250; // Fluid 1.25s entrance reveal
   const start = performance.now();
 
   function updateProgress(now) {
     const elapsed = now - start;
     const progress = Math.min(elapsed / duration, 1);
     
-    // Type characters dynamically up to 75% of duration
-    const typeProgress = Math.min(progress / 0.75, 1);
+    // Distribute typing slide-ups over the first 72% of the duration
+    const typeProgress = Math.min(progress / 0.72, 1);
     const charIndex = Math.floor(typeProgress * (logoText.length + 1));
-    textNode.textContent = logoText.slice(0, charIndex);
+    
+    letterSpans.forEach((span, idx) => {
+      if (idx < charIndex) {
+        span.classList.add("visible");
+      } else {
+        span.classList.remove("visible");
+      }
+    });
 
-    // Scale dot up from 75% to 100% of duration
-    if (progress >= 0.75) {
-      const dotProgress = (progress - 0.75) / 0.25;
-      const scaleVal = Math.min(1.2, dotProgress * 1.3);
+    // Pop dot in over final 28% of duration
+    if (progress >= 0.72) {
+      const dotProgress = (progress - 0.72) / 0.28;
+      const scaleVal = Math.min(1.2, dotProgress * 1.35);
       dotNode.style.transform = `scale(${scaleVal})`;
     } else {
       dotNode.style.transform = "scale(0)";
@@ -917,11 +931,11 @@ function initPreloader(callback) {
     if (progress < 1) {
       requestAnimationFrame(updateProgress);
     } else {
-      // Complete! Ensure dot is at scale(1) and trigger takeover
+      // Settle dot and trigger the FLIP slide takeover
       dotNode.style.transform = "scale(1)";
       setTimeout(() => {
         runLogoTakeover(preloader, preloaderLogo, callback);
-      }, 100);
+      }, 150);
     }
   }
 
