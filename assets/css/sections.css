@@ -569,9 +569,10 @@ header.scrolled {
 }
 
 .tab-btn:hover {
-  background: rgba(15, 21, 36, 0.6);
-  border-color: rgba(255, 255, 255, 0.15);
+  background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+  border-color: var(--color-primary);
   color: var(--text-primary);
+  box-shadow: 0 10px 20px -10px color-mix(in srgb, var(--color-primary) 20%, transparent);
   transform: scale(1.03);
 }
 
@@ -2804,9 +2805,11 @@ body.light-mode .tab-btn {
 }
 
 body.light-mode .tab-btn:hover {
-  background: rgba(15, 23, 42, 0.06) !important;
-  border-color: rgba(15, 23, 42, 0.12) !important;
+  background: color-mix(in srgb, var(--color-primary) 5%, #ffffff) !important;
+  border-color: var(--color-primary) !important;
   color: var(--text-primary) !important;
+  box-shadow: 0 10px 20px -10px color-mix(in srgb, var(--color-primary) 20%, transparent) !important;
+  transform: scale(1.03);
 }
 
 body.light-mode .tab-btn.active {

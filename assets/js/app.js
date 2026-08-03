@@ -434,6 +434,7 @@ function initSkillsTabs() {
       switchTab(btn);
     });
     btn.addEventListener("mouseenter", () => {
+      switchTab(btn);
       const container = btn.querySelector(".tab-progress-circle");
       if (container) {
         animateProgressRing(container);
