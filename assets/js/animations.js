@@ -90,7 +90,7 @@ function initCustomCursor() {
     if (snappedEl) {
       cachedRect = snappedEl.getBoundingClientRect();
     }
-  });
+  }, { passive: true });
 
   // Lerp cursor movement
   function animateCursor() {
@@ -373,13 +373,34 @@ function initTimelineScrollHighlight() {
   const items = document.querySelectorAll(".timeline-item");
   if (!timeline || !progressLine) return;
 
-  window.addEventListener("scroll", () => {
+  let timelineTop = 0;
+  let timelineHeight = 0;
+  let dotOffsets = [];
+
+  function calculateOffsets() {
     const rect = timeline.getBoundingClientRect();
-    const timelineHeight = rect.height;
-    
-    // grow when entering viewport (trigger at 65% height of viewport)
+    timelineTop = rect.top + window.scrollY;
+    timelineHeight = rect.height;
+
+    dotOffsets = Array.from(items).map(item => {
+      const dot = item.querySelector(".timeline-dot");
+      if (!dot) return 0;
+      const dotRect = dot.getBoundingClientRect();
+      return dotRect.top + window.scrollY;
+    });
+  }
+
+  // Initial calculation
+  calculateOffsets();
+
+  // Recalculate on resize and load to preserve accuracy
+  window.addEventListener("resize", calculateOffsets, { passive: true });
+  window.addEventListener("load", calculateOffsets, { passive: true });
+
+  window.addEventListener("scroll", () => {
+    const scrollY = window.scrollY || document.documentElement.scrollTop;
     const triggerPoint = window.innerHeight * 0.65;
-    const topOffset = triggerPoint - rect.top;
+    const topOffset = triggerPoint - (timelineTop - scrollY);
     
     let progress = 0;
     if (topOffset > 0) {
@@ -389,10 +410,12 @@ function initTimelineScrollHighlight() {
     
     progressLine.style.height = `${progress}%`;
     
-    items.forEach(item => {
+    items.forEach((item, index) => {
       const dot = item.querySelector(".timeline-dot");
-      const dotRect = dot.getBoundingClientRect();
-      const dotTopOffset = triggerPoint - dotRect.top;
+      if (!dot) return;
+      
+      const dotTop = dotOffsets[index] || 0;
+      const dotTopOffset = triggerPoint - (dotTop - scrollY);
       
       if (dotTopOffset > 0) {
         dot.classList.add("active");
@@ -402,7 +425,7 @@ function initTimelineScrollHighlight() {
         item.classList.remove("illuminated");
       }
     });
-  });
+  }, { passive: true });
 }
 
 // --- HERO DESIGNER COORDINATE CROSSHAIR ---

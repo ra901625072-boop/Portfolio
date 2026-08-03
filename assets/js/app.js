@@ -8,7 +8,7 @@ function initHeaderScroll() {
     } else {
       header.classList.remove("scrolled");
     }
-  });
+  }, { passive: true });
 }
 
 function initMobileMenu() {
@@ -626,12 +626,22 @@ function initScrollProgress() {
   const progress = document.getElementById("scroll-progress");
   if (!progress) return;
   
+  let docHeight = document.documentElement.scrollHeight;
+  let viewHeight = document.documentElement.clientHeight;
+  let totalScrollable = docHeight - viewHeight;
+
+  // Recalculate dimensions on resize/orientation changes instead of on scroll ticks
+  window.addEventListener("resize", () => {
+    docHeight = document.documentElement.scrollHeight;
+    viewHeight = document.documentElement.clientHeight;
+    totalScrollable = docHeight - viewHeight;
+  }, { passive: true });
+
   window.addEventListener("scroll", () => {
-    const winScroll = document.documentElement.scrollTop || document.body.scrollTop;
-    const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-    const scrolled = height > 0 ? (winScroll / height) * 100 : 0;
+    const winScroll = window.scrollY || document.documentElement.scrollTop;
+    const scrolled = totalScrollable > 0 ? (winScroll / totalScrollable) * 100 : 0;
     progress.style.width = scrolled + "%";
-  });
+  }, { passive: true });
 }
 
 // --- MOBILE FOOTER MARQUEE EFFECT ---

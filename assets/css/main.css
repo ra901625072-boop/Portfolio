@@ -120,6 +120,7 @@ html {
   scroll-behavior: smooth;
   scrollbar-width: thin;
   scrollbar-color: var(--color-primary) var(--bg-primary);
+  overflow-x: hidden;
 }
 
 body {
