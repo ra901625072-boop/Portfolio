@@ -457,6 +457,10 @@ function initDesignerGrid() {
     // Coordinate label floating alongside
     label.style.transform = `translate3d(${x + 15}px, ${y + 15}px, 0)`;
     label.innerText = `X: ${Math.round(x)}px | Y: ${Math.round(y)}px`;
+
+    // Update custom properties for dynamic grid spotlight glow
+    hero.style.setProperty("--global-mouse-x", `${x}px`);
+    hero.style.setProperty("--global-mouse-y", `${y}px`);
   });
 
   hero.addEventListener("mouseleave", () => {
