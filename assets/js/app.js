@@ -683,6 +683,8 @@ function initVisitorCounter() {
     })
     .then(data => {
       if (data && data.count) {
+        // Cache the real count to localStorage for reliable offline fallback
+        localStorage.setItem("real-views", data.count);
         animateVisitorCountUp(countEl, data.count);
       } else {
         countEl.innerText = "1";
@@ -690,10 +692,10 @@ function initVisitorCounter() {
     })
     .catch(error => {
       console.error("CounterAPI error:", error);
-      // Fallback: LocalStorage mock to at least show something realistic and premium
-      let localViews = parseInt(localStorage.getItem("mock-views") || "342", 10);
+      // Fallback: Use the last cached real view count, or default to current database baseline (85)
+      let localViews = parseInt(localStorage.getItem("real-views") || "85", 10);
       localViews += 1;
-      localStorage.setItem("mock-views", localViews);
+      localStorage.setItem("real-views", localViews);
       animateVisitorCountUp(countEl, localViews);
     });
 }
