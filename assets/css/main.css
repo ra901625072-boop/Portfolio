@@ -101,8 +101,8 @@ body.light-mode .custom-cursor-dot {
 
 body.light-mode .bg-grid-mesh {
   background-image: 
-    linear-gradient(rgba(15, 23, 42, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(15, 23, 42, 0.03) 1px, transparent 1px);
+    linear-gradient(rgba(15, 23, 42, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 23, 42, 0.08) 1px, transparent 1px);
 }
 
 body.light-mode .bg-glow-orb {
@@ -438,8 +438,8 @@ a {
   position: absolute;
   inset: 0;
   background-image: 
-    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    linear-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.07) 1px, transparent 1px);
   background-size: 50px 50px;
   mask-image: radial-gradient(ellipse at 50% 50%, black 50%, transparent 90%);
   -webkit-mask-image: radial-gradient(ellipse at 50% 50%, black 50%, transparent 90%);

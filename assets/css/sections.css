@@ -821,7 +821,7 @@ header.scrolled {
   top: 0;
   height: 100%;
   width: 2px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.15);
   transform: translateX(-50%);
   z-index: 1;
 }
@@ -2497,7 +2497,7 @@ footer {
 /* Axis lines representing wireframe blueprints */
 .designer-axis-x, .designer-axis-y {
   position: absolute;
-  background-color: rgba(var(--color-primary-rgb), 0.08);
+  background-color: rgba(var(--color-primary-rgb), 0.2);
   pointer-events: none;
 }
 
@@ -2570,7 +2570,7 @@ footer {
   height: 10px;
   border-left: 1px solid rgba(255, 255, 255, 0.1);
   border-right: 1px solid rgba(255, 255, 255, 0.1);
-  opacity: 0.25;
+  opacity: 0.45;
 }
 
 .blueprint-ruler-h::before {
@@ -2601,7 +2601,7 @@ footer {
   width: 10px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  opacity: 0.25;
+  opacity: 0.45;
 }
 
 /* --- REUSABLE STAGGER REVEAL SYSTEM --- */
@@ -2750,12 +2750,12 @@ body.light-mode .bg-text-watermark {
 }
 
 body.light-mode .blueprint-ruler-h {
-  border-left-color: rgba(15, 23, 42, 0.12) !important;
-  border-right-color: rgba(15, 23, 42, 0.12) !important;
+  border-left-color: rgba(15, 23, 42, 0.35) !important;
+  border-right-color: rgba(15, 23, 42, 0.35) !important;
 }
 
 body.light-mode .blueprint-ruler-h::before {
-  background: rgba(15, 23, 42, 0.12) !important;
+  background: rgba(15, 23, 42, 0.35) !important;
 }
 
 body.light-mode .blueprint-ruler-h::after {
@@ -2763,8 +2763,8 @@ body.light-mode .blueprint-ruler-h::after {
 }
 
 body.light-mode .blueprint-ruler-v {
-  border-top-color: rgba(15, 23, 42, 0.12) !important;
-  border-bottom-color: rgba(15, 23, 42, 0.12) !important;
+  border-top-color: rgba(15, 23, 42, 0.35) !important;
+  border-bottom-color: rgba(15, 23, 42, 0.35) !important;
 }
 
 body.light-mode .hero-coordinate-label {
@@ -2853,9 +2853,8 @@ body.light-mode .skill-bar-fill::after {
   box-shadow: 0 0 8px rgba(15, 23, 42, 0.15), 0 0 3px #fff !important;
 }
 
-body.light-mode .timeline::before,
-body.light-mode .timeline-progress-line {
-  background: rgba(15, 23, 42, 0.06) !important;
+body.light-mode .timeline::before {
+  background: rgba(15, 23, 42, 0.15) !important;
 }
 
 body.light-mode .timeline-dot {
