@@ -840,13 +840,13 @@ function runLogoTakeover(preloader, preloaderLogo, callback) {
   document.documentElement.style.overflow = "";
   document.body.style.overflow = "";
 
-  // Play the takeover translation!
-  navLogo.style.transition = "transform 1.1s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.8s ease-out, color 1.1s ease-out";
+  // Play the takeover translation with a very soft, long deceleration tail (Apple style ease)
+  navLogo.style.transition = "transform 1.35s cubic-bezier(0.2, 1, 0.2, 1), opacity 0.8s ease-out, color 1.35s ease-out";
   navLogo.style.transform = "translate3d(0, 0, 0) scale(1)";
   navLogo.style.color = ""; // return to CSS styled theme colors
   
   if (dot) {
-    dot.style.transition = "background-color 1.1s ease-out, transform 0.4s ease";
+    dot.style.transition = "background-color 1.35s ease-out, transform 0.4s ease";
     dot.style.backgroundColor = ""; // return to CSS styled theme colors
   }
 
@@ -863,7 +863,7 @@ function runLogoTakeover(preloader, preloaderLogo, callback) {
       dot.style.backgroundColor = "";
     }
     if (callback) callback();
-  }, 1200);
+  }, 1450);
 }
 
 // --- INITIALIZE PRELOADER LOGIC (Logo Typing only) ---

@@ -650,14 +650,14 @@ footer,
   justify-content: center;
   align-items: center;
   z-index: 100000;
-  transition: clip-path 1s var(--ease-out-expo), opacity 1s var(--ease-out-expo);
-  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
-  will-change: clip-path, opacity;
+  transition: opacity 1.2s cubic-bezier(0.2, 1, 0.25, 1), transform 1.2s cubic-bezier(0.2, 1, 0.25, 1);
+  transform: scale(1);
+  will-change: transform, opacity;
 }
 
 .preloader.fade-out {
-  clip-path: polygon(0 0, 100% 0, 100% 0, 0 0);
   opacity: 0;
+  transform: scale(1.03); /* Subtle zoom out */
   pointer-events: none;
 }
 
