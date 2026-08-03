@@ -1,3 +1,18 @@
+import {
+  renderProjects,
+  initProjectFilters,
+  renderAchievements,
+  initializeSpotlightEffects
+} from "./modules/projects.js";
+import { initAnimations, animatePercentageText } from "./modules/animations.js";
+
+function safeGetItem(key, fallback = null) {
+  try { return localStorage.getItem(key); } catch { return fallback; }
+}
+function safeSetItem(key, value) {
+  try { localStorage.setItem(key, value); } catch { /* silent */ }
+}
+
 // --- HEADER SCROLL ACTION ---
 function initHeaderScroll() {
   const header = document.querySelector("header");
@@ -22,6 +37,7 @@ function initMobileMenu() {
     const isActive = hamburger.classList.toggle("active");
     navMenu.classList.toggle("active");
     if (navOverlay) navOverlay.classList.toggle("active");
+    hamburger.setAttribute("aria-expanded", isActive ? "true" : "false");
     
     if (isActive) {
       document.body.style.overflow = "hidden";
@@ -51,28 +67,29 @@ function initScrollSpy() {
   const navLinks = document.querySelectorAll(".nav-link");
   if (sections.length === 0 || navLinks.length === 0) return;
 
-  const observerOptions = {
-    root: null,
-    rootMargin: "-25% 0px -65% 0px",
-    threshold: 0
-  };
+  const linkMap = new Map();
+  navLinks.forEach(link => {
+    const href = link.getAttribute("href");
+    if (href && href.startsWith("#")) {
+      linkMap.set(href.slice(1), link);
+    }
+  });
 
   const observerCallback = (entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
-        const id = entry.target.getAttribute("id");
-        navLinks.forEach(link => {
-          if (link.getAttribute("href") === `#${id}`) {
-            link.classList.add("active");
-          } else {
-            link.classList.remove("active");
-          }
-        });
+        navLinks.forEach(link => link.classList.remove("active"));
+        const activeLink = linkMap.get(entry.target.id);
+        if (activeLink) activeLink.classList.add("active");
       }
     });
   };
 
-  const observer = new IntersectionObserver(observerCallback, observerOptions);
+  const observer = new IntersectionObserver(observerCallback, {
+    root: null,
+    rootMargin: "-25% 0px -65% 0px",
+    threshold: 0
+  });
   sections.forEach(section => observer.observe(section));
 }
 
@@ -98,17 +115,17 @@ function updateIframeTheme(isLight) {
       }
     } else {
       // Fallback: If document body is not ready, update source
-      iframe.src = `assets/info/Resume.html?theme=${isLight ? "light" : "dark"}`;
+      iframe.src = `assets/docs/resume.html?theme=${isLight ? "light" : "dark"}`;
     }
   } catch (e) {
     // Cross-origin fallback (should not trigger for same-origin)
-    iframe.src = `assets/info/Resume.html?theme=${isLight ? "light" : "dark"}`;
+    iframe.src = `assets/docs/resume.html?theme=${isLight ? "light" : "dark"}`;
   }
 }
 
 // Syncs iframe, localStorage, and mockup buttons when theme changes
 function updateThemeSideEffects(isLight) {
-  localStorage.setItem("portfolio-theme", isLight ? "light" : "dark");
+  safeSetItem("portfolio-theme", isLight ? "light" : "dark");
   
   updateIframeTheme(isLight);
   
@@ -130,13 +147,13 @@ function initTheme() {
   const themeToggle = document.getElementById("theme-toggle");
   if (!themeToggle) return;
   
-  const savedTheme = localStorage.getItem("portfolio-theme") || "dark";
+  const savedTheme = safeGetItem("portfolio-theme", "dark") || "dark";
   const iframe = document.querySelector(".resume-iframe");
   
   // Set initial state silently based on saved preferences
   if (savedTheme === "light") {
     document.body.classList.add("light-mode");
-    if (iframe) iframe.src = "assets/info/Resume.html?theme=light";
+    if (iframe) iframe.src = "assets/docs/resume.html?theme=light";
     
     const btnDark = document.getElementById("dot-theme-dark");
     const btnLight = document.getElementById("dot-theme-light");
@@ -146,7 +163,14 @@ function initTheme() {
     }
   } else {
     document.body.classList.remove("light-mode");
-    if (iframe) iframe.src = "assets/info/Resume.html?theme=dark";
+    if (iframe) iframe.src = "assets/docs/resume.html?theme=dark";
+    
+    const btnDark = document.getElementById("dot-theme-dark");
+    const btnLight = document.getElementById("dot-theme-light");
+    if (btnDark && btnLight) {
+      btnDark.classList.add("active");
+      btnLight.classList.remove("active");
+    }
   }
 
   // Handle click on the main toggle button (fluid circular reveal)
@@ -251,24 +275,6 @@ function initSkillsTabs() {
     tools: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>`
   };
 
-  function animatePercentageText(tooltip, targetVal) {
-    let current = 0;
-    const duration = 1000; // Matches progress ring animation speed
-    const startTime = performance.now();
-    
-    function update(now) {
-      const elapsed = now - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      const ease = progress * (2 - progress); // easeOutQuad
-      current = Math.round(ease * targetVal);
-      tooltip.innerText = `${current}%`;
-      if (progress < 1) {
-        requestAnimationFrame(update);
-      }
-    }
-    requestAnimationFrame(update);
-  }
-
   function animateProgressRing(container) {
     const fill = container.querySelector(".progress-ring-fill");
     const tooltip = container.querySelector(".tab-tooltip");
@@ -353,16 +359,17 @@ function initSkillsTabs() {
     });
   }, 150);
 
-  // Expose to window so animations.js can synchronize animations
-  window.animatePercentageText = animatePercentageText;
-
   function switchTab(btn) {
     if (btn.classList.contains("active")) return;
     const targetTab = btn.dataset.tab;
 
-    // Update active button
-    tabBtns.forEach(b => b.classList.remove("active"));
+    // Update active button and ARIA
+    tabBtns.forEach(b => {
+      b.classList.remove("active");
+      b.setAttribute("aria-selected", "false");
+    });
     btn.classList.add("active");
+    btn.setAttribute("aria-selected", "true");
 
     // Show/Hide Panes
     tabPanes.forEach(pane => {
@@ -427,7 +434,6 @@ function initSkillsTabs() {
       switchTab(btn);
     });
     btn.addEventListener("mouseenter", () => {
-      switchTab(btn);
       const container = btn.querySelector(".tab-progress-circle");
       if (container) {
         animateProgressRing(container);
@@ -442,6 +448,8 @@ function showToast(title, message) {
   if (!container) {
     container = document.createElement("div");
     container.className = "toast-container";
+    container.setAttribute("role", "status");
+    container.setAttribute("aria-live", "polite");
     document.body.appendChild(container);
   }
 
@@ -629,8 +637,8 @@ function initScrollProgress() {
   let docHeight = document.documentElement.scrollHeight;
   let viewHeight = document.documentElement.clientHeight;
   let totalScrollable = docHeight - viewHeight;
+  let isScrollTicking = false;
 
-  // Recalculate dimensions on resize/orientation changes instead of on scroll ticks
   window.addEventListener("resize", () => {
     docHeight = document.documentElement.scrollHeight;
     viewHeight = document.documentElement.clientHeight;
@@ -638,9 +646,15 @@ function initScrollProgress() {
   }, { passive: true });
 
   window.addEventListener("scroll", () => {
-    const winScroll = window.scrollY || document.documentElement.scrollTop;
-    const scrolled = totalScrollable > 0 ? (winScroll / totalScrollable) * 100 : 0;
-    progress.style.width = scrolled + "%";
+    if (!isScrollTicking) {
+      requestAnimationFrame(() => {
+        const winScroll = window.scrollY || document.documentElement.scrollTop;
+        const scrolled = totalScrollable > 0 ? winScroll / totalScrollable : 0;
+        progress.style.transform = `scaleX(${scrolled})`;
+        isScrollTicking = false;
+      });
+      isScrollTicking = true;
+    }
   }, { passive: true });
 }
 
@@ -684,7 +698,7 @@ function initVisitorCounter() {
     .then(data => {
       if (data && data.count) {
         // Cache the real count to localStorage for reliable offline fallback
-        localStorage.setItem("real-views", data.count);
+        safeSetItem("real-views", data.count);
         animateVisitorCountUp(countEl, data.count);
       } else {
         countEl.innerText = "1";
@@ -693,30 +707,33 @@ function initVisitorCounter() {
     .catch(error => {
       console.error("CounterAPI error:", error);
       // Fallback: Use the last cached real view count, or default to current database baseline (85)
-      let localViews = parseInt(localStorage.getItem("real-views") || "85", 10);
+      let localViews = parseInt(safeGetItem("real-views") || "85", 10);
       localViews += 1;
-      localStorage.setItem("real-views", localViews);
+      safeSetItem("real-views", localViews);
       animateVisitorCountUp(countEl, localViews);
     });
 }
 
 function animateVisitorCountUp(element, target) {
-  let count = Math.max(0, target - 30); // start count-up from last 30 hits for a quick visual ticker
-  const duration = 1200; // ms
-  const stepTime = Math.max(Math.floor(duration / 30), 15);
+  const start = Math.max(0, target - 30);
+  const duration = 1200;
+  const startTime = performance.now();
   
-  const timer = setInterval(() => {
-    count++;
-    element.innerText = count.toLocaleString();
-    if (count >= target) {
-      element.innerText = target.toLocaleString();
-      clearInterval(timer);
+  function update(now) {
+    const elapsed = now - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const current = Math.round(start + (target - start) * progress);
+    element.innerText = current.toLocaleString();
+    if (progress < 1) {
+      requestAnimationFrame(update);
     }
-  }, stepTime);
+  }
+  requestAnimationFrame(update);
 }
 
 // --- MAIN RUNNER ---
 document.addEventListener("DOMContentLoaded", () => {
+  initAnimations();
   initScrollProgress();
   initHeaderScroll();
   initMobileMenu();
@@ -726,22 +743,18 @@ document.addEventListener("DOMContentLoaded", () => {
   initSkillsTabs();
   initContactForm();
   initMobileFooterMarquee();
+  
+  let marqueeResizeTimer = null;
+  window.addEventListener("resize", () => {
+    clearTimeout(marqueeResizeTimer);
+    marqueeResizeTimer = setTimeout(initMobileFooterMarquee, 250);
+  }, { passive: true });
+
   initVisitorCounter();
 
   // Load dynamically generated projects & achievements data
-  if (typeof renderProjects === "function") {
-    renderProjects("all");
-  }
-  if (typeof initProjectFilters === "function") {
-    initProjectFilters();
-  }
-  if (typeof renderAchievements === "function") {
-    renderAchievements();
-  }
-  if (typeof initCarouselControls === "function") {
-    initCarouselControls();
-  }
-  if (typeof initializeSpotlightEffects === "function") {
-    initializeSpotlightEffects();
-  }
+  renderProjects("all");
+  initProjectFilters();
+  renderAchievements();
+  initializeSpotlightEffects();
 });

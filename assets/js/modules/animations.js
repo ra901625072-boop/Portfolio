@@ -24,10 +24,20 @@ function initCustomCursor() {
     return;
   }
 
+  let isCursorAnimating = false;
+
+  function startCursorLoop() {
+    if (!isCursorAnimating) {
+      isCursorAnimating = true;
+      requestAnimationFrame(animateCursor);
+    }
+  }
+
   // Global mouse position tracking (no reflows)
   window.addEventListener("mousemove", (e) => {
     mouseX = e.clientX;
     mouseY = e.clientY;
+    startCursorLoop();
   });
 
   // Attach magnetic snap listeners directly to interactive elements
@@ -39,6 +49,7 @@ function initCustomCursor() {
       cachedBorderRadius = window.getComputedStyle(el).borderRadius;
       el.style.transition = 'none';
       cursor.classList.add("snapped");
+      startCursorLoop();
     });
 
     el.addEventListener("mousemove", (e) => {
@@ -48,6 +59,7 @@ function initCustomCursor() {
       // Define target pull coordinates
       targetPullX = (e.clientX - elX) * 0.32;
       targetPullY = (e.clientY - elY) * 0.32;
+      startCursorLoop();
     });
 
     el.addEventListener("mouseleave", () => {
@@ -82,6 +94,7 @@ function initCustomCursor() {
       
       releasingEl.style.transition = 'none';
       requestAnimationFrame(animateRelease);
+      startCursorLoop();
     });
   });
 
@@ -131,9 +144,19 @@ function initCustomCursor() {
       dot.style.transform = `translate3d(${dotX}px, ${dotY}px, 0) translate3d(-50%, -50%, 0)`;
     }
 
+    const deltaX = Math.abs(mouseX - cursorX);
+    const deltaY = Math.abs(mouseY - cursorY);
+    const dotDeltaX = Math.abs(mouseX - dotX);
+    const dotDeltaY = Math.abs(mouseY - dotY);
+
+    if (!snappedEl && deltaX < 0.1 && deltaY < 0.1 && dotDeltaX < 0.1 && dotDeltaY < 0.1) {
+      isCursorAnimating = false;
+      return;
+    }
+
     requestAnimationFrame(animateCursor);
   }
-  animateCursor();
+  startCursorLoop();
 
   // Hover states for generic clickable elements
   const hoverables = document.querySelectorAll("a, button, .project-card, .form-control, .visitor-counter");
@@ -202,8 +225,26 @@ function initScrollReveals() {
   reveals.forEach(el => revealObserver.observe(el));
 }
 
+export function animatePercentageText(element, targetVal) {
+  let current = 0;
+  const duration = 1000;
+  const startTime = performance.now();
+  
+  function update(now) {
+    const elapsed = now - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const ease = progress * (2 - progress);
+    current = Math.round(ease * targetVal);
+    element.innerText = `${current}%`;
+    if (progress < 1) {
+      requestAnimationFrame(update);
+    }
+  }
+  requestAnimationFrame(update);
+}
+
 // --- SKILL BAR FILLING ---
-function animateSkillsBars() {
+export function animateSkillsBars() {
   if (skillsAnimated) return;
   skillsAnimated = true;
 
@@ -246,20 +287,15 @@ function animateSkillsBars() {
       const labelPct = wrapper ? wrapper.querySelector(".skill-percentage") : null;
       const tooltip = bar.querySelector(".skill-tooltip");
       
-      if (window.animatePercentageText) {
-        if (tooltip) window.animatePercentageText(tooltip, percent);
-        if (labelPct) window.animatePercentageText(labelPct, percent);
-      } else {
-        if (tooltip) tooltip.innerText = `${percent}%`;
-        if (labelPct) labelPct.innerText = `${percent}%`;
-      }
+      if (tooltip) animatePercentageText(tooltip, percent);
+      if (labelPct) animatePercentageText(labelPct, percent);
     });
   }, 50);
 }
 
 // --- STATS COUNT-UP EFFECT ---
 let statsAnimated = false;
-function animateStatsCounters() {
+export function animateStatsCounters() {
   if (statsAnimated) return;
   statsAnimated = true;
 
@@ -331,7 +367,13 @@ class TextTyper {
 function initTypingEffect() {
   const target = document.querySelector(".typed-text");
   if (!target) return;
-  const words = JSON.parse(target.dataset.words);
+  let words;
+  try {
+    words = JSON.parse(target.dataset.words);
+  } catch (e) {
+    console.warn('Invalid typed-text data-words JSON:', e);
+    return;
+  }
   new TextTyper(target, words);
 }
 
@@ -397,34 +439,41 @@ function initTimelineScrollHighlight() {
   window.addEventListener("resize", calculateOffsets, { passive: true });
   window.addEventListener("load", calculateOffsets, { passive: true });
 
+  let isTimelineScrolling = false;
   window.addEventListener("scroll", () => {
-    const scrollY = window.scrollY || document.documentElement.scrollTop;
-    const triggerPoint = window.innerHeight * 0.65;
-    const topOffset = triggerPoint - (timelineTop - scrollY);
-    
-    let progress = 0;
-    if (topOffset > 0) {
-      progress = (topOffset / timelineHeight) * 100;
+    if (!isTimelineScrolling) {
+      requestAnimationFrame(() => {
+        const scrollY = window.scrollY || document.documentElement.scrollTop;
+        const triggerPoint = window.innerHeight * 0.65;
+        const topOffset = triggerPoint - (timelineTop - scrollY);
+        
+        let progress = 0;
+        if (topOffset > 0) {
+          progress = (topOffset / timelineHeight) * 100;
+        }
+        progress = Math.min(Math.max(progress, 0), 100);
+        
+        progressLine.style.height = `${progress}%`;
+        
+        items.forEach((item, index) => {
+          const dot = item.querySelector(".timeline-dot");
+          if (!dot) return;
+          
+          const dotTop = dotOffsets[index] || 0;
+          const dotTopOffset = triggerPoint - (dotTop - scrollY);
+          
+          if (dotTopOffset > 0) {
+            dot.classList.add("active");
+            item.classList.add("illuminated");
+          } else {
+            dot.classList.remove("active");
+            item.classList.remove("illuminated");
+          }
+        });
+        isTimelineScrolling = false;
+      });
+      isTimelineScrolling = true;
     }
-    progress = Math.min(Math.max(progress, 0), 100);
-    
-    progressLine.style.height = `${progress}%`;
-    
-    items.forEach((item, index) => {
-      const dot = item.querySelector(".timeline-dot");
-      if (!dot) return;
-      
-      const dotTop = dotOffsets[index] || 0;
-      const dotTopOffset = triggerPoint - (dotTop - scrollY);
-      
-      if (dotTopOffset > 0) {
-        dot.classList.add("active");
-        item.classList.add("illuminated");
-      } else {
-        dot.classList.remove("active");
-        item.classList.remove("illuminated");
-      }
-    });
   }, { passive: true });
 }
 
@@ -445,22 +494,31 @@ function initDesignerGrid() {
   window.addEventListener("resize", () => { if (rect) updateRect(); }, { passive: true });
   window.addEventListener("scroll", () => { if (rect) updateRect(); }, { passive: true });
 
+  let isGridMouseMoving = false;
   hero.addEventListener("mousemove", (e) => {
-    if (!rect) updateRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    
-    // Position tracking lines with GPU translate3d
-    crosshairH.style.transform = `translate3d(0, ${y}px, 0)`;
-    crosshairV.style.transform = `translate3d(${x}px, 0, 0)`;
-    
-    // Coordinate label floating alongside
-    label.style.transform = `translate3d(${x + 15}px, ${y + 15}px, 0)`;
-    label.innerText = `X: ${Math.round(x)}px | Y: ${Math.round(y)}px`;
+    if (!isGridMouseMoving) {
+      const clientX = e.clientX;
+      const clientY = e.clientY;
+      requestAnimationFrame(() => {
+        if (!rect) updateRect();
+        const x = clientX - rect.left;
+        const y = clientY - rect.top;
+        
+        // Position tracking lines with GPU translate3d
+        crosshairH.style.transform = `translate3d(0, ${y}px, 0)`;
+        crosshairV.style.transform = `translate3d(${x}px, 0, 0)`;
+        
+        // Coordinate label floating alongside
+        label.style.transform = `translate3d(${x + 15}px, ${y + 15}px, 0)`;
+        label.innerText = `X: ${Math.round(x)}px | Y: ${Math.round(y)}px`;
 
-    // Update custom properties for dynamic grid spotlight glow
-    hero.style.setProperty("--global-mouse-x", `${x}px`);
-    hero.style.setProperty("--global-mouse-y", `${y}px`);
+        // Update custom properties for dynamic grid spotlight glow
+        hero.style.setProperty("--global-mouse-x", `${x}px`);
+        hero.style.setProperty("--global-mouse-y", `${y}px`);
+        isGridMouseMoving = false;
+      });
+      isGridMouseMoving = true;
+    }
   });
 
   hero.addEventListener("mouseleave", () => {
@@ -469,15 +527,18 @@ function initDesignerGrid() {
 }
 
 // --- INITIALIZE ALL ANIMATIONS ---
-document.addEventListener("DOMContentLoaded", () => {
+export function initAnimations() {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    animateSkillsBars();
+    animateStatsCounters();
+    initTypingEffect();
+    return;
+  }
+  
   initCustomCursor();
   initScrollReveals();
   initTypingEffect();
   initAvatarParallax();
   initTimelineScrollHighlight();
   initDesignerGrid();
-});
-
-// Re-expose trigger functions in case of dynamic reloading
-window.animateSkillsBars = animateSkillsBars;
-window.animateStatsCounters = animateStatsCounters;
+}
