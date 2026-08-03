@@ -768,13 +768,132 @@ function animateVisitorCountUp(element, target) {
   requestAnimationFrame(update);
 }
 
+// --- TYPING ANIMATION FOR PRELOADER LOGIC ---
+function typePreloaderText(text, element, speed, callback) {
+  element.innerHTML = "";
+  
+  const textNode = document.createElement("span");
+  textNode.className = "preloader-logo-text-inner";
+  element.appendChild(textNode);
+  
+  const dotNode = document.createElement("span");
+  dotNode.className = "logo-dot";
+  element.appendChild(dotNode);
+  
+  let index = 0;
+  const timer = setInterval(() => {
+    if (index < text.length) {
+      textNode.textContent += text.charAt(index);
+      index++;
+    } else {
+      clearInterval(timer);
+      
+      // Pop the red dot in using spring curve scale
+      dotNode.style.transform = "scale(1)";
+      
+      setTimeout(() => {
+        if (callback) callback();
+      }, 350);
+    }
+  }, speed);
+}
+
+// --- FLIP LOGO TAKEOVER TRANSITION ---
+function runLogoTakeover(preloader, preloaderLogo, callback) {
+  const navLogo = document.getElementById("nav-logo");
+  const header = document.querySelector("header");
+  const percentEl = document.getElementById("preloader-percent");
+  const progressContainer = document.querySelector(".preloader-progress-container");
+
+  // Fade out percentage and bar first
+  if (percentEl) percentEl.style.transition = "opacity 0.4s ease";
+  if (progressContainer) progressContainer.style.transition = "opacity 0.4s ease";
+  if (percentEl) percentEl.style.opacity = "0";
+  if (progressContainer) progressContainer.style.opacity = "0";
+
+  if (!navLogo) {
+    // Fallback if header logo is missing
+    preloader.classList.add("fade-out");
+    document.documentElement.style.overflow = "";
+    document.body.style.overflow = "";
+    setTimeout(() => {
+      preloader.remove();
+      if (callback) callback();
+    }, 1000);
+    return;
+  }
+
+  // Temporarily reset header translations to read exact landing layout positions
+  const originalHeaderTransform = header.style.transform;
+  const originalHeaderOpacity = header.style.opacity;
+  const originalHeaderVisibility = header.style.visibility;
+  
+  header.style.transform = "none";
+  header.style.opacity = "0";
+  header.style.visibility = "hidden";
+  
+  const lastRect = navLogo.getBoundingClientRect();
+  
+  // Restore initial header states
+  header.style.transform = originalHeaderTransform;
+  header.style.opacity = originalHeaderOpacity;
+  header.style.visibility = originalHeaderVisibility;
+
+  const firstRect = preloaderLogo.getBoundingClientRect();
+
+  // Calculate layout offset deltas
+  const deltaX = firstRect.left - lastRect.left;
+  const deltaY = firstRect.top - lastRect.top;
+  const scale = firstRect.width / lastRect.width;
+
+  // Apply FLIP inversion styles on header logo (match preloader logo size/spot)
+  navLogo.style.transformOrigin = "top left";
+  navLogo.style.transform = `translate3d(${deltaX}px, ${deltaY}px, 0) scale(${scale})`;
+  navLogo.style.transition = "none";
+  navLogo.style.zIndex = "100001"; // Draw on top of preloader
+  navLogo.style.opacity = "1";
+  
+  // Make header active instantly but keep logo offset
+  header.style.opacity = "1";
+  header.style.transform = "none";
+
+  // Hide preloader text instantly to make it seem like the same text is moving
+  preloaderLogo.style.opacity = "0";
+  preloaderLogo.style.transition = "opacity 0.1s ease";
+
+  // Force reflow
+  navLogo.offsetHeight;
+
+  // Fade out preloader curtain overlay
+  preloader.classList.add("fade-out");
+
+  // Unlock scrolling immediately
+  document.documentElement.style.overflow = "";
+  document.body.style.overflow = "";
+
+  // Play the takeover translation!
+  navLogo.style.transition = "transform 1.1s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.8s ease-out";
+  navLogo.style.transform = "translate3d(0, 0, 0) scale(1)";
+
+  setTimeout(() => {
+    preloader.remove();
+    // Clean inline transformation styles
+    navLogo.style.transform = "";
+    navLogo.style.transformOrigin = "";
+    navLogo.style.transition = "";
+    navLogo.style.zIndex = "";
+    if (callback) callback();
+  }, 1200);
+}
+
 // --- INITIALIZE PRELOADER LOGIC ---
 function initPreloader(callback) {
   const preloader = document.getElementById("preloader");
+  const preloaderLogo = document.getElementById("preloader-logo-text");
   const percentEl = document.getElementById("preloader-percent");
   const progressBar = document.getElementById("preloader-progress-bar");
   
-  if (!preloader) {
+  if (!preloader || !preloaderLogo) {
     document.documentElement.style.overflow = "";
     document.body.style.overflow = "";
     if (callback) callback();
@@ -782,42 +901,38 @@ function initPreloader(callback) {
   }
 
   let currentPercent = 0;
-  const duration = 1600; // 1.6s smooth loading feel
-  const start = performance.now();
+  const logoText = "Akshay";
+  
+  // Start by typing "Akshay" logo first
+  typePreloaderText(logoText, preloaderLogo, 90, () => {
+    // Fill the percentage progress bar to 100%
+    const duration = 1000;
+    const start = performance.now();
 
-  function updateProgress(now) {
-    const elapsed = now - start;
-    const progress = Math.min(elapsed / duration, 1);
-    
-    // Smooth ease-out-cubic curve for percentage feel
-    const ease = 1 - Math.pow(1 - progress, 3);
-    currentPercent = Math.floor(ease * 100);
-
-    if (percentEl) {
-      percentEl.innerText = String(currentPercent).padStart(2, '0');
-    }
-    if (progressBar) {
-      progressBar.style.width = `${currentPercent}%`;
-    }
-
-    if (progress < 1) {
-      requestAnimationFrame(updateProgress);
-    } else {
-      // Complete: fade out screen with clipping mask
-      preloader.classList.add("fade-out");
+    function updateProgress(now) {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
       
-      // Unlock body & document scrolls
-      document.documentElement.style.overflow = "";
-      document.body.style.overflow = "";
-      
-      setTimeout(() => {
-        preloader.remove();
-        if (callback) callback();
-      }, 1000);
-    }
-  }
+      const ease = 1 - Math.pow(1 - progress, 3);
+      currentPercent = Math.floor(ease * 100);
 
-  requestAnimationFrame(updateProgress);
+      if (percentEl) {
+        percentEl.innerText = String(currentPercent).padStart(2, '0');
+      }
+      if (progressBar) {
+        progressBar.style.width = `${currentPercent}%`;
+      }
+
+      if (progress < 1) {
+        requestAnimationFrame(updateProgress);
+      } else {
+        // Run FLIP transition logo takeover
+        runLogoTakeover(preloader, preloaderLogo, callback);
+      }
+    }
+
+    requestAnimationFrame(updateProgress);
+  });
 }
 
 // --- MAIN RUNNER ---
