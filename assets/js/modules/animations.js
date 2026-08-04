@@ -58,9 +58,12 @@ function initCustomCursor() {
       if (!cachedRect) cachedRect = el.getBoundingClientRect();
       const elX = cachedRect.left + cachedRect.width / 2;
       const elY = cachedRect.top + cachedRect.height / 2;
-      // Define target pull coordinates
-      targetPullX = (e.clientX - elX) * 0.32;
-      targetPullY = (e.clientY - elY) * 0.32;
+      // Proportional pull strength: smaller elements pull more, larger elements resist displacement to retain hover focus
+      const maxDim = Math.max(cachedRect.width, cachedRect.height);
+      const pullStrength = Math.min(0.35, 28 / maxDim);
+      
+      targetPullX = (e.clientX - elX) * pullStrength;
+      targetPullY = (e.clientY - elY) * pullStrength;
       startCursorLoop();
     });
 
@@ -680,10 +683,11 @@ export function updateNavIndicator() {
     const menuRect = navMenu.getBoundingClientRect();
     const linkRect = activeLink.getBoundingClientRect();
 
-    indicator.style.width = `${linkRect.width}px`;
-    indicator.style.height = `${linkRect.height}px`;
-    indicator.style.left = `${linkRect.left - menuRect.left}px`;
-    indicator.style.top = `${linkRect.top - menuRect.top}px`;
+    const x = linkRect.left - menuRect.left;
+    const y = linkRect.top - menuRect.top;
+    const scaleX = linkRect.width / 100; // Base width is 100px
+
+    indicator.style.transform = `translate3d(${x}px, ${y}px, 0) scaleX(${scaleX})`;
     indicator.style.opacity = '1';
   } else {
     indicator.style.opacity = '0';
@@ -711,10 +715,11 @@ function initNavIndicator() {
       const menuRect = navMenu.getBoundingClientRect();
       const linkRect = link.getBoundingClientRect();
 
-      indicator.style.width = `${linkRect.width}px`;
-      indicator.style.height = `${linkRect.height}px`;
-      indicator.style.left = `${linkRect.left - menuRect.left}px`;
-      indicator.style.top = `${linkRect.top - menuRect.top}px`;
+      const x = linkRect.left - menuRect.left;
+      const y = linkRect.top - menuRect.top;
+      const scaleX = linkRect.width / 100;
+
+      indicator.style.transform = `translate3d(${x}px, ${y}px, 0) scaleX(${scaleX})`;
       indicator.style.opacity = '1';
     });
   });

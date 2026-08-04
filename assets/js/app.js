@@ -698,28 +698,10 @@ function initScrollProgress() {
   const progress = document.getElementById("scroll-progress");
   if (!progress) return;
   
-  let docHeight = document.documentElement.scrollHeight;
-  let viewHeight = document.documentElement.clientHeight;
-  let totalScrollable = docHeight - viewHeight;
-  let isScrollTicking = false;
-
-  window.addEventListener("resize", () => {
-    docHeight = document.documentElement.scrollHeight;
-    viewHeight = document.documentElement.clientHeight;
-    totalScrollable = docHeight - viewHeight;
-  }, { passive: true });
-
-  window.addEventListener("scroll", () => {
-    if (!isScrollTicking) {
-      requestAnimationFrame(() => {
-        const winScroll = window.scrollY || document.documentElement.scrollTop;
-        const scrolled = totalScrollable > 0 ? winScroll / totalScrollable : 0;
-        progress.style.transform = `scaleX(${scrolled})`;
-        isScrollTicking = false;
-      });
-      isScrollTicking = true;
-    }
-  }, { passive: true });
+  // Bind progress bar directly to Lenis scroll event for frame-rate synchronized smooth scaling
+  lenis.on('scroll', (e) => {
+    progress.style.transform = `scaleX(${e.progress})`;
+  });
 }
 
 // --- MOBILE FOOTER MARQUEE EFFECT ---
