@@ -43,14 +43,18 @@ header.scrolled {
   font-family: var(--font-heading);
   font-size: 1.5rem;
   font-weight: 800;
-  background: var(--grad-primary);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
   display: flex;
   align-items: center;
   gap: 0.5rem;
   margin-right: 2.5rem;
+  text-decoration: none;
+}
+
+.logo-text {
+  background: var(--grad-primary);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .logo-dot {
@@ -322,6 +326,7 @@ body.light-mode {
   transform: scale(0.8) translateY(15px);
   transition: opacity 1.4s var(--ease-out-spring), transform 1.4s var(--ease-out-spring);
   will-change: transform, opacity;
+  z-index: 500; /* Behind sticky header (1000) but above flyer initial state (400) */
 }
 
 .badge-1 {
@@ -3480,5 +3485,102 @@ body.light-mode .btn-secondary::after {
   font-weight: 700;
   box-shadow: 0 0 15px var(--color-primary);
 }
+
+
+/* --- SCROLL-DRIVEN FLYING AVATAR ANIMATION --- */
+
+.logo-avatar-container {
+  width: 0;
+  height: 32px;
+  border-radius: 50%;
+  overflow: hidden;
+  opacity: 0;
+  transform: scale(0);
+  flex-shrink: 0;
+}
+
+.logo-avatar-container img,
+.menu-avatar-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+@media (max-width: 1024px) {
+  .scrolled-avatar .logo-avatar-container {
+    width: 32px;
+    opacity: 1;
+    transform: scale(1);
+    border: 1px solid rgba(var(--avatar-glow-rgb), 0.5);
+    box-shadow: 0 0 10px rgba(var(--avatar-glow-rgb), 0.3);
+    margin-right: 0.25rem;
+  }
+}
+
+.nav-avatar-li {
+  display: none;
+}
+
+@media (min-width: 1025px) {
+  .nav-avatar-li {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 0;
+    opacity: 0;
+    transform: scale(0);
+    margin-left: -1.75rem; /* Cancels out flexbox gap on the nav menu container when item is hidden */
+  }
+  
+  .scrolled-avatar .nav-avatar-li {
+    width: 36px;
+    opacity: 1;
+    transform: scale(1);
+    margin-left: 0;
+  }
+}
+
+.menu-avatar-container {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 1.5px solid rgba(var(--avatar-glow-rgb), 0.5);
+  box-shadow: 0 0 12px rgba(var(--avatar-glow-rgb), 0.3);
+  flex-shrink: 0;
+}
+
+.flying-avatar-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 380px; /* Base width matching hero avatar card */
+  height: 380px; /* Base height matching hero avatar card */
+  transform-origin: top left;
+  pointer-events: none;
+  z-index: 9999;
+  display: none;
+  overflow: hidden;
+  will-change: transform, border-radius;
+  box-shadow: 0 20px 50px -10px rgba(var(--avatar-glow-rgb), 0.18),
+              inset 0 0 20px rgba(var(--avatar-glow-rgb), 0.08);
+  border-radius: var(--radius-lg);
+  background: radial-gradient(circle at 50% 40%, rgba(var(--avatar-glow-rgb), 0.22) 0%, transparent 70%),
+              linear-gradient(135deg, rgba(var(--avatar-glow-rgb), 0.08) 0%, rgba(var(--color-secondary-rgb), 0.03) 100%);
+  border: 1px solid rgba(var(--avatar-glow-rgb), 0.22);
+}
+
+.flying-avatar-container img {
+  width: 90%;
+  height: auto;
+  object-fit: cover;
+  position: absolute;
+  bottom: 0;
+  left: 5%;
+  border-radius: inherit;
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.5));
+}
+
 
 

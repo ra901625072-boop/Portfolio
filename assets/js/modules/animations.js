@@ -18,9 +18,9 @@ function initCustomCursor() {
   let targetPullX = 0, targetPullY = 0;
   let currentPullX = 0, currentPullY = 0;
 
-  // Check if touch device - do not activate custom cursor followers
-  const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-  if (isTouchDevice) {
+  // Disable custom cursor only if the primary pointer is touch (e.g. phones/tablets)
+  const isTouchPrimary = window.matchMedia('(pointer: coarse)').matches;
+  if (isTouchPrimary) {
     cursor.style.display = 'none';
     dot.style.display = 'none';
     return;
@@ -35,10 +35,19 @@ function initCustomCursor() {
     }
   }
 
+  let firstMove = true;
   // Global mouse position tracking (no reflows)
   window.addEventListener("mousemove", (e) => {
     mouseX = e.clientX;
     mouseY = e.clientY;
+    
+    // Fade in cursor only on first movement to prevent ghost cursor at (0,0) on load
+    if (firstMove) {
+      cursor.style.opacity = '1';
+      dot.style.opacity = '1';
+      firstMove = false;
+    }
+    
     startCursorLoop();
   });
 
@@ -510,6 +519,9 @@ function initTimelineScrollHighlight() {
 // --- HERO DESIGNER COORDINATE CROSSHAIR ---
 // --- HERO DESIGNER COORDINATE CROSSHAIR ---
 function initDesignerGrid() {
+  const isHoverSupported = window.matchMedia('(hover: hover)').matches;
+  if (!isHoverSupported) return;
+
   const hero = document.getElementById("hero");
   const crosshairH = document.getElementById("crosshair-h");
   const crosshairV = document.getElementById("crosshair-v");

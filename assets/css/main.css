@@ -422,6 +422,7 @@ a {
   z-index: 10000;
   mix-blend-mode: difference;
   will-change: transform;
+  opacity: 0; /* Hide initially to prevent ghost cursor at (0,0) on load */
   transition: 
     width 0.35s var(--ease-out-spring), 
     height 0.35s var(--ease-out-spring), 
@@ -443,6 +444,8 @@ a {
   pointer-events: none;
   z-index: 10000;
   will-change: transform;
+  opacity: 0; /* Hide initially to prevent ghost cursor at (0,0) on load */
+  transition: opacity 0.3s var(--ease-out-expo);
 }
 
 .custom-cursor.hovered {

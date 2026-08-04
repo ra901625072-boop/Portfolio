@@ -303,6 +303,9 @@ export function renderAchievements() {
 
 // --- SPOTLIGHT GLOW MOUSE BINDINGS ---
 export function initializeSpotlightEffects() {
+  const isHoverSupported = window.matchMedia('(hover: hover)').matches;
+  if (!isHoverSupported) return;
+
   const cards = document.querySelectorAll(".spotlight-card");
   cards.forEach(card => {
     let rect = null;

@@ -789,6 +789,7 @@ function runLogoTakeover(preloader, preloaderLogo, callback) {
     setTimeout(() => {
       preloader.remove();
       if (callback) callback();
+      window.dispatchEvent(new CustomEvent("recalc-offsets"));
     }, 1000);
     return;
   }
@@ -860,6 +861,8 @@ function runLogoTakeover(preloader, preloaderLogo, callback) {
     navLogo.style.transformOrigin = "";
     navLogo.style.transition = "";
     navLogo.style.zIndex = "";
+    // Notify all modules that layout positions have settled post-preloader
+    window.dispatchEvent(new CustomEvent("recalc-offsets"));
   }, 1400);
 }
 
@@ -992,6 +995,327 @@ function initShimmerDismissal() {
   }, true); // Use capture phase
 }
 
+// --- SCROLL-DRIVEN AVATAR FLYING ANIMATION ---
+function initAvatarScrollAnimation() {
+  const heroCard = document.querySelector(".hero-avatar-card");
+  const logoTarget = document.querySelector(".logo-avatar-container");
+  const menuTarget = document.querySelector(".menu-avatar-container");
+  const flyingAvatar = document.getElementById("flying-avatar");
+  
+  if (!heroCard || !flyingAvatar) return;
+  
+  const heroImg = heroCard.querySelector("img");
+  const flyingImg = flyingAvatar.querySelector("img");
+  let heroPageRect = null;
+  let targetRect = null;
+  let activeTarget = null;
+  let isMobileLayout = false;
+  let hasMeasuredSettled = false;
+  
+  function updateLayoutPositions() {
+    isMobileLayout = window.innerWidth <= 1024;
+    activeTarget = isMobileLayout ? logoTarget : menuTarget;
+    
+    if (!activeTarget) return;
+    
+    // Temporarily reset styles to measure natural dimensions
+    const originalHeroOpacity = heroCard.style.opacity;
+    const originalHeroTransform = heroCard.style.transform;
+    heroCard.style.opacity = "";
+    heroCard.style.transform = "none";
+    
+    const heroRect = heroCard.getBoundingClientRect();
+    
+    // Restore styling
+    heroCard.style.transform = originalHeroTransform;
+    heroCard.style.opacity = originalHeroOpacity;
+    
+    heroPageRect = {
+      left: heroRect.left + window.scrollX,
+      top: heroRect.top + window.scrollY,
+      width: heroRect.width,
+      height: heroRect.height
+    };
+    
+    // Temporarily apply active sticky scrolled styles to measure final positions accurately
+    const header = document.querySelector("header");
+    const originalHeaderTransition = header ? header.style.transition : "";
+    const wasScrolled = header ? header.classList.contains("scrolled") : false;
+    
+    if (header) {
+      header.style.transition = "none";
+      header.classList.add("scrolled");
+    }
+    
+    const originalTargetStyle = activeTarget.style.cssText;
+    const targetParent = activeTarget.closest("li, a");
+    const originalParentStyle = targetParent ? targetParent.style.cssText : "";
+    
+    if (isMobileLayout) {
+      activeTarget.style.setProperty("display", "block", "important");
+      activeTarget.style.setProperty("width", "32px", "important");
+      activeTarget.style.setProperty("transform", "scale(1)", "important");
+      activeTarget.style.setProperty("margin-right", "0.25rem", "important");
+      activeTarget.style.setProperty("opacity", "0", "important"); // hidden but sized
+    } else {
+      if (targetParent) {
+        targetParent.style.setProperty("display", "flex", "important");
+        targetParent.style.setProperty("width", "36px", "important");
+        targetParent.style.setProperty("transform", "scale(1)", "important");
+        targetParent.style.setProperty("margin-left", "0", "important");
+        targetParent.style.setProperty("opacity", "0", "important"); // hidden but sized
+      }
+    }
+    
+    // Force a layout flush to ensure styles are applied before measurement
+    if (header) header.offsetHeight;
+    
+    const targetBounding = activeTarget.getBoundingClientRect();
+    targetRect = {
+      left: targetBounding.left,
+      top: targetBounding.top,
+      width: targetBounding.width,
+      height: targetBounding.height
+    };
+    
+    // Restore layout state
+    activeTarget.style.cssText = originalTargetStyle;
+    if (targetParent) {
+      targetParent.style.cssText = originalParentStyle;
+    }
+    if (header) {
+      if (!wasScrolled) {
+        header.classList.remove("scrolled");
+      }
+      header.offsetHeight; // flush
+      header.style.transition = originalHeaderTransition;
+    }
+    
+    // Set flyer base dimensions dynamically to match starting hero size
+    flyingAvatar.style.width = `${heroPageRect.width}px`;
+    flyingAvatar.style.height = `${heroPageRect.height}px`;
+  }
+  
+  // Initial measurement fallback
+  updateLayoutPositions();
+  
+  // Re-run measurement when layout changes
+  window.addEventListener("resize", () => {
+    hasMeasuredSettled = false;
+    updateLayoutPositions();
+    handleScroll(window.scrollY);
+  }, { passive: true });
+  
+  window.addEventListener("load", () => {
+    hasMeasuredSettled = false;
+    updateLayoutPositions();
+    handleScroll(window.scrollY);
+  }, { passive: true });
+  
+  window.addEventListener("recalc-offsets", () => {
+    hasMeasuredSettled = false;
+    updateLayoutPositions();
+    handleScroll(window.scrollY);
+  }, { passive: true });
+  
+  const scrollEnd = 300;
+  let lastProgress = -1;
+  
+  function easeOutQuad(t) {
+    return t * (2 - t);
+  }
+  
+  function handleScroll(scrollY) {
+    // Lazy measure at the very first scroll frame to ensure page is settled and transitions finished
+    if (scrollY > 0 && !hasMeasuredSettled) {
+      updateLayoutPositions();
+      hasMeasuredSettled = true;
+    }
+    
+    if (!heroPageRect || !targetRect || !activeTarget) return;
+    
+    const progress = Math.min(Math.max(scrollY / scrollEnd, 0), 1);
+    
+    if (progress === lastProgress) return;
+    lastProgress = progress;
+    
+    const body = document.body;
+    const p = easeOutQuad(progress); // Eased progress for organic motion
+    
+    if (progress === 0) {
+      body.classList.remove("scrolled-avatar");
+      heroCard.style.opacity = "";
+      flyingAvatar.style.display = "none";
+      flyingAvatar.style.opacity = "0";
+      
+      // Reset targets
+      if (logoTarget) logoTarget.style.cssText = "";
+      const menuParent = menuTarget ? menuTarget.closest("li") : null;
+      if (menuParent) menuParent.style.cssText = "";
+    } else if (progress === 1) {
+      body.classList.add("scrolled-avatar");
+      heroCard.style.opacity = "0";
+      flyingAvatar.style.display = "none";
+      flyingAvatar.style.opacity = "0";
+      
+      if (isMobileLayout) {
+        if (logoTarget) {
+          logoTarget.style.display = "block";
+          logoTarget.style.width = "32px";
+          logoTarget.style.opacity = "1";
+          logoTarget.style.transform = "scale(1)";
+          logoTarget.style.marginRight = "0.25rem";
+          const logoImg = logoTarget.querySelector("img");
+          if (logoImg) logoImg.style.opacity = "1";
+        }
+      } else {
+        const menuParent = menuTarget ? menuTarget.closest("li") : null;
+        if (menuParent) {
+          menuParent.style.display = "flex";
+          menuParent.style.width = "36px";
+          menuParent.style.marginLeft = "0";
+          menuParent.style.opacity = "1";
+          menuParent.style.transform = "scale(1)";
+        }
+        if (menuTarget) {
+          const menuImg = menuTarget.querySelector("img");
+          if (menuImg) menuImg.style.opacity = "1";
+        }
+      }
+    } else {
+      body.classList.remove("scrolled-avatar");
+      
+      // 1. Hide the original hero card instantly (opacity 0) while animating
+      // to avoid transparency overlaps and dark overlay dimming artifacts.
+      heroCard.style.opacity = "0";
+      
+      // 2. The flyer is fully opaque until it starts merging into the header at the very end
+      let flyerOpacity = 1;
+      if (progress > 0.9) {
+        flyerOpacity = (1 - progress) / 0.1;
+      }
+      
+      flyingAvatar.style.display = "block";
+      flyingAvatar.style.opacity = flyerOpacity.toString();
+      
+      // Open space in header smoothly as avatar flies closer
+      if (isMobileLayout) {
+        if (logoTarget) {
+          logoTarget.style.display = "block";
+          logoTarget.style.width = `${p * 32}px`;
+          logoTarget.style.opacity = p.toString();
+          logoTarget.style.transform = `scale(${p})`;
+          logoTarget.style.marginRight = `${p * 0.25}rem`;
+          
+          // Target image fades in over the last 20% scroll
+          const logoImg = logoTarget.querySelector("img");
+          if (logoImg) {
+            if (progress > 0.8) {
+              logoImg.style.opacity = ((progress - 0.8) / 0.2).toString();
+            } else {
+              logoImg.style.opacity = "0";
+            }
+          }
+        }
+        const menuParent = menuTarget ? menuTarget.closest("li") : null;
+        if (menuParent) menuParent.style.cssText = "";
+      } else {
+        const menuParent = menuTarget ? menuTarget.closest("li") : null;
+        if (menuParent) {
+          menuParent.style.display = "flex";
+          menuParent.style.width = `${p * 36}px`;
+          menuParent.style.marginLeft = `${(1 - p) * -1.75}rem`;
+          menuParent.style.opacity = p.toString();
+          menuParent.style.transform = `scale(${p})`;
+        }
+        if (menuTarget) {
+          // Target image fades in over the last 20% scroll
+          const menuImg = menuTarget.querySelector("img");
+          if (menuImg) {
+            if (progress > 0.8) {
+              menuImg.style.opacity = ((progress - 0.8) / 0.2).toString();
+            } else {
+              menuImg.style.opacity = "0";
+            }
+          }
+        }
+        if (logoTarget) logoTarget.style.cssText = "";
+      }
+      
+      // Flyer position interpolation
+      const currentHeroLeft = heroPageRect.left - window.scrollX;
+      const currentHeroTop = heroPageRect.top - scrollY;
+      
+      const currentLeft = currentHeroLeft + (targetRect.left - currentHeroLeft) * p;
+      const currentTop = currentHeroTop + (targetRect.top - currentHeroTop) * p;
+      
+      const currentWidth = heroPageRect.width + (targetRect.width - heroPageRect.width) * p;
+      const scale = currentWidth / heroPageRect.width;
+      
+      flyingAvatar.style.transform = `translate3d(${currentLeft}px, ${currentTop}px, 0) scale(${scale})`;
+      
+      // Dynamic stacking order: start behind badges (400 < 500) and finish above header (2000 > 1000)
+      if (progress < 0.5) {
+        flyingAvatar.style.zIndex = "400";
+      } else {
+        flyingAvatar.style.zIndex = "2000";
+      }
+      
+      // Interpolate border radius
+      const startRadius = 24;
+      const endRadius = heroPageRect.width / 2;
+      const currentRadius = startRadius + (endRadius - startRadius) * p;
+      flyingAvatar.style.borderRadius = `${currentRadius}px`;
+      
+      // Interpolate container box shadow (combines card box shadow with circular header glow shadow)
+      const glowIntensity = 0.3;
+      const glowRadius = isMobileLayout ? 10 : 12;
+      
+      const shadowX = 0;
+      const shadowY = 20 * (1 - p);
+      const shadowBlur = 50 * (1 - p) + glowRadius * p;
+      const shadowSpread = -10 * (1 - p);
+      const shadowAlpha = 0.18 * (1 - p) + glowIntensity * p;
+      
+      const insetBlur = 20 * (1 - p);
+      const insetAlpha = 0.08 * (1 - p);
+      
+      flyingAvatar.style.boxShadow = `
+        ${shadowX}px ${shadowY}px ${shadowBlur}px ${shadowSpread}px rgba(var(--avatar-glow-rgb), ${shadowAlpha}),
+        inset 0 0 ${insetBlur}px rgba(var(--avatar-glow-rgb), ${insetAlpha})
+      `;
+      
+      // Flyer image scaling and translation to match start/end positions perfectly
+      if (flyingImg) {
+        flyingImg.style.width = `${90 + 10 * p}%`;
+        flyingImg.style.left = `${5 - 5 * p}%`;
+        
+        // Match the 10px baseline vertical offset of the hero avatar card
+        const currentTranslateY = 10 * (1 - p);
+        flyingImg.style.transform = `translateY(${currentTranslateY}px)`;
+        
+        // Interpolate drop shadow to avoid sudden pops
+        const shadowOpacity = 0.7 * (1 - p);
+        const shadowOffsetY = 15 * (1 - p);
+        const shadowBlurSize = 30 * (1 - p);
+        flyingImg.style.filter = `drop-shadow(0 ${shadowOffsetY}px ${shadowBlurSize}px rgba(0, 0, 0, ${shadowOpacity}))`;
+      }
+    }
+  }
+  
+  // Bind to Lenis scrolling
+  if (typeof lenis !== "undefined" && lenis) {
+    lenis.on("scroll", (e) => {
+      handleScroll(e.scroll);
+    });
+  }
+  
+  // Fallback for native scroll
+  window.addEventListener("scroll", () => {
+    handleScroll(window.scrollY);
+  }, { passive: true });
+}
+
 // --- MAIN RUNNER ---
 document.addEventListener("DOMContentLoaded", () => {
   initPreloader(() => {
@@ -1022,6 +1346,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Initialize new premium transitions and skeleton listeners
   initNavTransitions();
   initShimmerDismissal();
+  initAvatarScrollAnimation();
 
   // Load dynamically generated projects & achievements data
   renderProjects("all");
