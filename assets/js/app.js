@@ -267,7 +267,7 @@ function initTheme() {
           clipPath: clipPath
         },
         {
-          duration: 650,
+          duration: 1000,
           easing: "cubic-bezier(0.16, 1, 0.3, 1)", // Fluid Apple-like decel curve
           pseudoElement: "::view-transition-new(root)"
         }
