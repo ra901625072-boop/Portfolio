@@ -1161,6 +1161,7 @@ function initAvatarScrollAnimation() {
     
     if (progress === 0) {
       body.classList.remove("scrolled-avatar");
+      heroCard.style.transition = "";
       heroCard.style.opacity = "";
       flyingAvatar.style.display = "none";
       flyingAvatar.style.opacity = "0";
@@ -1171,6 +1172,7 @@ function initAvatarScrollAnimation() {
       if (menuParent) menuParent.style.cssText = "";
     } else if (progress === 1) {
       body.classList.add("scrolled-avatar");
+      heroCard.style.transition = "none";
       heroCard.style.opacity = "0";
       flyingAvatar.style.display = "none";
       flyingAvatar.style.opacity = "0";
@@ -1210,8 +1212,8 @@ function initAvatarScrollAnimation() {
       body.classList.remove("scrolled-avatar");
       const p = easeOutQuad(progress);
       
-      // 1. Hide the original hero card instantly (opacity 0) while animating
-      // to avoid transparency overlaps and dark overlay dimming artifacts.
+      // Disable transition to hide the original card instantly (avoiding "double image" overlap)
+      heroCard.style.transition = "none";
       heroCard.style.opacity = "0";
       
       // 2. The flyer is fully opaque until it starts merging into the header at the very end
