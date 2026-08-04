@@ -1208,6 +1208,7 @@ function initAvatarScrollAnimation() {
       }
       
       body.classList.remove("scrolled-avatar");
+      const p = easeOutQuad(progress);
       
       // 1. Hide the original hero card instantly (opacity 0) while animating
       // to avoid transparency overlaps and dark overlay dimming artifacts.
