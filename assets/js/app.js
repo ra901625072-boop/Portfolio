@@ -1125,23 +1125,42 @@ function initAvatarScrollAnimation() {
   
   const scrollEnd = 300;
   let lastProgress = -1;
-  let activeScrollY = 0;
-  let rAFid = null;
+  
+  let targetScrollY = 0;
+  let lerpedScrollY = 0;
+  let isLoopRunning = false;
   
   function easeOutQuad(t) {
     return t * (2 - t);
   }
   
   function handleScroll(scrollY) {
-    activeScrollY = scrollY;
-    if (!rAFid) {
-      rAFid = requestAnimationFrame(updateVisuals);
+    targetScrollY = scrollY;
+    startVisualLoop();
+  }
+  
+  function startVisualLoop() {
+    if (!isLoopRunning) {
+      isLoopRunning = true;
+      requestAnimationFrame(visualLoop);
     }
   }
   
-  function updateVisuals() {
-    rAFid = null;
-    const scrollY = activeScrollY;
+  function visualLoop() {
+    const diff = targetScrollY - lerpedScrollY;
+    
+    if (Math.abs(diff) < 0.05) {
+      lerpedScrollY = targetScrollY;
+      isLoopRunning = false;
+    } else {
+      lerpedScrollY += diff * 0.14; // Elastic smoothing dampener
+      requestAnimationFrame(visualLoop);
+    }
+    
+    updateVisuals(lerpedScrollY);
+  }
+  
+  function updateVisuals(scrollY) {
     
     // Lazy measure at the very first scroll frame to ensure page is settled and transitions finished
     if (scrollY > 0 && !hasMeasuredSettled) {
