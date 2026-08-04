@@ -629,7 +629,7 @@ footer,
 /* --- VIEW TRANSITION RIPPLE ANIMATION --- */
 /* Custom View Transition styles for the ripple effect */
 ::view-transition-group(root) {
-  animation-duration: 1s;
+  animation-duration: 1.5s;
 }
 
 ::view-transition-image-pair(root) {
@@ -654,7 +654,7 @@ footer,
 
 /* Animate the theme toggle button group independently */
 ::view-transition-group(theme-toggle-btn) {
-  animation-duration: 1s;
+  animation-duration: 1.5s;
   animation-timing-function: var(--ease-out-spring);
 }
 

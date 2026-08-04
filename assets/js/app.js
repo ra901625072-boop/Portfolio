@@ -267,7 +267,7 @@ function initTheme() {
           clipPath: clipPath
         },
         {
-          duration: 1000,
+          duration: 1500,
           easing: "cubic-bezier(0.16, 1, 0.3, 1)", // Fluid Apple-like decel curve
           pseudoElement: "::view-transition-new(root)"
         }
@@ -844,12 +844,12 @@ function runLogoTakeover(preloader, preloaderLogo, callback) {
   document.body.style.overflow = "";
 
   // Play the takeover translation with a smooth, premium transition (Apple-style easeOutExpo but slightly slower)
-  navLogo.style.transition = "transform 0.95s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s ease-out";
+  navLogo.style.transition = "transform 1.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.9s ease-out";
   navLogo.style.transform = "translate3d(0, 0, 0) scale(1)";
 
   // Trigger callback (site-loaded event) early to choreograph page entrance with the logo takeover
   if (callback) {
-    setTimeout(callback, 350); // Sweet spot: page reveals smoothly mid-takeover
+    setTimeout(callback, 550); // Sweet spot: page reveals smoothly mid-takeover
   }
 
   // Remove preloader curtain after it has fully faded out
@@ -860,7 +860,7 @@ function runLogoTakeover(preloader, preloaderLogo, callback) {
     navLogo.style.transformOrigin = "";
     navLogo.style.transition = "";
     navLogo.style.zIndex = "";
-  }, 1050);
+  }, 1400);
 }
 
 // --- INITIALIZE PRELOADER LOGIC (Logo Typing with Staggered Character Slide-Up) ---
