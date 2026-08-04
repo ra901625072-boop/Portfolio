@@ -1279,11 +1279,16 @@ function initAvatarScrollAnimation() {
       
       flyingAvatar.style.transform = `translate3d(${currentLeft}px, ${currentTop}px, 0) scale(${scale})`;
       
-      // Dynamic stacking order: start behind badges (400 < 500) and finish above header (2000 > 1000)
-      if (progress < 0.5) {
-        flyingAvatar.style.zIndex = "400";
-      } else {
+      // Dynamic stacking order: on mobile, always keep flyer above header (2000 > 1000).
+      // On desktop, start behind badges (400 < 500) and finish above header (2000 > 1000).
+      if (isMobileLayout) {
         flyingAvatar.style.zIndex = "2000";
+      } else {
+        if (progress < 0.5) {
+          flyingAvatar.style.zIndex = "400";
+        } else {
+          flyingAvatar.style.zIndex = "2000";
+        }
       }
       
       // Interpolate border radius (non-reflow layout paint)
