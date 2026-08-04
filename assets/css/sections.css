@@ -331,12 +331,12 @@ body.light-mode {
 
 .badge-1 {
   top: 15%;
-  left: -10%;
+  left: -8%;
 }
 
 .badge-2 {
   bottom: 15%;
-  right: -5%;
+  right: -8%;
 }
 
 .site-loaded .badge-1 {
@@ -987,7 +987,7 @@ body.light-mode {
 
 .timeline-item:nth-child(odd) .timeline-content {
   float: left;
-  text-align: right;
+  text-align: left;
   padding-right: 2rem;
 }
 
@@ -1969,11 +1969,15 @@ footer {
   border-top: 1px solid rgba(255, 255, 255, 0.03);
   padding-top: 2rem;
   width: 100%;
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
   font-size: 0.85rem;
   color: var(--text-muted);
+}
+
+.footer-bottom p {
+  text-align: left;
 }
 
 .visitor-counter {
@@ -2023,6 +2027,7 @@ footer {
   justify-content: center;
   cursor: pointer;
   transition: var(--trans-normal);
+  justify-self: end;
 }
 
 .scroll-top-btn:hover {
@@ -2376,7 +2381,7 @@ footer {
   .hero-crosshair-h, .hero-crosshair-v, .hero-coordinate-label {
     display: none !important;
   }
-  .blueprint-ruler-h, .blueprint-ruler-v {
+  .blueprint-ruler-h, .blueprint-ruler-v, .blueprint-ruler-v-right {
     display: none !important;
   }
   
@@ -2428,8 +2433,14 @@ footer {
   }
   
   .footer-bottom {
+    display: flex;
     flex-direction: column;
     gap: 1rem;
+    align-items: center;
+    text-align: center;
+  }
+
+  .footer-bottom p {
     text-align: center;
   }
 
@@ -2812,15 +2823,23 @@ footer {
   letter-spacing: 0.5px;
 }
 
-.blueprint-ruler-v {
+.blueprint-ruler-v,
+.blueprint-ruler-v-right {
   position: absolute;
-  left: 20px;
   top: 15%;
   bottom: 15%;
   width: 10px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   opacity: 0.45;
+}
+
+.blueprint-ruler-v {
+  left: 20px;
+}
+
+.blueprint-ruler-v-right {
+  right: 20px;
 }
 
 /* --- REUSABLE STAGGER REVEAL SYSTEM --- */
@@ -2973,7 +2992,8 @@ body.light-mode .blueprint-ruler-h::after {
   color: var(--text-muted) !important;
 }
 
-body.light-mode .blueprint-ruler-v {
+body.light-mode .blueprint-ruler-v,
+body.light-mode .blueprint-ruler-v-right {
   border-top-color: rgba(15, 23, 42, 0.35) !important;
   border-bottom-color: rgba(15, 23, 42, 0.35) !important;
 }
@@ -3572,14 +3592,14 @@ body.light-mode .btn-secondary::after {
 }
 
 .flying-avatar-container img {
-  width: 100%;
+  width: 90%;
   height: auto;
   object-fit: cover;
   position: absolute;
   bottom: 0;
-  left: 0;
+  left: 5%;
   transform-origin: bottom center;
-  border-radius: inherit;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
   filter: drop-shadow(0 15px 30px rgba(0, 0, 0, 0.6));
 }
 
