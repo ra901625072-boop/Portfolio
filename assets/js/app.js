@@ -1030,6 +1030,8 @@ function initAvatarScrollAnimation() {
     heroCard.style.transform = originalHeroTransform;
     heroCard.style.opacity = originalHeroOpacity;
     
+    if (heroRect.width === 0 || heroRect.height === 0) return;
+    
     heroPageRect = {
       left: heroRect.left + window.scrollX,
       top: heroRect.top + window.scrollY,
@@ -1071,12 +1073,6 @@ function initAvatarScrollAnimation() {
     if (header) header.offsetHeight;
     
     const targetBounding = activeTarget.getBoundingClientRect();
-    targetRect = {
-      left: targetBounding.left,
-      top: targetBounding.top,
-      width: targetBounding.width,
-      height: targetBounding.height
-    };
     
     // Restore layout state
     activeTarget.style.cssText = originalTargetStyle;
@@ -1090,6 +1086,15 @@ function initAvatarScrollAnimation() {
       header.offsetHeight; // flush
       header.style.transition = originalHeaderTransition;
     }
+
+    if (targetBounding.width === 0 || targetBounding.height === 0) return;
+    
+    targetRect = {
+      left: targetBounding.left,
+      top: targetBounding.top,
+      width: targetBounding.width,
+      height: targetBounding.height
+    };
     
     // Set flyer base dimensions dynamically to match starting hero size
     flyingAvatar.style.width = `${heroPageRect.width}px`;
@@ -1144,15 +1149,15 @@ function initAvatarScrollAnimation() {
       hasMeasuredSettled = true;
     }
     
-    if (!heroPageRect || !targetRect || !activeTarget) return;
-    
-    const progress = Math.min(Math.max(scrollY / scrollEnd, 0), 1);
+    let progress = Math.min(Math.max(scrollY / scrollEnd, 0), 1);
+    if (scrollY < 3) {
+      progress = 0;
+    }
     
     if (progress === lastProgress) return;
     lastProgress = progress;
     
     const body = document.body;
-    const p = easeOutQuad(progress); // Eased progress for organic motion
     
     if (progress === 0) {
       body.classList.remove("scrolled-avatar");
@@ -1195,6 +1200,13 @@ function initAvatarScrollAnimation() {
         }
       }
     } else {
+      // Safety check: if rects are not measured yet, do not run intermediate animation frames
+      if (!heroPageRect || !targetRect || !activeTarget) {
+        // Reset lastProgress so we check again next frame
+        lastProgress = -1;
+        return;
+      }
+      
       body.classList.remove("scrolled-avatar");
       
       // 1. Hide the original hero card instantly (opacity 0) while animating
