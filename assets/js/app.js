@@ -1120,12 +1120,24 @@ function initAvatarScrollAnimation() {
   
   const scrollEnd = 300;
   let lastProgress = -1;
+  let activeScrollY = 0;
+  let rAFid = null;
   
   function easeOutQuad(t) {
     return t * (2 - t);
   }
   
   function handleScroll(scrollY) {
+    activeScrollY = scrollY;
+    if (!rAFid) {
+      rAFid = requestAnimationFrame(updateVisuals);
+    }
+  }
+  
+  function updateVisuals() {
+    rAFid = null;
+    const scrollY = activeScrollY;
+    
     // Lazy measure at the very first scroll frame to ensure page is settled and transitions finished
     if (scrollY > 0 && !hasMeasuredSettled) {
       updateLayoutPositions();
@@ -1261,44 +1273,20 @@ function initAvatarScrollAnimation() {
         flyingAvatar.style.zIndex = "2000";
       }
       
-      // Interpolate border radius
+      // Interpolate border radius (non-reflow layout paint)
       const startRadius = 24;
       const endRadius = heroPageRect.width / 2;
       const currentRadius = startRadius + (endRadius - startRadius) * p;
       flyingAvatar.style.borderRadius = `${currentRadius}px`;
       
-      // Interpolate container box shadow (combines card box shadow with circular header glow shadow)
-      const glowIntensity = 0.3;
-      const glowRadius = isMobileLayout ? 10 : 12;
+
       
-      const shadowX = 0;
-      const shadowY = 20 * (1 - p);
-      const shadowBlur = 50 * (1 - p) + glowRadius * p;
-      const shadowSpread = -10 * (1 - p);
-      const shadowAlpha = 0.18 * (1 - p) + glowIntensity * p;
-      
-      const insetBlur = 20 * (1 - p);
-      const insetAlpha = 0.08 * (1 - p);
-      
-      flyingAvatar.style.boxShadow = `
-        ${shadowX}px ${shadowY}px ${shadowBlur}px ${shadowSpread}px rgba(var(--avatar-glow-rgb), ${shadowAlpha}),
-        inset 0 0 ${insetBlur}px rgba(var(--avatar-glow-rgb), ${insetAlpha})
-      `;
-      
-      // Flyer image scaling and translation to match start/end positions perfectly
+      // Flyer image scaling and translation purely using hardware-accelerated CSS transforms.
+      // Starts scaled to 0.9 with translateY(10px) to match heroCard, and scales up to 1.0 at target.
       if (flyingImg) {
-        flyingImg.style.width = `${90 + 10 * p}%`;
-        flyingImg.style.left = `${5 - 5 * p}%`;
-        
-        // Match the 10px baseline vertical offset of the hero avatar card
         const currentTranslateY = 10 * (1 - p);
-        flyingImg.style.transform = `translateY(${currentTranslateY}px)`;
-        
-        // Interpolate drop shadow to avoid sudden pops
-        const shadowOpacity = 0.7 * (1 - p);
-        const shadowOffsetY = 15 * (1 - p);
-        const shadowBlurSize = 30 * (1 - p);
-        flyingImg.style.filter = `drop-shadow(0 ${shadowOffsetY}px ${shadowBlurSize}px rgba(0, 0, 0, ${shadowOpacity}))`;
+        const currentImgScale = 0.9 + 0.1 * p;
+        flyingImg.style.transform = `scale(${currentImgScale}) translateY(${currentTranslateY}px)`;
       }
     }
   }
