@@ -129,10 +129,22 @@ body.light-mode .bg-glow-orb {
 }
 
 html {
-  scroll-behavior: smooth;
   scrollbar-width: thin;
   scrollbar-color: var(--color-primary) var(--bg-primary);
   overflow-x: hidden;
+}
+
+/* Lenis smooth scrolling support */
+html.lenis, html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
 }
 
 body {
@@ -447,6 +459,11 @@ a {
   background-color: rgba(var(--color-secondary-rgb), 0.1);
   border-color: var(--color-secondary);
   border-width: 2px;
+  /* Disable width/height/border-radius transitions to prevent conflict with frame-by-frame JS updates */
+  transition: 
+    border-color 0.35s var(--ease-out-expo), 
+    background-color 0.35s var(--ease-out-expo),
+    opacity 0.3s var(--ease-out-expo);
 }
 
 .custom-cursor.has-text {
@@ -650,14 +667,14 @@ footer,
   justify-content: center;
   align-items: center;
   z-index: 100000;
-  transition: opacity 1.2s cubic-bezier(0.2, 1, 0.25, 1), transform 1.2s cubic-bezier(0.2, 1, 0.25, 1);
+  transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
   transform: scale(1);
   will-change: transform, opacity;
 }
 
 .preloader.fade-out {
   opacity: 0;
-  transform: scale(1.03); /* Subtle zoom out */
+  transform: scale(1.02); /* Subtle zoom out */
   pointer-events: none;
 }
 

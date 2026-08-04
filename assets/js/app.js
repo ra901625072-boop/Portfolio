@@ -5,10 +5,28 @@ import {
   initializeSpotlightEffects
 } from "./modules/projects.js";
 import { initAnimations, animatePercentageText, triggerPageTransition, updateNavIndicator } from "./modules/animations.js";
+import Lenis from 'lenis';
+
+// Initialize Lenis Smooth Scroll
+export const lenis = new Lenis({
+  duration: 1.2,
+  easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // easeOutExpo
+  smoothWheel: true,
+  wheelMultiplier: 1.0,
+  touchMultiplier: 1.5,
+});
+
+// Run Lenis RAF loop
+function raf(time) {
+  lenis.raf(time);
+  requestAnimationFrame(raf);
+}
+requestAnimationFrame(raf);
 
 // Lock scroll immediately on script execution to prevent layout jumping during loading
 document.documentElement.style.overflow = "hidden";
 document.body.style.overflow = "hidden";
+lenis.stop();
 
 function safeGetItem(key, fallback = null) {
   try { return localStorage.getItem(key); } catch { return fallback; }
@@ -843,10 +861,16 @@ function runLogoTakeover(preloader, preloaderLogo, callback) {
   document.documentElement.style.overflow = "";
   document.body.style.overflow = "";
 
-  // Play the takeover translation with a very soft, long deceleration tail (Apple style ease)
-  navLogo.style.transition = "transform 1.35s cubic-bezier(0.2, 1, 0.2, 1), opacity 0.8s ease-out";
+  // Play the takeover translation with a smooth, premium transition (Apple-style easeOutExpo but slightly slower)
+  navLogo.style.transition = "transform 0.95s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s ease-out";
   navLogo.style.transform = "translate3d(0, 0, 0) scale(1)";
 
+  // Trigger callback (site-loaded event) early to choreograph page entrance with the logo takeover
+  if (callback) {
+    setTimeout(callback, 350); // Sweet spot: page reveals smoothly mid-takeover
+  }
+
+  // Remove preloader curtain after it has fully faded out
   setTimeout(() => {
     preloader.remove();
     // Clean inline transformation styles
@@ -854,8 +878,7 @@ function runLogoTakeover(preloader, preloaderLogo, callback) {
     navLogo.style.transformOrigin = "";
     navLogo.style.transition = "";
     navLogo.style.zIndex = "";
-    if (callback) callback();
-  }, 1450);
+  }, 1050);
 }
 
 // --- INITIALIZE PRELOADER LOGIC (Logo Typing with Staggered Character Slide-Up) ---
@@ -892,7 +915,7 @@ function initPreloader(callback) {
   dotNode.style.transform = "scale(0)";
   preloaderLogo.appendChild(dotNode);
 
-  const duration = 1250; // Fluid 1.25s entrance reveal
+  const duration = 1000; // Balanced 1.0s entrance reveal
   const start = performance.now();
 
   function updateProgress(now) {
@@ -927,7 +950,7 @@ function initPreloader(callback) {
       dotNode.style.transform = "scale(1)";
       setTimeout(() => {
         runLogoTakeover(preloader, preloaderLogo, callback);
-      }, 150);
+      }, 100);
     }
   }
 
@@ -964,6 +987,15 @@ function initNavTransitions() {
       });
     });
   });
+
+  // Scroll to top button smoothly via Lenis
+  const scrollTopBtn = document.getElementById("scroll-top");
+  if (scrollTopBtn) {
+    scrollTopBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      lenis.scrollTo(0);
+    });
+  }
 }
 
 // --- GLOBAL SKELETON SHIMMER DISMISSAL ---
@@ -983,6 +1015,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initPreloader(() => {
     // Notify module scripts that site loading has concluded
     document.dispatchEvent(new CustomEvent("site-loaded"));
+    lenis.start();
   });
 
   initAnimations();

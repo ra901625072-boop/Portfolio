@@ -6,7 +6,7 @@ header {
   width: 100%;
   z-index: 1000;
   padding: 1.5rem 0;
-  transition: padding var(--trans-normal), background var(--trans-normal), border-bottom var(--trans-normal), box-shadow var(--trans-normal), transform 1.2s var(--ease-out-expo), opacity 1.2s var(--ease-out-expo);
+  transition: padding var(--trans-normal), background var(--trans-normal), border-bottom var(--trans-normal), box-shadow var(--trans-normal), transform 1.0s var(--ease-out-expo), opacity 1.0s var(--ease-out-expo);
   opacity: 0;
   transform: translateY(-20px);
   will-change: transform, opacity;
@@ -15,7 +15,7 @@ header {
 .site-loaded header {
   opacity: 1;
   transform: translateY(0);
-  transition-delay: 0.5s;
+  transition-delay: 0.3s;
 }
 
 header.scrolled {
@@ -147,7 +147,7 @@ header.scrolled {
   margin-bottom: 2rem;
   opacity: 0;
   transform: translateY(20px) scale(0.9);
-  transition: opacity 1.2s var(--ease-out-spring), transform 1.2s var(--ease-out-spring);
+  transition: opacity 0.9s var(--ease-out-spring), transform 0.9s var(--ease-out-spring);
   will-change: transform, opacity;
 }
 
@@ -175,7 +175,7 @@ header.scrolled {
   display: inline-block;
   transform: translateY(100%);
   opacity: 0;
-  transition: transform 1.3s var(--ease-out-expo), opacity 1.3s var(--ease-out-expo);
+  transition: transform 1.0s var(--ease-out-expo), opacity 1.0s var(--ease-out-expo);
   will-change: transform, opacity;
 }
 
@@ -192,7 +192,7 @@ header.scrolled {
 }
 
 .hero-title .clip-text-wrapper:nth-child(2) .clip-text-el {
-  transition-delay: 0.15s;
+  transition-delay: 0.1s;
 }
 
 .hero-title span.typed-text {
@@ -212,14 +212,14 @@ header.scrolled {
   max-width: 550px;
   opacity: 0;
   transform: translateY(25px);
-  transition: opacity 1.3s var(--ease-out-expo), transform 1.3s var(--ease-out-expo);
+  transition: opacity 1.0s var(--ease-out-expo), transform 1.0s var(--ease-out-expo);
   will-change: transform, opacity;
 }
 
 .site-loaded .hero-description {
   opacity: 1;
   transform: translateY(0);
-  transition-delay: 0.4s;
+  transition-delay: 0.25s;
 }
 
 .hero-actions {
@@ -227,14 +227,14 @@ header.scrolled {
   gap: 1.5rem;
   opacity: 0;
   transform: translateY(20px);
-  transition: opacity 1.3s var(--ease-out-expo), transform 1.3s var(--ease-out-expo);
+  transition: opacity 1.0s var(--ease-out-expo), transform 1.0s var(--ease-out-expo);
   will-change: transform, opacity;
 }
 
 .site-loaded .hero-actions {
   opacity: 1;
   transform: translateY(0);
-  transition-delay: 0.55s;
+  transition-delay: 0.35s;
 }
 
 .hero-visual {
@@ -271,8 +271,8 @@ body.light-mode {
   align-items: flex-end;
   opacity: 0;
   transform: scale(0.92) translateY(30px);
-  transition: opacity 1.5s var(--ease-out-expo), 
-              transform 1.5s var(--ease-out-expo),
+  transition: opacity 1.1s var(--ease-out-expo), 
+              transform 1.1s var(--ease-out-expo),
               box-shadow 0.4s ease,
               border-color 0.4s ease;
   will-change: transform, opacity;
@@ -287,7 +287,7 @@ body.light-mode {
 .site-loaded .hero-avatar-card {
   opacity: 1;
   transform: scale(1) translateY(0);
-  transition-delay: 0.3s;
+  transition-delay: 0.2s;
 }
 
 .hero-avatar-card img {
@@ -320,7 +320,7 @@ body.light-mode {
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
   opacity: 0;
   transform: scale(0.8) translateY(15px);
-  transition: opacity 1.3s var(--ease-out-spring), transform 1.3s var(--ease-out-spring);
+  transition: opacity 1.0s var(--ease-out-spring), transform 1.0s var(--ease-out-spring);
   will-change: transform, opacity;
 }
 
@@ -337,14 +337,14 @@ body.light-mode {
 .site-loaded .badge-1 {
   opacity: 1;
   transform: scale(1) translateY(0);
-  transition-delay: 0.65s;
+  transition-delay: 0.45s;
   animation: float 4s ease-in-out infinite alternate 2s;
 }
 
 .site-loaded .badge-2 {
   opacity: 1;
   transform: scale(1) translateY(0);
-  transition-delay: 0.8s;
+  transition-delay: 0.55s;
   animation: float-delayed 4s ease-in-out infinite alternate 2.15s;
 }
 

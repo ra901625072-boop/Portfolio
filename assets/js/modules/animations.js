@@ -1,3 +1,5 @@
+import { lenis } from "../app.js";
+
 // --- CUSTOM CURSOR FOLLOWER with Magnetic Snapping ---
 function initCustomCursor() {
   const cursor = document.querySelector(".custom-cursor");
@@ -513,13 +515,7 @@ function initDesignerGrid() {
   if (!hero || !crosshairH || !crosshairV || !label) return;
 
   let rect = null;
-  function updateRect() {
-    rect = hero.getBoundingClientRect();
-  }
-
-  hero.addEventListener("mouseenter", updateRect);
-  window.addEventListener("resize", () => { if (rect) updateRect(); }, { passive: true });
-  window.addEventListener("scroll", () => { if (rect) updateRect(); }, { passive: true });
+  let cachedSnapPoints = [];
 
   const snapTargets = [
     { selector: ".hero-avatar-card", label: "AVATAR" },
@@ -531,9 +527,9 @@ function initDesignerGrid() {
     { selector: ".hero-actions .btn-secondary", label: "CONTACT_LINK" }
   ];
 
-  function getSnapPoints() {
+  function cacheSnapPoints() {
     if (!rect) rect = hero.getBoundingClientRect();
-    const points = [];
+    cachedSnapPoints = [];
     snapTargets.forEach(target => {
       const el = document.querySelector(target.selector);
       if (el) {
@@ -541,11 +537,20 @@ function initDesignerGrid() {
         // Compute center relative to hero wrapper bounding box
         const px = elRect.left - rect.left + elRect.width / 2;
         const py = elRect.top - rect.top + elRect.height / 2;
-        points.push({ x: px, y: py, label: target.label });
+        cachedSnapPoints.push({ x: px, y: py, label: target.label });
       }
     });
-    return points;
   }
+
+  function updateRect() {
+    rect = hero.getBoundingClientRect();
+    cacheSnapPoints();
+  }
+
+  hero.addEventListener("mouseenter", updateRect);
+  window.addEventListener("resize", () => { if (rect) updateRect(); }, { passive: true });
+  window.addEventListener("scroll", () => { if (rect) updateRect(); }, { passive: true });
+  window.addEventListener("recalc-offsets", () => { if (rect) updateRect(); }, { passive: true });
 
   let isGridMouseMoving = false;
   hero.addEventListener("mousemove", (e) => {
@@ -558,12 +563,12 @@ function initDesignerGrid() {
         let y = clientY - rect.top;
         
         const snapRadius = 45;
-        const points = getSnapPoints();
         let snapped = false;
         let snapLabel = "";
         
-        for (let i = 0; i < points.length; i++) {
-          const pt = points[i];
+        // Use cached snap points directly to prevent layout thrashing
+        for (let i = 0; i < cachedSnapPoints.length; i++) {
+          const pt = cachedSnapPoints[i];
           const dist = Math.hypot(x - pt.x, y - pt.y);
           if (dist < snapRadius) {
             x = pt.x;
@@ -612,21 +617,38 @@ function initWatermarkParallax() {
   const watermarks = document.querySelectorAll(".bg-text-watermark");
   if (watermarks.length === 0) return;
   
+  let cachedOffsets = [];
+  
+  function cacheOffsets() {
+    cachedOffsets = Array.from(watermarks).map(wm => {
+      // Clear transform to read native boundary
+      const originalTransform = wm.style.transform;
+      wm.style.transform = "none";
+      const rect = wm.getBoundingClientRect();
+      wm.style.transform = originalTransform;
+      return {
+        element: wm,
+        initialTop: rect.top + window.scrollY
+      };
+    });
+  }
+  
+  cacheOffsets();
+  window.addEventListener("resize", cacheOffsets, { passive: true });
+  window.addEventListener("recalc-offsets", cacheOffsets, { passive: true });
+  
   let isScrolling = false;
   
   function updateParallax() {
     const scrollY = window.scrollY;
     const winHeight = window.innerHeight;
     
-    watermarks.forEach(wm => {
-      const rect = wm.getBoundingClientRect();
-      const elemTop = rect.top + scrollY;
-      
-      // Calculate offset relative to viewport center
-      const relativeScroll = (scrollY + winHeight / 2) - elemTop;
+    cachedOffsets.forEach(cache => {
+      // Calculate offset relative to viewport center using cached coordinates
+      const relativeScroll = (scrollY + winHeight / 2) - cache.initialTop;
       const translateY = relativeScroll * 0.12; // Subtle movement rate
       
-      wm.style.transform = `translate3d(0, ${translateY}px, 0)`;
+      cache.element.style.transform = `translate3d(0, ${translateY}px, 0)`;
     });
     isScrolling = false;
   }
@@ -711,7 +733,11 @@ export function triggerPageTransition(targetId, callback) {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     const target = document.getElementById(targetId);
     if (target) {
-      target.scrollIntoView({ behavior: 'auto' });
+      if (lenis) {
+        lenis.scrollTo(target, { immediate: true });
+      } else {
+        target.scrollIntoView({ behavior: 'auto' });
+      }
     }
     if (callback) callback();
     return;
@@ -732,10 +758,14 @@ export function triggerPageTransition(targetId, callback) {
   setTimeout(() => {
     const target = document.getElementById(targetId);
     if (target) {
-      const html = document.documentElement;
-      html.style.scrollBehavior = "auto";
-      target.scrollIntoView();
-      html.style.scrollBehavior = "";
+      if (lenis) {
+        lenis.scrollTo(target, { immediate: true });
+      } else {
+        const html = document.documentElement;
+        html.style.scrollBehavior = "auto";
+        target.scrollIntoView();
+        html.style.scrollBehavior = "";
+      }
     }
 
     if (callback) callback();
