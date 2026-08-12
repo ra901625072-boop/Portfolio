@@ -189,17 +189,13 @@ a {
   transition: var(--trans-fast);
 }
 
-/* --- REVEAL ON SCROLL --- */
+/* --- REVEAL ON SCROLL (GSAP-driven) --- */
+/* Initial hidden state is applied via gsap.set() in animations.js */
+/* These rules are retained only as a no-JS fallback */
 .reveal {
-  opacity: 0;
-  transform: translateY(30px);
-  transition: opacity var(--trans-slow), transform var(--trans-slow);
+  will-change: transform, opacity;
 }
 
-.reveal.active {
-  opacity: 1;
-  transform: translateY(0);
-}
 
 /* --- UTILITY CLASSES --- */
 .container {

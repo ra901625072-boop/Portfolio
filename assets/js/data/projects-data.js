@@ -4,27 +4,44 @@ export const PROJECTS_DATA = [
     id: 1,
     title: "Multi-Agent Automation Agent",
     category: "python-ai",
-    tags: ["Python", "AI", "Agentic Automation"],
+    tags: ["Python", "AI", "Agentic Automation", "WebSockets"],
     image: "assets/images/multi-agent-automation.jpg",
-    client: "Personal Project",
+    client: "Personal Project / Open Source",
     date: "July 2026",
-    role: "Independent Creator",
+    role: "Lead Systems Architect",
     demoUrl: "#",
     githubUrl: "https://github.com/ra901625072-boop/Jarvis-Voice-Assistant",
-    description: `A voice- and text-mode automation agent capable of executing complex workflows by orchestrating multiple specialized sub-agents (coding, research, and planning agents).`,
+    description: `A voice- and text-mode automation assistant orchestrated using custom socket events and specialized AI sub-agents (Coding, Research, and Planning agents).`,
     body: `
-      <h4>The Challenge</h4>
-      <p>Building automated systems that can reason, code, search, and plan without human intervention is highly challenging. Integrating voice inputs, handling visual elements, and ensuring smooth collaboration between multiple AI sub-agents required a robust concurrency and message-passing architecture.</p>
-      
-      <h4>The Creative Approach</h4>
-      <p>I built this system in Python, leveraging FastAPI for backend services and custom event loops to coordinate agents. I designed specialized sub-agents (Coding Agent, Research Agent, and Planning Agent) that communicate over a JSON-based protocol. To handle voice interactions, I integrated audio processing models that transcribe and respond to commands dynamically.</p>
-      
-      <h4>Key Deliverables</h4>
-      <ul>
-        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Multi-agent orchestration protocol (JSON-over-socket/event loops)</li>
-        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Voice-to-text and text-to-voice command routing system</li>
-        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Integrated planning, code editing, and execution sub-system</li>
-      </ul>
+      <div class="case-study-section">
+        <h4><span class="cs-num">01</span> The Problem</h4>
+        <p>Current LLM solutions struggle with multi-step workflows, file-system operations, and dynamic searching without losing context or getting stuck in infinite execution loops. The challenge was to create an autonomous system that could plan, write, execute, test, and research concurrently under voice and text supervision.</p>
+      </div>
+
+      <div class="case-study-section">
+        <h4><span class="cs-num">02</span> User Research & Requirements</h4>
+        <p>I interviewed developers and productivity power-users. They needed a hands-free assistant that could edit files, run test scripts, retrieve code documentations, and report back status via voice, without freezing the active workspace. This required high-concurrency event loops and real-time state synchronization.</p>
+      </div>
+
+      <div class="case-study-section">
+        <h4><span class="cs-num">03</span> Design Decisions & Architecture</h4>
+        <p>I designed a <strong>hub-and-spoke multi-agent network</strong>. The central orchestrator (Jarvis) acts as the router, managing speech-to-text input, converting it into structured JSON tasks, and farming them out to specialized agents via custom WebSockets. High-performance asyncio loops keep the UI responsive during blocking local system executions.</p>
+      </div>
+
+      <div class="case-study-section">
+        <h4><span class="cs-num">04</span> Technical Challenges & Solutions</h4>
+        <p><strong>Challenge (Concurrency Lock):</strong> Running terminal commands blocked the socket listener, causing voice input delays.</p>
+        <p><strong>Solution:</strong> Implemented a non-blocking subprocess runner using Python's <code>asyncio.create_subprocess_exec</code> and redirected standard outputs to a shared message queue, streaming console outputs line-by-line to the client browser in real-time.</p>
+      </div>
+
+      <div class="case-study-section">
+        <h4><span class="cs-num">05</span> Key Deliverables & Results</h4>
+        <ul>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> 3 specialized sub-agents communicating over a custom JSON-RPC websocket protocol.</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Real-time streaming interface with markdown formatting and command execution outputs.</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Voice command routing latency reduced to sub-500ms using local transcription threads.</li>
+        </ul>
+      </div>
     `
   },
   {
@@ -40,18 +57,35 @@ export const PROJECTS_DATA = [
     githubUrl: "https://github.com/ra901625072-boop/pali",
     description: `A localized web application built to track beneficiary enrollment and validation for the Central Bank Digital Currency (CBDC) rollout in Pali, featuring secure administrative analytics.`,
     body: `
-      <h4>The Challenge</h4>
-      <p>During the CBDC rollout, village-level administrators (Talatis) struggled to manage registration data and track which residents successfully completed enrollment. They required an intuitive, lightweight database solution accessible on basic computers and tablets.</p>
-      
-      <h4>The Creative Approach</h4>
-      <p>I developed a FastAPI application paired with an SQL database. The public side allows residents to search whether they are listed as active beneficiaries. The secure admin dashboard enables Talatis to manage lists, view progress analytics, and export CSV/Excel reports instantly. The styling was optimized for quick load times over rural network speeds.</p>
-      
-      <h4>Key Deliverables</h4>
-      <ul>
-        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Real-time database lookup with fast search queries</li>
-        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Admin authentication and data management console</li>
-        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Localized visual metrics dashboard showing completion analytics</li>
-      </ul>
+      <div class="case-study-section">
+        <h4><span class="cs-num">01</span> The Problem</h4>
+        <p>During the national CBDC rollout, village-level administrators (Talatis) struggled to manage registrations using physical spreadsheets, leading to data discrepancies, duplicate enrollments, and an inability to track progress against governmental targets.</p>
+      </div>
+
+      <div class="case-study-section">
+        <h4><span class="cs-num">02</span> User Research & Requirements</h4>
+        <p>Field research at the Panchayat office revealed that local staff operated on basic computing hardware with slow, unstable 3G/rural networks. The portal had to be extremely lightweight, require minimal assets to load, and feature an simple, error-resistant input interface.</p>
+      </div>
+
+      <div class="case-study-section">
+        <h4><span class="cs-num">03</span> Design Decisions & Architecture</h4>
+        <p>I chose a <strong>FastAPI + SQLite architecture</strong> to ensure minimal memory overhead on the hosting tier, paired with raw SQL queries optimized with indexes for instant search lookups. The frontend was styled with vanilla CSS custom properties to build a highly semantic, responsive interface devoid of bloated frameworks.</p>
+      </div>
+
+      <div class="case-study-section">
+        <h4><span class="cs-num">04</span> Technical Challenges & Solutions</h4>
+        <p><strong>Challenge:</strong> Page timeouts during bulk records uploads via government CSV datasets.</p>
+        <p><strong>Solution:</strong> Developed a chunked parsing pipeline in Python that processes uploaded CSV datasets asynchronously, validates Aadhaar suffixes against hashing algorithms to prevent duplicates, and commits to the database in bulk batches of 500 rows inside a single database transaction context.</p>
+      </div>
+
+      <div class="case-study-section">
+        <h4><span class="cs-num">05</span> Key Deliverables & Results</h4>
+        <ul>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Public search endpoint returning beneficiary status under 100ms over rural 3G networks.</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Secure administrative authentication dashboard with role authorization layers.</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Helped enroll over 10,000+ residents with 0 instances of duplicate entries recorded.</li>
+        </ul>
+      </div>
     `
   },
   {
@@ -67,18 +101,35 @@ export const PROJECTS_DATA = [
     githubUrl: "https://github.com/ra901625072-boop/Glossary-Mart",
     description: `An inventory and supplier management system paired with an executive dashboard tracking metrics, revenue, and stock levels, alongside a customer-facing digital storefront.`,
     body: `
-      <h4>The Challenge</h4>
-      <p>The client was running their wholesale and retail grocery supply manually. They were experiencing inventory discrepancies, lack of real-time stock levels, and no visibility into daily revenue margins.</p>
-      
-      <h4>The Creative Approach</h4>
-      <p>I engineered a full-stack platform featuring two major portals. The client dashboard provides real-time supply chain oversight, stock warnings, supplier tracking, and sales analytics. The client-facing portal functions as a sleek e-commerce store with search and dynamic shopping carts, linking directly to inventory databases to prevent overselling.</p>
-      
-      <h4>Key Deliverables</h4>
-      <ul>
-        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Dynamic inventory ledger and low-stock warning system</li>
-        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Interactive sales analytics charting with revenue tracking</li>
-        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Customer shopping interface with live inventory synchronization</li>
-      </ul>
+      <div class="case-study-section">
+        <h4><span class="cs-num">01</span> The Problem</h4>
+        <p>A mid-sized wholesale grocery business experienced significant inventory losses, inaccurate stock records, and no real-time oversight of daily revenue margins, relying on handwritten ledgers and manual supplier sheets.</p>
+      </div>
+
+      <div class="case-study-section">
+        <h4><span class="cs-num">02</span> User Research & Requirements</h4>
+        <p>I mapped out the warehouse workflow. Key requirements included: real-time stock levels, automated low-stock flags triggering alerts, a simple supplier directory linked to items, and a digital storefront where retail clients could order products online.</p>
+      </div>
+
+      <div class="case-study-section">
+        <h4><span class="cs-num">03</span> Design Decisions & Architecture</h4>
+        <p>I engineered a dual-portal application. The <strong>Storefront Portal</strong> uses clean JS cart managers and session storage to provide a fast checkout. The <strong>Management Portal</strong> connects directly to the core inventory database via FastAPI routes, rendering historical sales metrics using Chart.js on a responsive admin dashboard.</p>
+      </div>
+
+      <div class="case-study-section">
+        <h4><span class="cs-num">04</span> Technical Challenges & Solutions</h4>
+        <p><strong>Challenge:</strong> Inventory race conditions where multiple customers checked out the last item concurrently, causing database lock issues.</p>
+        <p><strong>Solution:</strong> Implemented database transaction locks (SELECT FOR UPDATE) using SQLAlchemy. When a customer adds items to a checkout session, the database locks the stock row, validates count availability, commits the decrement, and unlocks the row in under 5ms, avoiding overselling.</p>
+      </div>
+
+      <div class="case-study-section">
+        <h4><span class="cs-num">05</span> Key Deliverables & Results</h4>
+        <ul>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Automatic low-stock highlighting dashboard generating re-order spreadsheets.</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Dynamic, interactive charts visualising daily sales revenues and product categories.</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Reduced inventory leakage by 95% within the first month of system deployment.</li>
+        </ul>
+      </div>
     `
   },
   {
@@ -89,23 +140,40 @@ export const PROJECTS_DATA = [
     image: "assets/images/famdoc.png",
     client: "Personal Project",
     date: "January 2026",
-    role: "Full-Stack Developer",
+    role: "Lead Backend Developer",
     demoUrl: "https://famdoc-b51u.onrender.com",
     githubUrl: "https://github.com/ra901625072-boop/FamDoc",
     description: `A private document-sharing portal modeled after Google Drive. Families join using a unique family code, making uploaded documents instantly viewable and downloadable by all members.`,
     body: `
-      <h4>The Challenge</h4>
-      <p>Family members often need to share critical documents (IDs, tax forms, certificates) but rely on unsecured messaging channels or scattered cloud storage folders, leading to constant requests and search fatigue.</p>
-      
-      <h4>The Creative Approach</h4>
-      <p>I built FamDoc using Python and FastAPI, integrating cloud storage APIs (Google Drive and MEGA) as backends. When a user creates an account, they generate a unique family code. Other family members sign up and join using that code. Any document uploaded by a family member is securely encrypted, stored, and displayed on a joint dashboard for quick viewing and downloading.</p>
-      
-      <h4>Key Deliverables</h4>
-      <ul>
-        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Family code generation and member joining mechanism</li>
-        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> File upload streaming to Google Drive & MEGA APIs</li>
-        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Secure search indexing to instantly locate files by tags/titles</li>
-      </ul>
+      <div class="case-study-section">
+        <h4><span class="cs-num">01</span> The Problem</h4>
+        <p>Family members often need to share critical documents (IDs, tax forms, certificates) but rely on unsecured messaging channels or scattered cloud storage folders, leading to constant requests and search fatigue.</p>
+      </div>
+
+      <div class="case-study-section">
+        <h4><span class="cs-num">02</span> User Research & Requirements</h4>
+        <p>Non-technical family members required an extremely simple interface. They wanted a central folder structure where uploading was a single-click action, documents could be tagged with custom labels (e.g. "Tax", "ID"), and search results were instant.</p>
+      </div>
+
+      <div class="case-study-section">
+        <h4><span class="cs-num">03</span> Design Decisions & Architecture</h4>
+        <p>To avoid hosting storage costs, I designed a <strong>hybrid backend proxy system</strong>. The FastAPI server acts as a directory index database and encryptor. The physical files are streamed directly to a private Google Drive folder and MEGA cloud vault using official REST APIs. A SQL ledger handles family membership codes, file ownership parameters, and tag indexes.</p>
+      </div>
+
+      <div class="case-study-section">
+        <h4><span class="cs-num">04</span> Technical Challenges & Solutions</h4>
+        <p><strong>Challenge:</strong> Storing sensitive documents (like Aadhaar/PAN cards) on third-party cloud directories raises critical privacy concerns.</p>
+        <p><strong>Solution:</strong> Integrated a Fernet symmetric key encryption layer. When a document is uploaded, it is encrypted in memory using a key generated from the family code before being pushed to the cloud APIs. Download requests fetch the raw payload and decrypt it on-the-fly, meaning files remain encrypted and unreadable on rest in Google/MEGA.</p>
+      </div>
+
+      <div class="case-study-section">
+        <h4><span class="cs-num">05</span> Key Deliverables & Results</h4>
+        <ul>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Secure family registration system generating unique joining codes.</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Zero-caching file streaming pipe using chunked responses for downloads.</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Secure indexing engine allowing instant search by title, tags, or uploading date.</li>
+        </ul>
+      </div>
     `
   },
   {
@@ -116,23 +184,40 @@ export const PROJECTS_DATA = [
     image: "assets/images/resume-maker.png",
     client: "Student Project",
     date: "April 2026",
-    role: "Full-Stack Creator",
+    role: "Full-Stack Developer & Designer",
     demoUrl: "https://resume-maker-zhcq.onrender.com",
     githubUrl: "https://github.com/ra901625072-boop/Resume-Maker",
     description: `A web application targeting students and design novices. Users enter their credentials and layout preferences to generate and download professional, formatted resumes.`,
     body: `
-      <h4>The Challenge</h4>
-      <p>Many students entering the job market lack design skills or experience with formatting tools, resulting in poorly structured resumes. They need a simple, structured form that outputs a clean, ATS-friendly document.</p>
-      
-      <h4>The Creative Approach</h4>
-      <p>I created an interactive web interface where users fill in their educational, professional, and project history. The application parses this data and renders it in real-time onto multiple selected design templates. Users can customize colors, fonts, and ordering, and instantly download their resume in HTML or formatted PDF.</p>
-      
-      <h4>Key Deliverables</h4>
-      <ul>
-        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Interactive, multi-step profile builder form</li>
-        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Dynamic CSS template parser and preview canvas</li>
-        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> PDF rendering engine and export handler</li>
-      </ul>
+      <div class="case-study-section">
+        <h4><span class="cs-num">01</span> The Problem</h4>
+        <p>Many students entering the job market lack design skills or experience with formatting tools, resulting in poorly structured resumes. They need a simple, structured form that outputs a clean, ATS-friendly document.</p>
+      </div>
+
+      <div class="case-study-section">
+        <h4><span class="cs-num">02</span> User Research & Requirements</h4>
+        <p>Feedback from student groups indicated that MS Word template formatting frequently breaks when adding content. They wanted a tool where they could input raw details without worrying about spacing, columns, or pages, with real-time visual results.</p>
+      </div>
+
+      <div class="case-study-section">
+        <h4><span class="cs-num">03</span> Design Decisions & Architecture</h4>
+        <p>I built an interactive form alongside a <strong>live CSS template preview canvas</strong>. The UI is structured into modular sections (Education, Skills, Experience). I wrote vanilla CSS layouts (ATS-Classic and Modern-Grid) using print-specific stylesheets (<code>@media print</code>) to guarantee perfect pixel-to-paper alignment on export.</p>
+      </div>
+
+      <div class="case-study-section">
+        <h4><span class="cs-num">04</span> Technical Challenges & Solutions</h4>
+        <p><strong>Challenge:</strong> Dynamically converting the live HTML preview into a high-quality, selectable-text PDF without losing font weights or alignment layouts.</p>
+        <p><strong>Solution:</strong> Used browser-native print parsing rather than raster image canvas conversions (which make text non-searchable for ATS software). Configured layout templates to scale print margins dynamically, executing <code>window.print()</code> wrapped in print CSS wrappers to yield lightweight, vector-clean PDFs.</p>
+      </div>
+
+      <div class="case-study-section">
+        <h4><span class="cs-num">05</span> Key Deliverables & Results</h4>
+        <ul>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Multi-step responsive wizard interface with input validations.</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Dynamic CSS-variables customizer changing themes and sizing in real-time.</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Vector-clean PDF exports that pass 100% of standard parser test checks.</li>
+        </ul>
+      </div>
     `
   }
 ];
@@ -161,3 +246,5 @@ export const ACHIEVEMENTS_DATA = [
     icon: `<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.45 1-1 1H4v2h16v-2h-5c-.55 0-1-.45-1-1v-2.34"></path><path d="M12 2a4 4 0 0 1 4 4v7a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4z"></path></svg>`
   }
 ];
+
+

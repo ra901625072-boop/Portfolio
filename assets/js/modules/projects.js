@@ -105,6 +105,65 @@ function getScrollbarWidth() {
 let previouslyFocusedElement = null;
 let modalKeydownHandler = null;
 
+function setupModalOverlayListeners(modalOverlay, modalWrapper) {
+  previouslyFocusedElement = document.activeElement;
+  const sbWidth = getScrollbarWidth();
+  if (sbWidth > 0) {
+    document.body.style.paddingRight = `${sbWidth}px`;
+    const header = document.querySelector("header");
+    if (header) {
+      header.style.paddingRight = `${sbWidth}px`;
+    }
+  }
+  document.body.style.overflow = "hidden"; // Disable body scroll
+  modalOverlay.classList.add("active");
+  
+  // Focus initial element
+  const closeBtn = document.getElementById("modal-close");
+  if (closeBtn) closeBtn.focus();
+  
+  // Close actions
+  closeBtn.addEventListener("click", closeCaseStudy);
+  
+  const handleOverlayClick = (e) => {
+    if (e.target === modalOverlay) closeCaseStudy();
+  };
+  modalOverlay.addEventListener("click", handleOverlayClick);
+  modalOverlay._overlayClick = handleOverlayClick;
+
+  // Keyboard accessibility focus trapping & escape key closure
+  const focusableSelectors = 'a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), [tabindex="0"]';
+  
+  modalKeydownHandler = (e) => {
+    if (e.key === "Escape") {
+      closeCaseStudy();
+      return;
+    }
+
+    if (e.key === "Tab") {
+      const focusables = modalWrapper.querySelectorAll(focusableSelectors);
+      if (focusables.length === 0) return;
+      
+      const firstEl = focusables[0];
+      const lastEl = focusables[focusables.length - 1];
+
+      if (e.shiftKey) { // Shift + Tab
+        if (document.activeElement === firstEl) {
+          lastEl.focus();
+          e.preventDefault();
+        }
+      } else { // Tab
+        if (document.activeElement === lastEl) {
+          firstEl.focus();
+          e.preventDefault();
+        }
+      }
+    }
+  };
+
+  document.addEventListener("keydown", modalKeydownHandler);
+}
+
 export function openCaseStudy(projectId) {
   const project = PROJECTS_DATA.find(p => p.id === projectId);
   if (!project) return;
@@ -186,64 +245,9 @@ export function openCaseStudy(projectId) {
     </div>
   `;
   
-  // Show modal overlay & prevent background shifting
-  previouslyFocusedElement = document.activeElement;
-  const sbWidth = getScrollbarWidth();
-  if (sbWidth > 0) {
-    document.body.style.paddingRight = `${sbWidth}px`;
-    const header = document.querySelector("header");
-    if (header) {
-      header.style.paddingRight = `${sbWidth}px`;
-    }
-  }
-  document.body.style.overflow = "hidden"; // Disable body scroll
-  modalOverlay.classList.add("active");
-  
-  // Focus initial element
-  const closeBtn = document.getElementById("modal-close");
-  closeBtn.focus();
-  
-  // Close actions
-  closeBtn.addEventListener("click", closeCaseStudy);
-  
-  const handleOverlayClick = (e) => {
-    if (e.target === modalOverlay) closeCaseStudy();
-  };
-  modalOverlay.addEventListener("click", handleOverlayClick);
-  modalOverlay._overlayClick = handleOverlayClick;
-
-  // Keyboard accessibility focus trapping & escape key closure
-  const focusableSelectors = 'a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), [tabindex="0"]';
-  
-  modalKeydownHandler = (e) => {
-    if (e.key === "Escape") {
-      closeCaseStudy();
-      return;
-    }
-
-    if (e.key === "Tab") {
-      const focusables = modalWrapper.querySelectorAll(focusableSelectors);
-      if (focusables.length === 0) return;
-      
-      const firstEl = focusables[0];
-      const lastEl = focusables[focusables.length - 1];
-
-      if (e.shiftKey) { // Shift + Tab
-        if (document.activeElement === firstEl) {
-          lastEl.focus();
-          e.preventDefault();
-        }
-      } else { // Tab
-        if (document.activeElement === lastEl) {
-          firstEl.focus();
-          e.preventDefault();
-        }
-      }
-    }
-  };
-
-  document.addEventListener("keydown", modalKeydownHandler);
+  setupModalOverlayListeners(modalOverlay, modalWrapper);
 }
+
 
 export function closeCaseStudy() {
   const modalOverlay = document.getElementById("case-study-modal");
@@ -286,20 +290,28 @@ export function renderAchievements() {
   // Clone cards to enable seamless infinite wrapping loops
   const items = [...ACHIEVEMENTS_DATA, ...ACHIEVEMENTS_DATA];
   
-  items.forEach(a => {
+  items.forEach((a, index) => {
     const card = document.createElement("div");
     card.className = "achievement-card glass-card spotlight-card";
+    card.dataset.id = a.id;
+    card.setAttribute("tabindex", "0");
+    card.setAttribute("aria-label", `View details for achievement: ${a.title}`);
+    card.style.animationDelay = `${index * 0.08}s`;
     
     card.innerHTML = `
-      <div class="achievement-icon">${a.icon}</div>
-      <span class="achievement-issuer">${a.issuer}</span>
-      <h3 class="achievement-title">${a.title}</h3>
-      <p class="achievement-desc">${a.desc}</p>
+      <div class="cert-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+        <div class="cert-icon-wrapper" style="display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 12px; background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.2); color: var(--color-primary);">${a.icon}</div>
+        <span class="cert-badge" style="font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: 20px; background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.2); color: var(--color-primary); text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em;">Milestone</span>
+      </div>
+      <span class="cert-issuer" style="font-size: 0.85rem; color: var(--color-text-secondary); font-weight: 500;">${a.issuer}</span>
+      <h3 class="cert-title" style="font-size: 1.15rem; margin: 0.5rem 0; line-height: 1.4; color: var(--text-primary); font-family: var(--font-heading);">${a.title}</h3>
+      <p class="cert-desc" style="font-size: 0.9rem; color: var(--color-text-paragraph); line-height: 1.6;">${a.desc}</p>
     `;
     
     container.appendChild(card);
   });
 }
+
 
 // --- SPOTLIGHT GLOW MOUSE BINDINGS ---
 export function initializeSpotlightEffects() {

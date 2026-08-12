@@ -149,16 +149,9 @@ header.scrolled {
   font-weight: 600;
   width: fit-content;
   margin-bottom: 2rem;
-  opacity: 0;
-  transform: translateY(20px) scale(0.9);
-  transition: opacity 0.9s var(--ease-out-spring), transform 0.9s var(--ease-out-spring);
   will-change: transform, opacity;
 }
 
-.site-loaded .hero-badge {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-}
 
 .hero-badge span {
   width: 6px;
@@ -168,7 +161,7 @@ header.scrolled {
   animation: pulse 1.5s infinite;
 }
 
-/* Reusable Clip Text for Entrance Animation */
+/* Reusable Clip Text for Entrance Animation (GSAP-driven) */
 .clip-text-wrapper {
   display: block;
   overflow: hidden;
@@ -177,15 +170,7 @@ header.scrolled {
 
 .clip-text-el {
   display: inline-block;
-  transform: translateY(100%);
-  opacity: 0;
-  transition: transform 1.0s var(--ease-out-expo), opacity 1.0s var(--ease-out-expo);
   will-change: transform, opacity;
-}
-
-.site-loaded .clip-text-el {
-  transform: translateY(0);
-  opacity: 1;
 }
 
 .hero-title {
@@ -193,10 +178,6 @@ header.scrolled {
   font-weight: 800;
   line-height: 1.1;
   margin-bottom: 1.5rem;
-}
-
-.hero-title .clip-text-wrapper:nth-child(2) .clip-text-el {
-  transition-delay: 0.1s;
 }
 
 .hero-title span.typed-text {
@@ -214,31 +195,13 @@ header.scrolled {
   color: var(--text-secondary);
   margin-bottom: 2.5rem;
   max-width: 550px;
-  opacity: 0;
-  transform: translateY(25px);
-  transition: opacity 1.4s var(--ease-out-expo), transform 1.4s var(--ease-out-expo);
   will-change: transform, opacity;
-}
-
-.site-loaded .hero-description {
-  opacity: 1;
-  transform: translateY(0);
-  transition-delay: 0.35s;
 }
 
 .hero-actions {
   display: flex;
   gap: 1.5rem;
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 1.4s var(--ease-out-expo), transform 1.4s var(--ease-out-expo);
   will-change: transform, opacity;
-}
-
-.site-loaded .hero-actions {
-  opacity: 1;
-  transform: translateY(0);
-  transition-delay: 0.45s;
 }
 
 .hero-visual {
@@ -273,25 +236,14 @@ body.light-mode {
   display: flex;
   justify-content: center;
   align-items: flex-end;
-  opacity: 0;
-  transform: scale(0.92) translateY(30px);
-  transition: opacity 1.5s var(--ease-out-expo), 
-              transform 1.5s var(--ease-out-expo),
-              box-shadow 0.4s ease,
-              border-color 0.4s ease;
   will-change: transform, opacity;
+  transition: box-shadow 0.4s ease, border-color 0.4s ease;
 }
 
 .hero-avatar-card:hover {
   border-color: rgba(var(--avatar-glow-rgb), 0.5);
   box-shadow: 0 30px 60px -10px rgba(var(--avatar-glow-rgb), 0.3), 
               inset 0 0 30px rgba(var(--avatar-glow-rgb), 0.15);
-}
-
-.site-loaded .hero-avatar-card {
-  opacity: 1;
-  transform: scale(1) translateY(0);
-  transition-delay: 0.3s;
 }
 
 .hero-avatar-card img {
@@ -322,9 +274,6 @@ body.light-mode {
   align-items: center;
   gap: 1rem;
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
-  opacity: 0;
-  transform: scale(0.8) translateY(15px);
-  transition: opacity 1.4s var(--ease-out-spring), transform 1.4s var(--ease-out-spring);
   will-change: transform, opacity;
   z-index: 500; /* Behind sticky header (1000) but above flyer initial state (400) */
 }
@@ -339,18 +288,13 @@ body.light-mode {
   right: -8%;
 }
 
-.site-loaded .badge-1 {
-  opacity: 1;
-  transform: scale(1) translateY(0);
-  transition-delay: 0.6s;
-  animation: float 4s ease-in-out infinite alternate 2s;
+/* Float animations are started by GSAP after entrance completes */
+.badge-float-1 {
+  animation: float 4s ease-in-out infinite alternate;
 }
 
-.site-loaded .badge-2 {
-  opacity: 1;
-  transform: scale(1) translateY(0);
-  transition-delay: 0.7s;
-  animation: float-delayed 4s ease-in-out infinite alternate 2.15s;
+.badge-float-2 {
+  animation: float-delayed 4s ease-in-out infinite alternate;
 }
 
 .hero-floating-badge svg {
@@ -1470,32 +1414,48 @@ body.light-mode {
   width: 340px;
   flex-shrink: 0;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  transition: transform var(--trans-normal), border-color var(--trans-normal), box-shadow var(--trans-normal);
+  cursor: pointer;
+  padding: 2rem;
 }
 
 .achievement-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 48px;
   height: 48px;
-  color: var(--color-accent);
-  margin-bottom: 1.5rem;
+  border-radius: 12px;
+  background: rgba(168, 85, 247, 0.1);
+  border: 1px solid rgba(168, 85, 247, 0.2);
+  color: var(--color-primary);
+  margin-bottom: 1.25rem;
 }
 
 .achievement-title {
-  font-size: 1.25rem;
-  margin-bottom: 0.75rem;
+  font-size: 1.15rem;
+  margin: 0.5rem 0;
+  line-height: 1.4;
+  color: var(--text-primary);
+  font-family: var(--font-heading);
 }
 
 .achievement-issuer {
   font-size: 0.85rem;
-  color: var(--color-secondary);
-  font-weight: 700;
-  text-transform: uppercase;
-  margin-bottom: 0.75rem;
+  color: var(--color-text-secondary);
+  font-weight: 500;
   display: block;
 }
 
 .achievement-desc {
   font-size: 0.9rem;
-  color: var(--text-secondary);
+  color: var(--color-text-paragraph);
+  line-height: 1.6;
 }
 
 .carousel-controls {
@@ -2842,33 +2802,17 @@ footer {
   right: 20px;
 }
 
-/* --- REUSABLE STAGGER REVEAL SYSTEM --- */
+/* --- REUSABLE STAGGER REVEAL SYSTEM (GSAP-driven) --- */
+/* Initial hidden state and stagger delays are handled by GSAP ScrollTrigger in animations.js */
 .reveal-stagger {
   --stagger-delay: 0.08s;
   --base-delay: 0.1s;
 }
 
 .reveal-stagger > * {
-  opacity: 0 !important;
-  transform: translateY(20px) scale(0.98) !important;
-  transition: opacity 0.8s var(--ease-out-expo), transform 0.8s var(--ease-out-expo) !important;
   will-change: transform, opacity;
 }
 
-.reveal.active .reveal-stagger > * {
-  opacity: 1 !important;
-  transform: translateY(0) scale(1) !important;
-}
-
-/* Stagger item delays */
-.reveal.active .reveal-stagger > *:nth-child(1) { transition-delay: calc(var(--base-delay) + 1 * var(--stagger-delay)) !important; }
-.reveal.active .reveal-stagger > *:nth-child(2) { transition-delay: calc(var(--base-delay) + 2 * var(--stagger-delay)) !important; }
-.reveal.active .reveal-stagger > *:nth-child(3) { transition-delay: calc(var(--base-delay) + 3 * var(--stagger-delay)) !important; }
-.reveal.active .reveal-stagger > *:nth-child(4) { transition-delay: calc(var(--base-delay) + 4 * var(--stagger-delay)) !important; }
-.reveal.active .reveal-stagger > *:nth-child(5) { transition-delay: calc(var(--base-delay) + 5 * var(--stagger-delay)) !important; }
-.reveal.active .reveal-stagger > *:nth-child(6) { transition-delay: calc(var(--base-delay) + 6 * var(--stagger-delay)) !important; }
-.reveal.active .reveal-stagger > *:nth-child(7) { transition-delay: calc(var(--base-delay) + 7 * var(--stagger-delay)) !important; }
-.reveal.active .reveal-stagger > *:nth-child(8) { transition-delay: calc(var(--base-delay) + 8 * var(--stagger-delay)) !important; }
 
 /* Skills pane active stagger animation */
 .skills-pane.active .skill-bar-wrapper {
@@ -3602,6 +3546,7 @@ body.light-mode .btn-secondary::after {
   border-radius: 0 0 var(--radius-lg) var(--radius-lg);
   filter: drop-shadow(0 15px 30px rgba(0, 0, 0, 0.6));
 }
+
 
 
 

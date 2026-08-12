@@ -1,6 +1,11 @@
 import { lenis } from "../app.js";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 // --- CUSTOM CURSOR FOLLOWER with Magnetic Snapping ---
+// (Kept as vanilla JS — already premium-quality with manual lerp and GPU compositing)
 function initCustomCursor() {
   const cursor = document.querySelector(".custom-cursor");
   const dot = document.querySelector(".custom-cursor-dot");
@@ -213,85 +218,122 @@ function initCustomCursor() {
   });
 }
 
-// --- SCROLL REVEAL ANIMATIONS ---
-let skillsAnimated = false;
-
+// --- GSAP SCROLL REVEAL ANIMATIONS ---
 function initScrollReveals() {
-  const reveals = document.querySelectorAll(
-    ".reveal, .reveal-up, .reveal-down, .reveal-left, .reveal-right, .reveal-scale, .reveal-fade"
-  );
+  // Section-level reveals: Each section with class "reveal" fades in
+  const sections = document.querySelectorAll(".reveal");
   
-  const revealCallback = (entries, observer) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add("active");
+  sections.forEach(section => {
+    // The section itself animates in
+    gsap.set(section, { opacity: 0, y: 30 });
+    
+    ScrollTrigger.create({
+      trigger: section,
+      start: "top 88%",
+      end: "top 20%",
+      onEnter: () => {
+        gsap.to(section, {
+          opacity: 1,
+          y: 0,
+          duration: 1,
+          ease: "power4.out",
+        });
         
-        // If skill section, trigger skill bars filling
-        if (entry.target.id === "skills") {
+        // Trigger skill bars filling
+        if (section.id === "skills") {
           animateSkillsBars();
         }
         
-        // If about section, trigger stats counters
-        if (entry.target.id === "about") {
+        // Trigger stats counters
+        if (section.id === "about") {
           animateStatsCounters();
         }
 
-        // If experience section, trigger timeline offset recalculation after layout has settled
-        if (entry.target.id === "experience") {
+        // Trigger timeline offset recalculation
+        if (section.id === "experience") {
           window.dispatchEvent(new CustomEvent("recalc-offsets"));
         }
-      } else {
-        entry.target.classList.remove("active");
+      },
+      onLeaveBack: () => {
+        gsap.to(section, {
+          opacity: 0,
+          y: 30,
+          duration: 0.6,
+          ease: "power2.in",
+        });
         
-        // Reset animation states on exit so they run again on re-entry
-        if (entry.target.id === "about") {
+        // Reset animation states on exit so they replay on re-entry
+        if (section.id === "about") {
           statsAnimated = false;
         }
-        if (entry.target.id === "skills") {
+        if (section.id === "skills") {
           skillsAnimated = false;
         }
-      }
+      },
     });
-  };
-
-  const revealObserver = new IntersectionObserver(revealCallback, {
-    root: null,
-    threshold: 0.1,
-    rootMargin: "0px 0px -40px 0px"
   });
 
-  reveals.forEach(el => revealObserver.observe(el));
-}
-
-export function animatePercentageText(element, targetVal) {
-  let current = 0;
-  const duration = 1000;
-  const startTime = performance.now();
+  // Staggered children: Animate direct children of `.reveal-stagger` containers
+  const staggerContainers = document.querySelectorAll(".reveal-stagger");
   
-  function update(now) {
-    const elapsed = now - startTime;
-    const progress = Math.min(elapsed / duration, 1);
-    const ease = progress * (2 - progress);
-    current = Math.round(ease * targetVal);
-    element.innerText = `${current}%`;
-    if (progress < 1) {
-      requestAnimationFrame(update);
-    }
-  }
-  requestAnimationFrame(update);
+  staggerContainers.forEach(container => {
+    const children = container.children;
+    if (children.length === 0) return;
+    
+    gsap.set(children, { opacity: 0, y: 25, scale: 0.97 });
+    
+    ScrollTrigger.create({
+      trigger: container,
+      start: "top 85%",
+      onEnter: () => {
+        gsap.to(children, {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 0.9,
+          ease: "back.out(1.2)",
+          stagger: 0.1,
+          clearProps: "transform",
+        });
+      },
+      onLeaveBack: () => {
+        gsap.to(children, {
+          opacity: 0,
+          y: 25,
+          scale: 0.97,
+          duration: 0.4,
+          ease: "power2.in",
+          stagger: 0.03,
+        });
+      }
+    });
+  });
 }
 
-// --- SKILL BAR FILLING ---
+// --- GSAP PERCENTAGE TEXT COUNT-UP ---
+export function animatePercentageText(element, targetVal) {
+  const obj = { val: 0 };
+  gsap.to(obj, {
+    val: targetVal,
+    duration: 1.2,
+    ease: "power2.out",
+    onUpdate: () => {
+      element.innerText = `${Math.round(obj.val)}%`;
+    }
+  });
+}
+
+// --- GSAP SKILL BAR FILLING ---
+let skillsAnimated = false;
 export function animateSkillsBars() {
   if (skillsAnimated) return;
   skillsAnimated = true;
 
   const bars = document.querySelectorAll(".skill-bar-fill");
   
-  // 1. Reset all bars first
-  bars.forEach(bar => {
-    bar.style.transition = "none";
-    bar.style.width = "0%";
+  bars.forEach((bar, index) => {
+    const percent = parseInt(bar.dataset.percentage, 10);
+    if (isNaN(percent)) return;
     
     const wrapper = bar.closest(".skill-bar-wrapper");
     const labelPct = wrapper ? wrapper.querySelector(".skill-percentage") : null;
@@ -302,58 +344,49 @@ export function animateSkillsBars() {
       tooltip.className = "skill-tooltip";
       bar.appendChild(tooltip);
     }
+    
+    // Reset
+    gsap.set(bar, { width: "0%" });
     tooltip.innerText = "0%";
     if (labelPct) labelPct.innerText = "0%";
-  });
-  
-  // 2. Force a single reflow on the parent container to flush layout writes
-  const skillsContent = document.querySelector(".skills-content");
-  if (skillsContent) {
-    skillsContent.offsetHeight; // layout flush
-  }
-  
-  // 3. Trigger smooth draw-in and count-up animations
-  setTimeout(() => {
-    bars.forEach(bar => {
-      const percent = parseInt(bar.dataset.percentage, 10);
-      if (isNaN(percent)) return;
-      
-      bar.style.transition = "width 1.5s cubic-bezier(0.1, 0.8, 0.2, 1)";
-      bar.style.width = `${percent}%`;
-      
-      const wrapper = bar.closest(".skill-bar-wrapper");
-      const labelPct = wrapper ? wrapper.querySelector(".skill-percentage") : null;
-      const tooltip = bar.querySelector(".skill-tooltip");
-      
-      if (tooltip) animatePercentageText(tooltip, percent);
-      if (labelPct) animatePercentageText(labelPct, percent);
+    
+    // Animate the fill bar with stagger
+    gsap.to(bar, {
+      width: `${percent}%`,
+      duration: 1.6,
+      delay: index * 0.08,
+      ease: "power3.out",
+      onStart: () => {
+        if (tooltip) animatePercentageText(tooltip, percent);
+        if (labelPct) animatePercentageText(labelPct, percent);
+      }
     });
-  }, 50);
+  });
 }
 
-// --- STATS COUNT-UP EFFECT ---
+// --- GSAP STATS COUNT-UP ---
 let statsAnimated = false;
 export function animateStatsCounters() {
   if (statsAnimated) return;
   statsAnimated = true;
 
   const stats = document.querySelectorAll(".stat-number span");
-  stats.forEach(stat => {
+  stats.forEach((stat, index) => {
     const target = parseInt(stat.dataset.target, 10);
-    let count = 0;
-    const duration = 2000; // ms
-    const increment = target / (duration / 16); // 60fps refresh rate
-
-    function updateCount() {
-      count += increment;
-      if (count < target) {
-        stat.innerText = Math.floor(count);
-        requestAnimationFrame(updateCount);
-      } else {
+    const obj = { count: 0 };
+    
+    gsap.to(obj, {
+      count: target,
+      duration: 2,
+      delay: index * 0.15,
+      ease: "power2.out",
+      onUpdate: () => {
+        stat.innerText = Math.floor(obj.count);
+      },
+      onComplete: () => {
         stat.innerText = target;
       }
-    }
-    updateCount();
+    });
   });
 }
 
@@ -415,7 +448,7 @@ function initTypingEffect() {
   new TextTyper(target, words);
 }
 
-// --- AVATAR MOUSE PARALLAX ---
+// --- GSAP AVATAR MOUSE PARALLAX (3D tilt) ---
 function initAvatarParallax() {
   const visual = document.querySelector(".hero-visual");
   const card = document.querySelector(".hero-avatar-card");
@@ -426,6 +459,14 @@ function initAvatarParallax() {
     rect = visual.getBoundingClientRect();
   }
 
+  // Use gsap.quickTo for buttery-smooth interpolation
+  const rotX = gsap.quickTo(card, "rotateX", { duration: 0.4, ease: "power2.out" });
+  const rotY = gsap.quickTo(card, "rotateY", { duration: 0.4, ease: "power2.out" });
+  const moveX = gsap.quickTo(card, "x", { duration: 0.5, ease: "power2.out" });
+  const moveY = gsap.quickTo(card, "y", { duration: 0.5, ease: "power2.out" });
+
+  gsap.set(card, { transformPerspective: 1000 });
+
   visual.addEventListener("mouseenter", updateRect);
   window.addEventListener("resize", () => { if (rect) updateRect(); }, { passive: true });
   window.addEventListener("scroll", () => { if (rect) updateRect(); }, { passive: true });
@@ -435,88 +476,67 @@ function initAvatarParallax() {
     const x = e.clientX - rect.left - rect.width / 2;
     const y = e.clientY - rect.top - rect.height / 2;
     
-    // Tilt card with hardware acceleration
-    card.style.transform = `perspective(1000px) rotateY(${x * 0.05}deg) rotateX(${-y * 0.05}deg) translate3d(${x * 0.02}px, ${y * 0.02}px, 0)`;
+    rotY(x * 0.05);
+    rotX(-y * 0.05);
+    moveX(x * 0.02);
+    moveY(y * 0.02);
   });
 
   visual.addEventListener("mouseleave", () => {
     rect = null;
-    card.style.transform = '';
-    card.style.transition = 'transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1)';
+    gsap.to(card, {
+      rotateX: 0,
+      rotateY: 0,
+      x: 0,
+      y: 0,
+      duration: 0.8,
+      ease: "elastic.out(1, 0.5)",
+    });
   });
 }
 
-// --- TIMELINE SCROLL HIGHLIGHT ---
+// --- GSAP TIMELINE SCROLL HIGHLIGHT ---
 function initTimelineScrollHighlight() {
   const timeline = document.querySelector(".timeline");
   const progressLine = document.querySelector(".timeline-progress-line");
   const items = document.querySelectorAll(".timeline-item");
   if (!timeline || !progressLine) return;
 
-  let timelineTop = 0;
-  let timelineHeight = 0;
-  let dotOffsets = [];
-
-  function calculateOffsets() {
-    const rect = timeline.getBoundingClientRect();
-    timelineTop = rect.top + window.scrollY;
-    timelineHeight = rect.height;
-
-    dotOffsets = Array.from(items).map(item => {
-      const dot = item.querySelector(".timeline-dot");
-      if (!dot) return 0;
-      const dotRect = dot.getBoundingClientRect();
-      return dotRect.top + window.scrollY;
-    });
-  }
-
-  // Initial calculation
-  calculateOffsets();
-
-  // Recalculate on resize, load, and custom layout shifts to preserve accuracy
-  window.addEventListener("resize", calculateOffsets, { passive: true });
-  window.addEventListener("load", calculateOffsets, { passive: true });
-  window.addEventListener("recalc-offsets", calculateOffsets, { passive: true });
-
-  let isTimelineScrolling = false;
-  window.addEventListener("scroll", () => {
-    if (!isTimelineScrolling) {
-      requestAnimationFrame(() => {
-        const scrollY = window.scrollY || document.documentElement.scrollTop;
-        const triggerPoint = window.innerHeight * 0.65;
-        const topOffset = triggerPoint - (timelineTop - scrollY);
-        
-        let progress = 0;
-        if (topOffset > 0) {
-          progress = (topOffset / timelineHeight) * 100;
-        }
-        progress = Math.min(Math.max(progress, 0), 100);
-        
-        progressLine.style.height = `${progress}%`;
-        
-        items.forEach((item, index) => {
-          const dot = item.querySelector(".timeline-dot");
-          if (!dot) return;
-          
-          const dotTop = dotOffsets[index] || 0;
-          const dotTopOffset = triggerPoint - (dotTop - scrollY);
-          
-          if (dotTopOffset > 0) {
-            dot.classList.add("active");
-            item.classList.add("illuminated");
-          } else {
-            dot.classList.remove("active");
-            item.classList.remove("illuminated");
-          }
-        });
-        isTimelineScrolling = false;
-      });
-      isTimelineScrolling = true;
+  // Animate the progress line height with ScrollTrigger scrub
+  gsap.fromTo(progressLine, 
+    { height: "0%" },
+    {
+      height: "100%",
+      ease: "none",
+      scrollTrigger: {
+        trigger: timeline,
+        start: "top 65%",
+        end: "bottom 65%",
+        scrub: 0.3,
+      }
     }
-  }, { passive: true });
+  );
+
+  // Animate individual timeline items
+  items.forEach(item => {
+    const dot = item.querySelector(".timeline-dot");
+    if (!dot) return;
+    
+    ScrollTrigger.create({
+      trigger: dot,
+      start: "top 65%",
+      onEnter: () => {
+        dot.classList.add("active");
+        item.classList.add("illuminated");
+      },
+      onLeaveBack: () => {
+        dot.classList.remove("active");
+        item.classList.remove("illuminated");
+      }
+    });
+  });
 }
 
-// --- HERO DESIGNER COORDINATE CROSSHAIR ---
 // --- HERO DESIGNER COORDINATE CROSSHAIR ---
 function initDesignerGrid() {
   const isHoverSupported = window.matchMedia('(hover: hover)').matches;
@@ -567,57 +587,51 @@ function initDesignerGrid() {
   window.addEventListener("scroll", () => { if (rect) updateRect(); }, { passive: true });
   window.addEventListener("recalc-offsets", () => { if (rect) updateRect(); }, { passive: true });
 
-  let isGridMouseMoving = false;
-  hero.addEventListener("mousemove", (e) => {
-    if (!isGridMouseMoving) {
-      const clientX = e.clientX;
-      const clientY = e.clientY;
-      requestAnimationFrame(() => {
-        if (!rect) updateRect();
-        let x = clientX - rect.left;
-        let y = clientY - rect.top;
-        
-        const snapRadius = 45;
-        let snapped = false;
-        let snapLabel = "";
-        
-        // Use cached snap points directly to prevent layout thrashing
-        for (let i = 0; i < cachedSnapPoints.length; i++) {
-          const pt = cachedSnapPoints[i];
-          const dist = Math.hypot(x - pt.x, y - pt.y);
-          if (dist < snapRadius) {
-            x = pt.x;
-            y = pt.y;
-            snapped = true;
-            snapLabel = pt.label;
-            break;
-          }
-        }
-        
-        // Position tracking lines with GPU translate3d
-        crosshairH.style.transform = `translate3d(0, ${y}px, 0)`;
-        crosshairV.style.transform = `translate3d(${x}px, 0, 0)`;
-        
-        // Coordinate label floating alongside
-        label.style.transform = `translate3d(${x + 15}px, ${y + 15}px, 0)`;
-        
-        if (snapped) {
-          if (gridContainer) gridContainer.classList.add("snapped");
-          label.classList.add("snapped");
-          label.innerText = `SNAP [${snapLabel}] X: ${Math.round(x)}px | Y: ${Math.round(y)}px`;
-        } else {
-          if (gridContainer) gridContainer.classList.remove("snapped");
-          label.classList.remove("snapped");
-          label.innerText = `X: ${Math.round(x)}px | Y: ${Math.round(y)}px`;
-        }
+  // Use gsap.quickTo for smooth crosshair tracking
+  const crosshairHY = gsap.quickTo(crosshairH, "y", { duration: 0.15, ease: "power2.out" });
+  const crosshairVX = gsap.quickTo(crosshairV, "x", { duration: 0.15, ease: "power2.out" });
 
-        // Update custom properties for dynamic grid spotlight glow
-        hero.style.setProperty("--global-mouse-x", `${x}px`);
-        hero.style.setProperty("--global-mouse-y", `${y}px`);
-        isGridMouseMoving = false;
-      });
-      isGridMouseMoving = true;
+  hero.addEventListener("mousemove", (e) => {
+    if (!rect) updateRect();
+    let x = e.clientX - rect.left;
+    let y = e.clientY - rect.top;
+    
+    const snapRadius = 45;
+    let snapped = false;
+    let snapLabel = "";
+    
+    for (let i = 0; i < cachedSnapPoints.length; i++) {
+      const pt = cachedSnapPoints[i];
+      const dist = Math.hypot(x - pt.x, y - pt.y);
+      if (dist < snapRadius) {
+        x = pt.x;
+        y = pt.y;
+        snapped = true;
+        snapLabel = pt.label;
+        break;
+      }
     }
+    
+    // Position crosshairs with gsap.quickTo
+    crosshairHY(y);
+    crosshairVX(x);
+    
+    // Coordinate label
+    label.style.transform = `translate3d(${x + 15}px, ${y + 15}px, 0)`;
+    
+    if (snapped) {
+      if (gridContainer) gridContainer.classList.add("snapped");
+      label.classList.add("snapped");
+      label.innerText = `SNAP [${snapLabel}] X: ${Math.round(x)}px | Y: ${Math.round(y)}px`;
+    } else {
+      if (gridContainer) gridContainer.classList.remove("snapped");
+      label.classList.remove("snapped");
+      label.innerText = `X: ${Math.round(x)}px | Y: ${Math.round(y)}px`;
+    }
+
+    // Update custom properties for dynamic grid spotlight glow
+    hero.style.setProperty("--global-mouse-x", `${x}px`);
+    hero.style.setProperty("--global-mouse-y", `${y}px`);
   });
 
   hero.addEventListener("mouseleave", () => {
@@ -627,55 +641,23 @@ function initDesignerGrid() {
   });
 }
 
-// --- WATERMARK SCROLL PARALLAX ---
+// --- GSAP WATERMARK SCROLL PARALLAX ---
 function initWatermarkParallax() {
   const watermarks = document.querySelectorAll(".bg-text-watermark");
   if (watermarks.length === 0) return;
   
-  let cachedOffsets = [];
-  
-  function cacheOffsets() {
-    cachedOffsets = Array.from(watermarks).map(wm => {
-      // Clear transform to read native boundary
-      const originalTransform = wm.style.transform;
-      wm.style.transform = "none";
-      const rect = wm.getBoundingClientRect();
-      wm.style.transform = originalTransform;
-      return {
-        element: wm,
-        initialTop: rect.top + window.scrollY
-      };
+  watermarks.forEach(wm => {
+    gsap.to(wm, {
+      y: () => 120,
+      ease: "none",
+      scrollTrigger: {
+        trigger: wm.closest("section") || wm.parentElement,
+        start: "top bottom",
+        end: "bottom top",
+        scrub: 0.5,
+      }
     });
-  }
-  
-  cacheOffsets();
-  window.addEventListener("resize", cacheOffsets, { passive: true });
-  window.addEventListener("recalc-offsets", cacheOffsets, { passive: true });
-  
-  let isScrolling = false;
-  
-  function updateParallax() {
-    const scrollY = window.scrollY;
-    const winHeight = window.innerHeight;
-    
-    cachedOffsets.forEach(cache => {
-      // Calculate offset relative to viewport center using cached coordinates
-      const relativeScroll = (scrollY + winHeight / 2) - cache.initialTop;
-      const translateY = relativeScroll * 0.12; // Subtle movement rate
-      
-      cache.element.style.transform = `translate3d(0, ${translateY}px, 0)`;
-    });
-    isScrolling = false;
-  }
-  
-  window.addEventListener("scroll", () => {
-    if (!isScrolling) {
-      requestAnimationFrame(updateParallax);
-      isScrolling = true;
-    }
-  }, { passive: true });
-  
-  updateParallax();
+  });
 }
 
 // --- SLIDING CAPSULE NAV INDICATOR ---
@@ -699,10 +681,16 @@ export function updateNavIndicator() {
     const y = linkRect.top - menuRect.top;
     const scaleX = linkRect.width / 100; // Base width is 100px
 
-    indicator.style.transform = `translate3d(${x}px, ${y}px, 0) scaleX(${scaleX})`;
-    indicator.style.opacity = '1';
+    gsap.to(indicator, {
+      x: x,
+      y: y,
+      scaleX: scaleX,
+      opacity: 1,
+      duration: 0.35,
+      ease: "power3.out",
+    });
   } else {
-    indicator.style.opacity = '0';
+    gsap.to(indicator, { opacity: 0, duration: 0.2 });
   }
 }
 
@@ -731,8 +719,14 @@ function initNavIndicator() {
       const y = linkRect.top - menuRect.top;
       const scaleX = linkRect.width / 100;
 
-      indicator.style.transform = `translate3d(${x}px, ${y}px, 0) scaleX(${scaleX})`;
-      indicator.style.opacity = '1';
+      gsap.to(indicator, {
+        x: x,
+        y: y,
+        scaleX: scaleX,
+        opacity: 1,
+        duration: 0.3,
+        ease: "power3.out",
+      });
     });
   });
 
@@ -745,7 +739,7 @@ function initNavIndicator() {
   window.addEventListener("resize", updateNavIndicator, { passive: true });
 }
 
-// --- PAGE TRANSITION CURTAIN ---
+// --- PAGE TRANSITION CURTAIN (GSAP Timeline) ---
 export function triggerPageTransition(targetId, callback) {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     const target = document.getElementById(targetId);
@@ -767,12 +761,22 @@ export function triggerPageTransition(targetId, callback) {
     document.body.appendChild(curtain);
   }
 
-  curtain.getBoundingClientRect(); // force layout flush
+  // Use GSAP timeline for the page transition
+  const tl = gsap.timeline();
 
-  curtain.classList.remove("active-out");
-  curtain.classList.add("active-in");
+  tl.set(curtain, { 
+    clipPath: "polygon(0 0, 0 0, 0 100%, 0% 100%)",
+  });
 
-  setTimeout(() => {
+  // Slide in
+  tl.to(curtain, {
+    clipPath: "polygon(0 0, 100% 0, 100% 100%, 0 100%)",
+    duration: 0.6,
+    ease: "power4.inOut",
+  });
+
+  // At the midpoint, scroll to target
+  tl.call(() => {
     const target = document.getElementById(targetId);
     if (target) {
       if (lenis) {
@@ -784,26 +788,99 @@ export function triggerPageTransition(targetId, callback) {
         html.style.scrollBehavior = "";
       }
     }
-
     if (callback) callback();
+  });
 
-    curtain.classList.remove("active-in");
-    curtain.classList.add("active-out");
+  // Slide out
+  tl.to(curtain, {
+    clipPath: "polygon(100% 0, 100% 0, 100% 100%, 100% 100%)",
+    duration: 0.6,
+    ease: "power4.inOut",
+  });
 
-    setTimeout(() => {
-      curtain.classList.remove("active-out");
-    }, 750);
-  }, 750);
+  // Reset
+  tl.set(curtain, { 
+    clipPath: "polygon(0 0, 0 0, 0 100%, 0% 100%)",
+  });
+}
+
+// --- GSAP HERO ENTRANCE SEQUENCE ---
+function initHeroEntrance() {
+  // This is triggered by the "site-loaded" event after preloader completes
+  document.addEventListener("site-loaded", () => {
+    document.body.classList.add("site-loaded");
+    
+    const tl = gsap.timeline({ defaults: { ease: "power4.out" } });
+
+    // Hero badge pops in
+    tl.fromTo(".hero-badge", 
+      { opacity: 0, y: 20, scale: 0.9 },
+      { opacity: 1, y: 0, scale: 1, duration: 0.9 },
+      0.1
+    );
+
+    // Hero title lines slide up from overflow-hidden clips
+    tl.fromTo(".clip-text-el",
+      { yPercent: 100, opacity: 0 },
+      { yPercent: 0, opacity: 1, duration: 1.1, stagger: 0.12, ease: "power4.out" },
+      0.2
+    );
+
+    // Hero description fades in
+    tl.fromTo(".hero-description",
+      { opacity: 0, y: 25 },
+      { opacity: 1, y: 0, duration: 1.2 },
+      0.5
+    );
+
+    // Hero action buttons stagger in
+    tl.fromTo(".hero-actions",
+      { opacity: 0, y: 20 },
+      { opacity: 1, y: 0, duration: 1.0 },
+      0.65
+    );
+
+    // Hero visual (avatar card + badges) entrance
+    tl.fromTo(".hero-avatar-card",
+      { opacity: 0, scale: 0.85, y: 30 },
+      { opacity: 1, scale: 1, y: 0, duration: 1.2, ease: "back.out(1.4)" },
+      0.3
+    );
+
+    // Floating badges pop in with spring overshoot
+    tl.fromTo(".hero-floating-badge",
+      { opacity: 0, scale: 0, y: 20 },
+      { opacity: 1, scale: 1, y: 0, duration: 0.8, ease: "back.out(2)", stagger: 0.15,
+        onComplete: () => {
+          // Start the infinite float animations after entrance completes
+          const badge1 = document.querySelector(".badge-1");
+          const badge2 = document.querySelector(".badge-2");
+          if (badge1) badge1.classList.add("badge-float-1");
+          if (badge2) badge2.classList.add("badge-float-2");
+        }
+      },
+      0.7
+    );
+
+    // Scroll indicator fades in last
+    tl.fromTo(".scroll-down",
+      { opacity: 0, y: -10 },
+      { opacity: 1, y: 0, duration: 0.8 },
+      1.0
+    );
+  });
 }
 
 // --- INITIALIZE ALL ANIMATIONS ---
 export function initAnimations() {
-  document.addEventListener("site-loaded", () => {
-    document.body.classList.add("site-loaded");
-  });
-
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     document.body.classList.add("site-loaded");
+    
+    // Force visible state for all hero elements
+    gsap.set(".hero-badge, .clip-text-el, .hero-description, .hero-actions, .hero-avatar-card, .hero-floating-badge, .scroll-down", {
+      opacity: 1, y: 0, scale: 1, yPercent: 0
+    });
+    
     animateSkillsBars();
     animateStatsCounters();
     initTypingEffect();
@@ -811,6 +888,7 @@ export function initAnimations() {
   }
   
   initCustomCursor();
+  initHeroEntrance();
   initScrollReveals();
   initTypingEffect();
   initAvatarParallax();

@@ -6,6 +6,10 @@ import {
 } from "./modules/projects.js";
 import { initAnimations, animatePercentageText, triggerPageTransition, updateNavIndicator } from "./modules/animations.js";
 import Lenis from 'lenis';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 // Initialize Lenis Smooth Scroll
 export const lenis = new Lenis({
@@ -16,12 +20,14 @@ export const lenis = new Lenis({
   touchMultiplier: 1.5,
 });
 
-// Run Lenis RAF loop
-function raf(time) {
-  lenis.raf(time);
-  requestAnimationFrame(raf);
-}
-requestAnimationFrame(raf);
+// Sync Lenis scroll position with GSAP's ScrollTrigger on every tick
+lenis.on('scroll', ScrollTrigger.update);
+
+// Use GSAP's ticker as the single RAF loop for both GSAP and Lenis
+gsap.ticker.add((time) => {
+  lenis.raf(time * 1000); // GSAP ticker passes seconds, Lenis expects ms
+});
+gsap.ticker.lagSmoothing(0);
 
 // Lock scroll immediately on script execution to prevent layout jumping during loading
 document.documentElement.style.overflow = "hidden";
@@ -314,17 +320,15 @@ function initSkillsTabs() {
     if (fill && !isNaN(pct)) {
       const radius = 14;
       const circumference = 2 * Math.PI * radius; // ~88px
-      
-      fill.style.strokeDasharray = circumference;
-      fill.style.transition = "none";
-      fill.style.strokeDashoffset = circumference;
-      
-      // Force reflow
-      fill.getBoundingClientRect();
-      
-      fill.style.transition = "stroke-dashoffset 1s cubic-bezier(0.25, 0.8, 0.25, 1)";
       const offset = circumference - (pct / 100) * circumference;
-      fill.style.strokeDashoffset = offset;
+      
+      gsap.set(fill, { attr: { "stroke-dasharray": circumference, "stroke-dashoffset": circumference } });
+      
+      gsap.to(fill, {
+        attr: { "stroke-dashoffset": offset },
+        duration: 1.2,
+        ease: "power3.out",
+      });
       
       if (tooltip) {
         animatePercentageText(tooltip, pct);
@@ -416,8 +420,7 @@ function initSkillsTabs() {
           const targetPct = parseInt(f.dataset.percentage, 10);
           if (isNaN(targetPct)) return;
           
-          f.style.transition = "none";
-          f.style.width = "0%";
+          gsap.set(f, { width: "0%" });
           
           const wrapper = f.closest(".skill-bar-wrapper");
           const labelPct = wrapper ? wrapper.querySelector(".skill-percentage") : null;
@@ -432,30 +435,25 @@ function initSkillsTabs() {
           if (labelPct) labelPct.innerText = "0%";
         });
         
-        // Force reflow
-        pane.offsetHeight;
-        
-        // Trigger smooth draw-in and count-up animations
-        setTimeout(() => {
-          fills.forEach(f => {
-            const targetPct = parseInt(f.dataset.percentage, 10);
-            if (isNaN(targetPct)) return;
-            
-            f.style.transition = "width 1.5s cubic-bezier(0.1, 0.8, 0.2, 1)";
-            f.style.width = `${targetPct}%`;
-            
-            const wrapper = f.closest(".skill-bar-wrapper");
-            const labelPct = wrapper ? wrapper.querySelector(".skill-percentage") : null;
-            const tooltip = f.querySelector(".skill-tooltip");
-            
-            if (tooltip) {
-              animatePercentageText(tooltip, targetPct);
-            }
-            if (labelPct) {
-              animatePercentageText(labelPct, targetPct);
+        // Trigger GSAP draw-in and count-up animations with stagger
+        fills.forEach((f, idx) => {
+          const targetPct = parseInt(f.dataset.percentage, 10);
+          if (isNaN(targetPct)) return;
+          
+          gsap.to(f, {
+            width: `${targetPct}%`,
+            duration: 1.5,
+            delay: idx * 0.08,
+            ease: "power3.out",
+            onStart: () => {
+              const wrapper = f.closest(".skill-bar-wrapper");
+              const labelPct = wrapper ? wrapper.querySelector(".skill-percentage") : null;
+              const tooltip = f.querySelector(".skill-tooltip");
+              if (tooltip) animatePercentageText(tooltip, targetPct);
+              if (labelPct) animatePercentageText(labelPct, targetPct);
             }
           });
-        }, 50);
+        });
       }
     });
   }
@@ -995,7 +993,7 @@ function initShimmerDismissal() {
   }, true); // Use capture phase
 }
 
-// --- SCROLL-DRIVEN AVATAR FLYING ANIMATION ---
+// --- SCROLL-DRIVEN AVATAR FLYING ANIMATION (GSAP ScrollTrigger) ---
 function initAvatarScrollAnimation() {
   const heroCard = document.querySelector(".hero-avatar-card");
   const logoTarget = document.querySelector(".logo-avatar-container");
@@ -1004,13 +1002,11 @@ function initAvatarScrollAnimation() {
   
   if (!heroCard || !flyingAvatar) return;
   
-  const heroImg = heroCard.querySelector("img");
   const flyingImg = flyingAvatar.querySelector("img");
   let heroPageRect = null;
   let targetRect = null;
   let activeTarget = null;
   let isMobileLayout = false;
-  let hasMeasuredSettled = false;
   
   function updateLayoutPositions() {
     isMobileLayout = window.innerWidth <= 1024;
@@ -1058,18 +1054,17 @@ function initAvatarScrollAnimation() {
       activeTarget.style.setProperty("width", "32px", "important");
       activeTarget.style.setProperty("transform", "scale(1)", "important");
       activeTarget.style.setProperty("margin-right", "0.25rem", "important");
-      activeTarget.style.setProperty("opacity", "0", "important"); // hidden but sized
+      activeTarget.style.setProperty("opacity", "0", "important");
     } else {
       if (targetParent) {
         targetParent.style.setProperty("display", "flex", "important");
         targetParent.style.setProperty("width", "36px", "important");
         targetParent.style.setProperty("transform", "scale(1)", "important");
         targetParent.style.setProperty("margin-left", "0", "important");
-        targetParent.style.setProperty("opacity", "0", "important"); // hidden but sized
+        targetParent.style.setProperty("opacity", "0", "important");
       }
     }
     
-    // Force a layout flush to ensure styles are applied before measurement
     if (header) header.offsetHeight;
     
     const targetBounding = activeTarget.getBoundingClientRect();
@@ -1083,7 +1078,7 @@ function initAvatarScrollAnimation() {
       if (!wasScrolled) {
         header.classList.remove("scrolled");
       }
-      header.offsetHeight; // flush
+      header.offsetHeight;
       header.style.transition = originalHeaderTransition;
     }
 
@@ -1096,251 +1091,153 @@ function initAvatarScrollAnimation() {
       height: targetBounding.height
     };
     
-    // Set flyer base dimensions dynamically to match starting hero size
     flyingAvatar.style.width = `${heroPageRect.width}px`;
     flyingAvatar.style.height = `${heroPageRect.height}px`;
   }
   
-  // Initial measurement fallback
+  // Initial measurement
   updateLayoutPositions();
   
-  // Re-run measurement when layout changes
-  window.addEventListener("resize", () => {
-    hasMeasuredSettled = false;
-    updateLayoutPositions();
-    handleScroll(window.scrollY);
-  }, { passive: true });
-  
-  window.addEventListener("load", () => {
-    hasMeasuredSettled = false;
-    updateLayoutPositions();
-    handleScroll(window.scrollY);
-  }, { passive: true });
-  
-  window.addEventListener("recalc-offsets", () => {
-    hasMeasuredSettled = false;
-    updateLayoutPositions();
-    handleScroll(window.scrollY);
-  }, { passive: true });
-  
-  const scrollEnd = 300;
-  let lastProgress = -1;
-  
-  let targetScrollY = 0;
-  let lerpedScrollY = 0;
-  let isLoopRunning = false;
+  // Re-measure on layout changes
+  window.addEventListener("resize", () => { updateLayoutPositions(); ScrollTrigger.refresh(); }, { passive: true });
+  window.addEventListener("load", () => { updateLayoutPositions(); ScrollTrigger.refresh(); }, { passive: true });
+  window.addEventListener("recalc-offsets", () => { updateLayoutPositions(); ScrollTrigger.refresh(); }, { passive: true });
   
   function easeOutQuad(t) {
     return t * (2 - t);
   }
   
-  function handleScroll(scrollY) {
-    targetScrollY = scrollY;
-    startVisualLoop();
-  }
-  
-  function startVisualLoop() {
-    if (!isLoopRunning) {
-      isLoopRunning = true;
-      requestAnimationFrame(visualLoop);
-    }
-  }
-  
-  function visualLoop() {
-    const diff = targetScrollY - lerpedScrollY;
-    
-    if (Math.abs(diff) < 0.05) {
-      lerpedScrollY = targetScrollY;
-      isLoopRunning = false;
-    } else {
-      lerpedScrollY += diff * 0.14; // Elastic smoothing dampener
-      requestAnimationFrame(visualLoop);
-    }
-    
-    updateVisuals(lerpedScrollY);
-  }
-  
-  function updateVisuals(scrollY) {
-    
-    // Lazy measure at the very first scroll frame to ensure page is settled and transitions finished
-    if (scrollY > 0 && !hasMeasuredSettled) {
-      updateLayoutPositions();
-      hasMeasuredSettled = true;
-    }
-    
-    let progress = Math.min(Math.max(scrollY / scrollEnd, 0), 1);
-    if (scrollY < 3) {
-      progress = 0;
-    }
-    
-    if (progress === lastProgress) return;
-    lastProgress = progress;
-    
-    const body = document.body;
-    
-    if (progress === 0) {
-      body.classList.remove("scrolled-avatar");
-      heroCard.style.transition = "";
-      heroCard.style.opacity = "";
-      flyingAvatar.style.display = "none";
-      flyingAvatar.style.opacity = "0";
+  // Use ScrollTrigger for the flying avatar animation
+  ScrollTrigger.create({
+    trigger: "#hero",
+    start: "top top",
+    end: "300px top",
+    scrub: 0.3,
+    onUpdate: (self) => {
+      let progress = self.progress;
+      if (window.scrollY < 3) progress = 0;
       
-      // Reset targets
-      if (logoTarget) logoTarget.style.cssText = "";
-      const menuParent = menuTarget ? menuTarget.closest("li") : null;
-      if (menuParent) menuParent.style.cssText = "";
-    } else if (progress === 1) {
-      body.classList.add("scrolled-avatar");
-      heroCard.style.transition = "none";
-      heroCard.style.opacity = "0";
-      flyingAvatar.style.display = "none";
-      flyingAvatar.style.opacity = "0";
+      const body = document.body;
       
-      if (isMobileLayout) {
-        if (logoTarget) {
-          logoTarget.style.display = "block";
-          logoTarget.style.width = "32px";
-          logoTarget.style.opacity = "1";
-          logoTarget.style.transform = "scale(1)";
-          logoTarget.style.marginRight = "0.25rem";
-          const logoImg = logoTarget.querySelector("img");
-          if (logoImg) logoImg.style.opacity = "1";
-        }
-      } else {
-        const menuParent = menuTarget ? menuTarget.closest("li") : null;
-        if (menuParent) {
-          menuParent.style.display = "flex";
-          menuParent.style.width = "36px";
-          menuParent.style.marginLeft = "0";
-          menuParent.style.opacity = "1";
-          menuParent.style.transform = "scale(1)";
-        }
-        if (menuTarget) {
-          const menuImg = menuTarget.querySelector("img");
-          if (menuImg) menuImg.style.opacity = "1";
-        }
-      }
-    } else {
-      // Safety check: if rects are not measured yet, do not run intermediate animation frames
-      if (!heroPageRect || !targetRect || !activeTarget) {
-        // Reset lastProgress so we check again next frame
-        lastProgress = -1;
-        return;
-      }
-      
-      body.classList.remove("scrolled-avatar");
-      const p = easeOutQuad(progress);
-      
-      // Disable transition to hide the original card instantly (avoiding "double image" overlap)
-      heroCard.style.transition = "none";
-      heroCard.style.opacity = "0";
-      
-      // 2. The flyer is fully opaque until it starts merging into the header at the very end
-      let flyerOpacity = 1;
-      if (progress > 0.9) {
-        flyerOpacity = (1 - progress) / 0.1;
-      }
-      
-      flyingAvatar.style.display = "block";
-      flyingAvatar.style.opacity = flyerOpacity.toString();
-      
-      // Open space in header smoothly as avatar flies closer
-      if (isMobileLayout) {
-        if (logoTarget) {
-          logoTarget.style.display = "block";
-          logoTarget.style.width = `${p * 32}px`;
-          logoTarget.style.opacity = p.toString();
-          logoTarget.style.transform = `scale(${p})`;
-          logoTarget.style.marginRight = `${p * 0.25}rem`;
-          
-          // Target image fades in over the last 20% scroll
-          const logoImg = logoTarget.querySelector("img");
-          if (logoImg) {
-            if (progress > 0.8) {
-              logoImg.style.opacity = ((progress - 0.8) / 0.2).toString();
-            } else {
-              logoImg.style.opacity = "0";
-            }
-          }
-        }
+      if (progress === 0) {
+        body.classList.remove("scrolled-avatar");
+        heroCard.style.transition = "";
+        heroCard.style.opacity = "";
+        flyingAvatar.style.display = "none";
+        flyingAvatar.style.opacity = "0";
+        
+        if (logoTarget) logoTarget.style.cssText = "";
         const menuParent = menuTarget ? menuTarget.closest("li") : null;
         if (menuParent) menuParent.style.cssText = "";
-      } else {
-        const menuParent = menuTarget ? menuTarget.closest("li") : null;
-        if (menuParent) {
-          menuParent.style.display = "flex";
-          menuParent.style.width = `${p * 36}px`;
-          menuParent.style.marginLeft = `${(1 - p) * -1.75}rem`;
-          menuParent.style.opacity = p.toString();
-          menuParent.style.transform = `scale(${p})`;
-        }
-        if (menuTarget) {
-          // Target image fades in over the last 20% scroll
-          const menuImg = menuTarget.querySelector("img");
-          if (menuImg) {
-            if (progress > 0.8) {
-              menuImg.style.opacity = ((progress - 0.8) / 0.2).toString();
-            } else {
-              menuImg.style.opacity = "0";
-            }
+      } else if (progress >= 1) {
+        body.classList.add("scrolled-avatar");
+        heroCard.style.transition = "none";
+        heroCard.style.opacity = "0";
+        flyingAvatar.style.display = "none";
+        flyingAvatar.style.opacity = "0";
+        
+        if (isMobileLayout) {
+          if (logoTarget) {
+            logoTarget.style.display = "block";
+            logoTarget.style.width = "32px";
+            logoTarget.style.opacity = "1";
+            logoTarget.style.transform = "scale(1)";
+            logoTarget.style.marginRight = "0.25rem";
+            const logoImg = logoTarget.querySelector("img");
+            if (logoImg) logoImg.style.opacity = "1";
+          }
+        } else {
+          const menuParent = menuTarget ? menuTarget.closest("li") : null;
+          if (menuParent) {
+            menuParent.style.display = "flex";
+            menuParent.style.width = "36px";
+            menuParent.style.marginLeft = "0";
+            menuParent.style.opacity = "1";
+            menuParent.style.transform = "scale(1)";
+          }
+          if (menuTarget) {
+            const menuImg = menuTarget.querySelector("img");
+            if (menuImg) menuImg.style.opacity = "1";
           }
         }
-        if (logoTarget) logoTarget.style.cssText = "";
-      }
-      
-      // Flyer position interpolation
-      const currentHeroLeft = heroPageRect.left - window.scrollX;
-      const currentHeroTop = heroPageRect.top - scrollY;
-      
-      const currentLeft = currentHeroLeft + (targetRect.left - currentHeroLeft) * p;
-      const currentTop = currentHeroTop + (targetRect.top - currentHeroTop) * p;
-      
-      const currentWidth = heroPageRect.width + (targetRect.width - heroPageRect.width) * p;
-      const scale = currentWidth / heroPageRect.width;
-      
-      flyingAvatar.style.transform = `translate3d(${currentLeft}px, ${currentTop}px, 0) scale(${scale})`;
-      
-      // Dynamic stacking order: on mobile, always keep flyer above header (2000 > 1000).
-      // On desktop, start behind badges (400 < 500) and finish above header (2000 > 1000).
-      if (isMobileLayout) {
-        flyingAvatar.style.zIndex = "2000";
       } else {
-        if (progress < 0.5) {
-          flyingAvatar.style.zIndex = "400";
+        if (!heroPageRect || !targetRect || !activeTarget) return;
+        
+        body.classList.remove("scrolled-avatar");
+        const p = easeOutQuad(progress);
+        
+        heroCard.style.transition = "none";
+        heroCard.style.opacity = "0";
+        
+        let flyerOpacity = 1;
+        if (progress > 0.9) {
+          flyerOpacity = (1 - progress) / 0.1;
+        }
+        
+        flyingAvatar.style.display = "block";
+        flyingAvatar.style.opacity = flyerOpacity.toString();
+        
+        if (isMobileLayout) {
+          if (logoTarget) {
+            logoTarget.style.display = "block";
+            logoTarget.style.width = `${p * 32}px`;
+            logoTarget.style.opacity = p.toString();
+            logoTarget.style.transform = `scale(${p})`;
+            logoTarget.style.marginRight = `${p * 0.25}rem`;
+            const logoImg = logoTarget.querySelector("img");
+            if (logoImg) {
+              logoImg.style.opacity = progress > 0.8 ? ((progress - 0.8) / 0.2).toString() : "0";
+            }
+          }
+          const menuParent = menuTarget ? menuTarget.closest("li") : null;
+          if (menuParent) menuParent.style.cssText = "";
         } else {
+          const menuParent = menuTarget ? menuTarget.closest("li") : null;
+          if (menuParent) {
+            menuParent.style.display = "flex";
+            menuParent.style.width = `${p * 36}px`;
+            menuParent.style.marginLeft = `${(1 - p) * -1.75}rem`;
+            menuParent.style.opacity = p.toString();
+            menuParent.style.transform = `scale(${p})`;
+          }
+          if (menuTarget) {
+            const menuImg = menuTarget.querySelector("img");
+            if (menuImg) {
+              menuImg.style.opacity = progress > 0.8 ? ((progress - 0.8) / 0.2).toString() : "0";
+            }
+          }
+          if (logoTarget) logoTarget.style.cssText = "";
+        }
+        
+        const currentHeroLeft = heroPageRect.left - window.scrollX;
+        const currentHeroTop = heroPageRect.top - (window.scrollY || document.documentElement.scrollTop);
+        
+        const currentLeft = currentHeroLeft + (targetRect.left - currentHeroLeft) * p;
+        const currentTop = currentHeroTop + (targetRect.top - currentHeroTop) * p;
+        
+        const currentWidth = heroPageRect.width + (targetRect.width - heroPageRect.width) * p;
+        const scale = currentWidth / heroPageRect.width;
+        
+        flyingAvatar.style.transform = `translate3d(${currentLeft}px, ${currentTop}px, 0) scale(${scale})`;
+        
+        if (isMobileLayout) {
           flyingAvatar.style.zIndex = "2000";
+        } else {
+          flyingAvatar.style.zIndex = progress < 0.5 ? "400" : "2000";
+        }
+        
+        const startRadius = 24;
+        const endRadius = heroPageRect.width / 2;
+        flyingAvatar.style.borderRadius = `${startRadius + (endRadius - startRadius) * p}px`;
+        
+        if (flyingImg) {
+          const currentTranslateY = 10 * (1 - p);
+          const currentImgScale = 0.9 + 0.1 * p;
+          flyingImg.style.transform = `scale(${currentImgScale}) translateY(${currentTranslateY}px)`;
         }
       }
-      
-      // Interpolate border radius (non-reflow layout paint)
-      const startRadius = 24;
-      const endRadius = heroPageRect.width / 2;
-      const currentRadius = startRadius + (endRadius - startRadius) * p;
-      flyingAvatar.style.borderRadius = `${currentRadius}px`;
-      
-
-      
-      // Flyer image scaling and translation purely using hardware-accelerated CSS transforms.
-      // Starts scaled to 0.9 with translateY(10px) to match heroCard, and scales up to 1.0 at target.
-      if (flyingImg) {
-        const currentTranslateY = 10 * (1 - p);
-        const currentImgScale = 0.9 + 0.1 * p;
-        flyingImg.style.transform = `scale(${currentImgScale}) translateY(${currentTranslateY}px)`;
-      }
     }
-  }
-  
-  // Bind to Lenis scrolling
-  if (typeof lenis !== "undefined" && lenis) {
-    lenis.on("scroll", (e) => {
-      handleScroll(e.scroll);
-    });
-  }
-  
-  // Fallback for native scroll
-  window.addEventListener("scroll", () => {
-    handleScroll(window.scrollY);
-  }, { passive: true });
+  });
 }
 
 // --- MAIN RUNNER ---
