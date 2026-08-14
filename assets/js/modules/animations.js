@@ -1,6 +1,7 @@
 import { lenis } from "../app.js";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { EASE, DURATION, requestAnimationFrameCoalesce } from "./motion-tokens.js";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -235,8 +236,8 @@ function initScrollReveals() {
         gsap.to(section, {
           opacity: 1,
           y: 0,
-          duration: 0.9,
-          ease: "power3.out",
+          duration: DURATION.reveal,
+          ease: EASE.expo,
         });
         
         // Trigger skill bars filling
@@ -275,9 +276,9 @@ function initScrollReveals() {
           opacity: 1,
           y: 0,
           scale: 1,
-          duration: 0.85,
-          ease: "back.out(1.2)",
-          stagger: 0.08,
+          duration: DURATION.reveal,
+          ease: EASE.back,
+          stagger: DURATION.stagger,
           clearProps: "transform",
         });
       }
@@ -291,7 +292,7 @@ export function animatePercentageText(element, targetVal) {
   gsap.to(obj, {
     val: targetVal,
     duration: 1.2,
-    ease: "power2.out",
+    ease: EASE.expo,
     onUpdate: () => {
       element.innerText = `${Math.round(obj.val)}%`;
     }
@@ -320,17 +321,17 @@ export function animateSkillsBars() {
       bar.appendChild(tooltip);
     }
     
-    // Reset
-    gsap.set(bar, { width: "0%" });
+    // Reset width statically and animate scaleX (composited)
+    gsap.set(bar, { width: `${percent}%`, transformOrigin: "left center", scaleX: 0 });
     tooltip.innerText = "0%";
     if (labelPct) labelPct.innerText = "0%";
     
-    // Animate the fill bar with stagger
+    // Animate scaleX with stagger using unified expo ease
     gsap.to(bar, {
-      width: `${percent}%`,
+      scaleX: 1,
       duration: 1.6,
       delay: index * 0.08,
-      ease: "power3.out",
+      ease: EASE.expo,
       onStart: () => {
         if (tooltip) animatePercentageText(tooltip, percent);
         if (labelPct) animatePercentageText(labelPct, percent);
@@ -354,7 +355,7 @@ export function animateStatsCounters() {
       count: target,
       duration: 2,
       delay: index * 0.15,
-      ease: "power2.out",
+      ease: EASE.expo,
       onUpdate: () => {
         stat.innerText = Math.floor(obj.count);
       },
@@ -435,10 +436,10 @@ function initAvatarParallax() {
   }
 
   // Use gsap.quickTo for buttery-smooth interpolation
-  const rotX = gsap.quickTo(card, "rotateX", { duration: 0.4, ease: "power2.out" });
-  const rotY = gsap.quickTo(card, "rotateY", { duration: 0.4, ease: "power2.out" });
-  const moveX = gsap.quickTo(card, "x", { duration: 0.5, ease: "power2.out" });
-  const moveY = gsap.quickTo(card, "y", { duration: 0.5, ease: "power2.out" });
+  const rotX = gsap.quickTo(card, "rotateX", { duration: 0.4, ease: EASE.expo });
+  const rotY = gsap.quickTo(card, "rotateY", { duration: 0.4, ease: EASE.expo });
+  const moveX = gsap.quickTo(card, "x", { duration: 0.5, ease: EASE.expo });
+  const moveY = gsap.quickTo(card, "y", { duration: 0.5, ease: EASE.expo });
 
   gsap.set(card, { transformPerspective: 1000 });
 
@@ -463,7 +464,7 @@ function initAvatarParallax() {
     gsap.to(lensVal, {
       r: targetRadius,
       duration: 0.45,
-      ease: "power2.out",
+      ease: EASE.expo,
       onUpdate: () => {
         card.style.setProperty("--mouse-r", `${lensVal.r}px`);
       }
@@ -475,7 +476,7 @@ function initAvatarParallax() {
     gsap.to(lensVal, {
       r: 0,
       duration: 0.4,
-      ease: "power2.inOut",
+      ease: EASE.expo,
       onUpdate: () => {
         card.style.setProperty("--mouse-r", `${lensVal.r}px`);
       }
@@ -504,7 +505,7 @@ function initAvatarParallax() {
       x: 0,
       y: 0,
       duration: 0.8,
-      ease: "elastic.out(1, 0.5)",
+      ease: EASE.spring,
     });
   });
 }
@@ -516,12 +517,12 @@ function initTimelineScrollHighlight() {
   const items = document.querySelectorAll(".timeline-item");
   if (!timeline || !progressLine) return;
 
-  // Animate the progress line height with ScrollTrigger scrub
+  // Animate the progress line scaleY (composited) with ScrollTrigger scrub
   gsap.fromTo(progressLine, 
-    { height: "0%" },
+    { scaleY: 0 },
     {
-      height: "100%",
-      ease: "none",
+      scaleY: 1,
+      ease: EASE.linear,
       scrollTrigger: {
         trigger: timeline,
         start: "top 65%",
@@ -549,6 +550,232 @@ function initTimelineScrollHighlight() {
       }
     });
   });
+}// --- INTERACTIVE INFINITY BRUSH BACKGROUND ---
+function initInfinityAnimation() {
+  const canvas = document.getElementById("hero-infinity-canvas");
+  const hero = document.getElementById("hero");
+  if (!canvas || !hero) return;
+
+  const ctx = canvas.getContext("2d");
+  let width, height;
+  const dpr = window.devicePixelRatio || 1;
+
+  // Cache theme state to avoid querying DOM every frame inside the animation loop
+  let isLight = document.body.classList.contains("light-mode");
+  const handleThemeChange = (e) => {
+    isLight = e.detail.isLight;
+  };
+  window.addEventListener("theme-changed", handleThemeChange);
+
+  // Track visibility to pause animation loop when scrolled out of view
+  let isVisible = true;
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      isVisible = entry.isIntersecting;
+    });
+  }, { threshold: 0.1 });
+  observer.observe(hero);
+
+  // Pre-calculate the base lemniscate points (240 points) to maximize smoothness and save CPU cycles
+  const segments = 240;
+  const basePoints = [];
+  const vertScale = 0.54;
+
+  for (let s = 0; s <= segments; s++) {
+    const t = (s / segments) * Math.PI * 2;
+    const denom = 1 + Math.sin(t) * Math.sin(t);
+    
+    // Position ratios relative to radius
+    const xRatio = Math.cos(t) / denom;
+    const yRatio = (Math.sin(t) * Math.cos(t) * vertScale) / denom;
+
+    // Perpendicular normal vector computation
+    const nextT = t + 0.012;
+    const nextDenom = 1 + Math.sin(nextT) * Math.sin(nextT);
+    const nx = Math.cos(nextT) / nextDenom;
+    const ny = (Math.sin(nextT) * Math.cos(nextT) * vertScale) / nextDenom;
+
+    const dx = nx - xRatio;
+    const dy = ny - yRatio;
+    const len = Math.sqrt(dx * dx + dy * dy) || 1;
+    const px = -dy / len;
+    const py = dx / len;
+
+    basePoints.push({
+      t,
+      xRatio,
+      yRatio,
+      px,
+      py
+    });
+  }
+
+  // Resize handler
+  function resize() {
+    const rect = canvas.getBoundingClientRect();
+    width = rect.width;
+    height = rect.height;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    ctx.scale(dpr, dpr);
+  }
+  window.addEventListener("resize", resize, { passive: true });
+  resize();
+
+  // Generate bristles once
+  const bristleCount = 38;
+  const bristles = [];
+  for (let i = 0; i < bristleCount; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const offsetMag = Math.random() * 20; // Maximum brush stroke width
+
+    // Core bristles vs outer spray
+    const density = Math.random();
+    const bristleWidth = density < 0.25 ? 0.35 : density < 0.8 ? 0.65 : 1.3;
+    const bristleOpacity = density < 0.25 ? 0.08 : density < 0.8 ? 0.16 : 0.04;
+
+    bristles.push({
+      dx: Math.cos(angle) * offsetMag,
+      dy: Math.sin(angle) * offsetMag,
+      width: bristleWidth,
+      opacity: bristleOpacity,
+      freq: 4 + Math.random() * 6,
+      amp: 1.5 + Math.random() * 3,
+      phase: Math.random() * Math.PI * 2
+    });
+  }
+
+  // Animation states
+  const animState = {
+    visibleLength: 0
+  };
+
+  // GSAP self-drawing grow effect on load
+  gsap.to(animState, {
+    visibleLength: 1.45 * Math.PI,
+    duration: 3.5,
+    ease: EASE.expo,
+    delay: 0.4
+  });
+
+  // Slowly breathing organic float offset
+  let floatTime = 0;
+  let flowProgress = 0;
+
+  // Render loop
+  function render() {
+    if (!isVisible) {
+      requestAnimationFrame(render);
+      return;
+    }
+
+    ctx.clearRect(0, 0, width, height);
+
+    // Get theme colors dynamically from cached state
+    const primaryRGB = isLight ? "35, 83, 71" : "255, 255, 255";
+
+    // Center coordinates
+    const cx = width / 2;
+    const cy = height / 2;
+
+    // Radius of infinity loop: occupy exactly 90% of screen height and width dynamically
+    const maxRadiusW = (width * 0.90) / 2; // fits 90% of screen width
+    const maxRadiusH = (height * 0.90 * Math.SQRT2) / vertScale; // fits 90% of screen height (lemniscate height is a*vertScale/SQRT2)
+    const aRadius = Math.min(maxRadiusW, maxRadiusH);
+
+    // Breathing float
+    floatTime += 0.005;
+    const floatOffsetX = Math.sin(floatTime) * 6;
+    const floatOffsetY = Math.cos(floatTime * 0.8) * 4;
+
+    // Continuous flow progress along the curve
+    flowProgress += 0.0016;
+
+    const lengthT = animState.visibleLength;
+
+    if (lengthT > 0.05) {
+      const headT = flowProgress * Math.PI * 2;
+      const chunkSize = 12; // Group size for batched drawing (makes it buttery smooth!)
+
+      for (let b = 0; b < bristles.length; b++) {
+        const bristle = bristles[b];
+        const bristleTaper = 1 - (b / bristleCount) * 0.6;
+        
+        ctx.lineWidth = bristle.width;
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+
+        for (let s = 0; s <= segments; s += chunkSize) {
+          ctx.beginPath();
+          let pathActive = false;
+          let sumOpacity = 0;
+          let count = 0;
+
+          for (let k = 0; k <= chunkSize && (s + k) <= segments; k++) {
+            const idx = s + k;
+            const pt = basePoints[idx];
+            const t = pt.t;
+
+            // Normalize angles for range checking
+            let normT = t;
+            let normHead = headT % (Math.PI * 2);
+            let normTail = (headT - lengthT) % (Math.PI * 2);
+            if (normTail < 0) normTail += Math.PI * 2;
+
+            let visible = false;
+            let opacityRatio = 0;
+
+            if (normTail < normHead) {
+              if (normT >= normTail && normT <= normHead) {
+                visible = true;
+                opacityRatio = (normT - normTail) / lengthT;
+              }
+            } else {
+              if (normT >= normTail || normT <= normHead) {
+                visible = true;
+                let dist = 0;
+                if (normT >= normTail) {
+                  dist = normT - normTail;
+                } else {
+                  dist = (Math.PI * 2 - normTail) + normT;
+                }
+                opacityRatio = dist / lengthT;
+              }
+            }
+
+            if (visible) {
+              // Calculate points using pre-calculated ratios
+              const bx = cx + (aRadius * pt.xRatio) + floatOffsetX;
+              const by = cy + (aRadius * pt.yRatio) + floatOffsetY;
+
+              const noise = Math.sin(t * bristle.freq + bristle.phase + floatTime * 1.2) * bristle.amp;
+              const finalX = bx + pt.px * (bristle.dx + noise);
+              const finalY = by + pt.py * (bristle.dy + noise);
+
+              if (!pathActive) {
+                ctx.moveTo(finalX, finalY);
+                pathActive = true;
+              } else {
+                ctx.lineTo(finalX, finalY);
+              }
+              sumOpacity += opacityRatio;
+              count++;
+            }
+          }
+
+          if (pathActive && count > 0) {
+            const avgOpacity = sumOpacity / count;
+            ctx.strokeStyle = `rgba(${primaryRGB}, ${bristle.opacity * avgOpacity * bristleTaper * 1.6})`;
+            ctx.stroke();
+          }
+        }
+      }
+    }
+
+    requestAnimationFrame(render);
+  }
+
+  requestAnimationFrame(render);
 }
 
 // --- HERO DESIGNER COORDINATE CROSSHAIR ---
@@ -597,13 +824,16 @@ function initDesignerGrid() {
   }
 
   hero.addEventListener("mouseenter", updateRect);
-  window.addEventListener("resize", () => { if (rect) updateRect(); }, { passive: true });
-  window.addEventListener("scroll", () => { if (rect) updateRect(); }, { passive: true });
-  window.addEventListener("recalc-offsets", () => { if (rect) updateRect(); }, { passive: true });
+  const coalescedUpdateDesignerRect = requestAnimationFrameCoalesce(() => {
+    if (rect) updateRect();
+  });
+  window.addEventListener("resize", coalescedUpdateDesignerRect, { passive: true });
+  window.addEventListener("scroll", coalescedUpdateDesignerRect, { passive: true });
+  window.addEventListener("recalc-offsets", coalescedUpdateDesignerRect, { passive: true });
 
   // Use gsap.quickTo for smooth crosshair tracking
-  const crosshairHY = gsap.quickTo(crosshairH, "y", { duration: 0.15, ease: "power2.out" });
-  const crosshairVX = gsap.quickTo(crosshairV, "x", { duration: 0.15, ease: "power2.out" });
+  const crosshairHY = gsap.quickTo(crosshairH, "y", { duration: 0.15, ease: EASE.expo });
+  const crosshairVX = gsap.quickTo(crosshairV, "x", { duration: 0.15, ease: EASE.expo });
 
   hero.addEventListener("mousemove", (e) => {
     if (!rect) updateRect();
@@ -701,7 +931,7 @@ export function updateNavIndicator() {
       scaleX: scaleX,
       opacity: 1,
       duration: 0.35,
-      ease: "power3.out",
+      ease: EASE.expo,
     });
   } else {
     gsap.to(indicator, { opacity: 0, duration: 0.2 });
@@ -739,7 +969,7 @@ function initNavIndicator() {
         scaleX: scaleX,
         opacity: 1,
         duration: 0.3,
-        ease: "power3.out",
+        ease: EASE.expo,
       });
     });
   });
@@ -785,8 +1015,8 @@ export function triggerPageTransition(targetId, callback) {
   // Slide in
   tl.to(curtain, {
     clipPath: "polygon(0 0, 100% 0, 100% 100%, 0 100%)",
-    duration: 0.42,
-    ease: "expo.inOut",
+    duration: DURATION.pageTransition,
+    ease: EASE.expo,
   });
 
   // At the midpoint, scroll to target
@@ -808,8 +1038,8 @@ export function triggerPageTransition(targetId, callback) {
   // Slide out
   tl.to(curtain, {
     clipPath: "polygon(100% 0, 100% 0, 100% 100%, 100% 100%)",
-    duration: 0.42,
-    ease: "expo.inOut",
+    duration: DURATION.pageTransition,
+    ease: EASE.expo,
   });
 
   // Reset
@@ -824,7 +1054,13 @@ function initHeroEntrance() {
   document.addEventListener("site-loaded", () => {
     document.body.classList.add("site-loaded");
     
-    const tl = gsap.timeline({ defaults: { ease: "power4.out" } });
+    const tl = gsap.timeline({ 
+      defaults: { ease: EASE.expo },
+      onComplete: () => {
+        // Fix text wrapping glitch by releasing overflow mask after entrance animations finish
+        gsap.set(".clip-text-wrapper", { overflow: "visible" });
+      }
+    });
 
     // Hero badge pops in
     tl.fromTo(".hero-badge", 
@@ -836,7 +1072,7 @@ function initHeroEntrance() {
     // Hero title lines slide up from overflow-hidden clips
     tl.fromTo(".clip-text-el",
       { yPercent: 100, opacity: 0 },
-      { yPercent: 0, opacity: 1, duration: 1.1, stagger: 0.12, ease: "power4.out" },
+      { yPercent: 0, opacity: 1, duration: 1.1, stagger: 0.12, ease: EASE.expo },
       0.2
     );
 
@@ -857,14 +1093,14 @@ function initHeroEntrance() {
     // Hero visual (avatar card + badges) entrance
     tl.fromTo(".hero-avatar-card",
       { opacity: 0, scale: 0.85, y: 30 },
-      { opacity: 1, scale: 1, y: 0, duration: 1.2, ease: "back.out(1.4)" },
+      { opacity: 1, scale: 1, y: 0, duration: 1.2, ease: EASE.back },
       0.3
     );
 
     // Floating badges pop in with spring overshoot
     tl.fromTo(".hero-floating-badge",
       { opacity: 0, scale: 0, y: 20 },
-      { opacity: 1, scale: 1, y: 0, duration: 0.8, ease: "back.out(2)", stagger: 0.15,
+      { opacity: 1, scale: 1, y: 0, duration: 0.8, ease: EASE.spring, stagger: 0.15,
         onComplete: () => {
           // Start the infinite float animations after entrance completes
           const badge1 = document.querySelector(".badge-1");
@@ -894,6 +1130,7 @@ export function initAnimations() {
     gsap.set(".hero-badge, .clip-text-el, .hero-description, .hero-actions, .hero-avatar-card, .hero-floating-badge, .scroll-down", {
       opacity: 1, y: 0, scale: 1, yPercent: 0
     });
+    gsap.set(".clip-text-wrapper", { overflow: "visible" });
     
     animateSkillsBars();
     animateStatsCounters();
@@ -910,4 +1147,5 @@ export function initAnimations() {
   initDesignerGrid();
   initWatermarkParallax();
   initNavIndicator();
+  initInfinityAnimation();
 }

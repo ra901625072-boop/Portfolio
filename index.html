@@ -29,6 +29,7 @@
   <!-- Preconnect for fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap">
 
   <!-- Stylesheets -->
   <link rel="stylesheet" href="assets/css/main.css">
@@ -84,7 +85,10 @@
     <div class="container nav-container">
       <a href="#hero" class="logo" id="nav-logo">
         <span class="logo-avatar-container">
-          <img src="assets/images/avatar.png" alt="Akshay" class="logo-avatar">
+          <picture>
+            <source srcset="assets/images/avatar.webp" type="image/webp">
+            <img src="assets/images/avatar.png" alt="Akshay" class="logo-avatar">
+          </picture>
         </span>
         <span class="logo-text">Akshay</span><span class="logo-dot"></span>
       </a>
@@ -109,7 +113,10 @@
         </li>
         <li class="nav-avatar-li">
           <span class="menu-avatar-container">
-            <img src="assets/images/avatar.png" alt="Akshay" class="menu-avatar">
+            <picture>
+              <source srcset="assets/images/avatar.webp" type="image/webp">
+              <img src="assets/images/avatar.png" alt="Akshay" class="menu-avatar">
+            </picture>
           </span>
         </li>
         <li class="drawer-extra-info">
@@ -154,6 +161,8 @@
       <div class="bg-glow-orb" style="top: -10%; left: -10%;" aria-hidden="true"></div>
       <div class="bg-glow-orb" style="bottom: 10%; right: -10%; background: radial-gradient(circle, rgba(255, 255, 255, 0.01) 0%, transparent 70%);" aria-hidden="true"></div>
       <div class="bg-text-watermark" style="top: 15%; left: 8%; opacity: 0.85;" aria-hidden="true">CREATIVE</div>
+      <!-- Infinity Brush Background Canvas -->
+      <canvas id="hero-infinity-canvas" class="hero-infinity-canvas" aria-hidden="true"></canvas>
       
       <!-- UI/UX Designer Grid rulers and interactive crosshairs -->
       <div class="hero-designer-grid" aria-hidden="true">
@@ -199,11 +208,17 @@
               <div class="avatar-shake-wrapper">
                 <!-- Professional Avatar Layer -->
                 <div class="avatar-layer professional">
-                  <img src="assets/images/avatar.png" alt="Akshaysinh Rajput" loading="eager" width="350" height="350">
+                  <picture>
+                    <source srcset="assets/images/avatar.webp" type="image/webp">
+                    <img src="assets/images/avatar.png" alt="Akshaysinh Rajput" loading="eager" width="350" height="350">
+                  </picture>
                 </div>
                 <!-- Deadpool Easter Egg Layer -->
                 <div class="avatar-layer deadpool">
-                  <img src="assets/images/DeadPool.png" alt="Deadpool" loading="lazy" width="350" height="350">
+                  <picture>
+                    <source srcset="assets/images/DeadPool.webp" type="image/webp">
+                    <img src="assets/images/DeadPool.png" alt="Deadpool" loading="lazy" width="350" height="350">
+                  </picture>
                 </div>
                 <!-- Magic Lens Target Border -->
                 <div class="lens-border"></div>
@@ -748,7 +763,10 @@
 
   <!-- Flying Avatar Clone -->
   <div class="flying-avatar-container" id="flying-avatar">
-    <img src="assets/images/avatar.png" alt="Akshay">
+    <picture>
+      <source srcset="assets/images/avatar.webp" type="image/webp">
+      <img src="assets/images/avatar.png" alt="Akshay">
+    </picture>
   </div>
 
   <!-- Scripts -->

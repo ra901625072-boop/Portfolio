@@ -5,6 +5,7 @@ import {
   initializeSpotlightEffects
 } from "./modules/projects.js";
 import { initAnimations, animatePercentageText, triggerPageTransition, updateNavIndicator } from "./modules/animations.js";
+import { EASE, requestAnimationFrameCoalesce } from "./modules/motion-tokens.js";
 import Lenis from 'lenis';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -174,6 +175,9 @@ function updateThemeSideEffects(isLight) {
       btnLight.classList.remove("active");
     }
   }
+
+  // Dispatch custom theme-changed event for animations (e.g. infinity canvas)
+  window.dispatchEvent(new CustomEvent("theme-changed", { detail: { isLight } }));
 }
 
 // --- THEME MANAGEMENT SYSTEM (Light/Dark Mode) ---
@@ -415,12 +419,12 @@ function initSkillsTabs() {
         // Find skill bars in active pane
         const fills = pane.querySelectorAll(".skill-bar-fill");
         
-        // Reset widths and label/tooltip text to 0 to prepare for animation
+        // Reset scaleX to 0, keep target width statically (composited)
         fills.forEach(f => {
           const targetPct = parseInt(f.dataset.percentage, 10);
           if (isNaN(targetPct)) return;
           
-          gsap.set(f, { width: "0%" });
+          gsap.set(f, { width: `${targetPct}%`, transformOrigin: "left center", scaleX: 0 });
           
           const wrapper = f.closest(".skill-bar-wrapper");
           const labelPct = wrapper ? wrapper.querySelector(".skill-percentage") : null;
@@ -435,16 +439,16 @@ function initSkillsTabs() {
           if (labelPct) labelPct.innerText = "0%";
         });
         
-        // Trigger GSAP draw-in and count-up animations with stagger
+        // Trigger GSAP draw-in and count-up animations with scaleX using unified expo ease
         fills.forEach((f, idx) => {
           const targetPct = parseInt(f.dataset.percentage, 10);
           if (isNaN(targetPct)) return;
           
           gsap.to(f, {
-            width: `${targetPct}%`,
+            scaleX: 1,
             duration: 1.5,
             delay: idx * 0.08,
-            ease: "power3.out",
+            ease: EASE.expo,
             onStart: () => {
               const wrapper = f.closest(".skill-bar-wrapper");
               const labelPct = wrapper ? wrapper.querySelector(".skill-percentage") : null;
@@ -1098,16 +1102,20 @@ function initAvatarScrollAnimation() {
   // Initial measurement
   updateLayoutPositions();
   
-  // Re-measure on layout changes
-  window.addEventListener("resize", () => { updateLayoutPositions(); ScrollTrigger.refresh(); }, { passive: true });
-  window.addEventListener("load", () => { updateLayoutPositions(); ScrollTrigger.refresh(); }, { passive: true });
-  window.addEventListener("recalc-offsets", () => { updateLayoutPositions(); ScrollTrigger.refresh(); }, { passive: true });
+  // Re-measure on layout changes (coalesced to prevent layout thrashing)
+  const coalescedRecalcOffsets = requestAnimationFrameCoalesce(() => {
+    updateLayoutPositions();
+    ScrollTrigger.refresh();
+  });
+  window.addEventListener("resize", coalescedRecalcOffsets, { passive: true });
+  window.addEventListener("load", coalescedRecalcOffsets, { passive: true });
+  window.addEventListener("recalc-offsets", coalescedRecalcOffsets, { passive: true });
   
   function easeOutQuad(t) {
     return t * (2 - t);
   }
   
-  // Use ScrollTrigger for the flying avatar animation
+  // Use ScrollTrigger for the flying avatar animation (using composited transforms and class toggles)
   ScrollTrigger.create({
     trigger: "#hero",
     start: "top top",
@@ -1125,45 +1133,16 @@ function initAvatarScrollAnimation() {
         heroCard.style.opacity = "";
         flyingAvatar.style.display = "none";
         flyingAvatar.style.opacity = "0";
-        
-        if (logoTarget) logoTarget.style.cssText = "";
-        const menuParent = menuTarget ? menuTarget.closest("li") : null;
-        if (menuParent) menuParent.style.cssText = "";
       } else if (progress >= 1) {
         body.classList.add("scrolled-avatar");
         heroCard.style.transition = "none";
         heroCard.style.opacity = "0";
         flyingAvatar.style.display = "none";
         flyingAvatar.style.opacity = "0";
-        
-        if (isMobileLayout) {
-          if (logoTarget) {
-            logoTarget.style.display = "block";
-            logoTarget.style.width = "32px";
-            logoTarget.style.opacity = "1";
-            logoTarget.style.transform = "scale(1)";
-            logoTarget.style.marginRight = "0.25rem";
-            const logoImg = logoTarget.querySelector("img");
-            if (logoImg) logoImg.style.opacity = "1";
-          }
-        } else {
-          const menuParent = menuTarget ? menuTarget.closest("li") : null;
-          if (menuParent) {
-            menuParent.style.display = "flex";
-            menuParent.style.width = "36px";
-            menuParent.style.marginLeft = "0";
-            menuParent.style.opacity = "1";
-            menuParent.style.transform = "scale(1)";
-          }
-          if (menuTarget) {
-            const menuImg = menuTarget.querySelector("img");
-            if (menuImg) menuImg.style.opacity = "1";
-          }
-        }
       } else {
         if (!heroPageRect || !targetRect || !activeTarget) return;
         
-        body.classList.remove("scrolled-avatar");
+        body.classList.add("scrolled-avatar");
         const p = easeOutQuad(progress);
         
         heroCard.style.transition = "none";
@@ -1176,38 +1155,6 @@ function initAvatarScrollAnimation() {
         
         flyingAvatar.style.display = "block";
         flyingAvatar.style.opacity = flyerOpacity.toString();
-        
-        if (isMobileLayout) {
-          if (logoTarget) {
-            logoTarget.style.display = "block";
-            logoTarget.style.width = `${p * 32}px`;
-            logoTarget.style.opacity = p.toString();
-            logoTarget.style.transform = `scale(${p})`;
-            logoTarget.style.marginRight = `${p * 0.25}rem`;
-            const logoImg = logoTarget.querySelector("img");
-            if (logoImg) {
-              logoImg.style.opacity = progress > 0.8 ? ((progress - 0.8) / 0.2).toString() : "0";
-            }
-          }
-          const menuParent = menuTarget ? menuTarget.closest("li") : null;
-          if (menuParent) menuParent.style.cssText = "";
-        } else {
-          const menuParent = menuTarget ? menuTarget.closest("li") : null;
-          if (menuParent) {
-            menuParent.style.display = "flex";
-            menuParent.style.width = `${p * 36}px`;
-            menuParent.style.marginLeft = `${(1 - p) * -1.75}rem`;
-            menuParent.style.opacity = p.toString();
-            menuParent.style.transform = `scale(${p})`;
-          }
-          if (menuTarget) {
-            const menuImg = menuTarget.querySelector("img");
-            if (menuImg) {
-              menuImg.style.opacity = progress > 0.8 ? ((progress - 0.8) / 0.2).toString() : "0";
-            }
-          }
-          if (logoTarget) logoTarget.style.cssText = "";
-        }
         
         const currentHeroLeft = heroPageRect.left - window.scrollX;
         const currentHeroTop = heroPageRect.top - (window.scrollY || document.documentElement.scrollTop);
@@ -1248,12 +1195,12 @@ document.addEventListener("DOMContentLoaded", () => {
     lenis.start();
   });
 
+  initTheme(); // Initialize theme classes early to prevent FOUC / canvas initialization conflicts
   initAnimations();
   initScrollProgress();
   initHeaderScroll();
   initMobileMenu();
   initScrollSpy();
-  initTheme();
   initResumeThemeToggle();
   initSkillsTabs();
   initContactForm();

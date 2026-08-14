@@ -36,7 +36,10 @@ export function renderProjects(filterValue = "all") {
         <div class="browser-title">${project.title}</div>
       </div>
       <div class="project-img-container shimmer-wrapper">
-        <img src="${project.image}" alt="${project.title}" loading="lazy" onload="this.closest('.shimmer-wrapper').classList.add('loaded')">
+        <picture>
+          <source srcset="${project.image.replace(/\.(png|jpg|jpeg)$/, '.webp')}" type="image/webp">
+          <img src="${project.image}" alt="${project.title}" loading="lazy" onload="this.closest('.shimmer-wrapper').classList.add('loaded')">
+        </picture>
       </div>
       <div class="project-card-content">
         <div class="project-tags">${tagsHtml}</div>
@@ -57,9 +60,9 @@ export function renderProjects(filterValue = "all") {
     container.appendChild(card);
   });
   
-  // Re-run spotlight init for newly added cards
+  // Re-run spotlight init for newly added cards under projects grid
   if (typeof initializeSpotlightEffects === "function") {
-    initializeSpotlightEffects();
+    initializeSpotlightEffects("#projects-grid");
   }
 }
 
@@ -184,7 +187,10 @@ export function openCaseStudy(projectId) {
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
     </button>
     <div class="modal-cover-wrapper shimmer-wrapper">
-      <img src="${project.image}" alt="${project.title}" class="modal-cover-img" onload="this.closest('.shimmer-wrapper').classList.add('loaded')">
+      <picture>
+        <source srcset="${project.image.replace(/\.(png|jpg|jpeg)$/, '.webp')}" type="image/webp">
+        <img src="${project.image}" alt="${project.title}" class="modal-cover-img" onload="this.closest('.shimmer-wrapper').classList.add('loaded')">
+      </picture>
     </div>
     <div class="modal-content-inner">
       <div class="modal-tags">${tagsHtml}</div>
@@ -317,24 +323,36 @@ export function renderAchievements() {
 
 
 // --- SPOTLIGHT GLOW MOUSE BINDINGS ---
-export function initializeSpotlightEffects() {
+export function initializeSpotlightEffects(containerSelector = null) {
   const isHoverSupported = window.matchMedia('(hover: hover)').matches;
   if (!isHoverSupported) return;
 
-  const cards = document.querySelectorAll(".spotlight-card");
+  const selector = containerSelector 
+    ? `${containerSelector} .spotlight-card` 
+    : ".spotlight-card";
+  const cards = document.querySelectorAll(selector);
+
   cards.forEach(card => {
+    // Abort existing listeners if already set up to prevent duplicate binds
+    if (card._spotlightController) {
+      card._spotlightController.abort();
+    }
+    
+    const controller = new AbortController();
+    card._spotlightController = controller;
+    const signal = controller.signal;
+    
     let rect = null;
+    let latestX = 0;
+    let latestY = 0;
+    let isInside = false;
+    let rafId = null;
     
-    card.addEventListener("mouseenter", () => {
-      rect = card.getBoundingClientRect();
-      // Apply short interpolation during mouse tracking
-      card.style.transition = "transform 0.12s cubic-bezier(0.25, 0.8, 0.25, 1), border-color 0.2s ease, box-shadow 0.2s ease";
-    });
-    
-    card.addEventListener("mousemove", (e) => {
+    function tick() {
+      if (!isInside) return;
       if (!rect) rect = card.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
+      const x = latestX - rect.left;
+      const y = latestY - rect.top;
       
       card.style.setProperty("--mouse-x", `${x}px`);
       card.style.setProperty("--mouse-y", `${y}px`);
@@ -349,13 +367,35 @@ export function initializeSpotlightEffects() {
       const rotateX = -(dy / (h / 2)) * 5.5;
       
       card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translate3d(0, 0, 15px) scale(1.02)`;
-    });
+      
+      rafId = requestAnimationFrame(tick);
+    }
+    
+    card.addEventListener("mouseenter", (e) => {
+      rect = card.getBoundingClientRect();
+      // Apply short interpolation during mouse tracking
+      card.style.transition = "transform 0.12s cubic-bezier(0.25, 0.8, 0.25, 1), border-color 0.2s ease, box-shadow 0.2s ease";
+      isInside = true;
+      latestX = e.clientX;
+      latestY = e.clientY;
+      tick();
+    }, { signal });
+    
+    card.addEventListener("mousemove", (e) => {
+      latestX = e.clientX;
+      latestY = e.clientY;
+    }, { signal });
     
     card.addEventListener("mouseleave", () => {
+      isInside = false;
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+        rafId = null;
+      }
       rect = null;
       // Spring reset on mouse exit
       card.style.transition = "transform 0.75s var(--ease-out-spring), border-color 0.4s ease, box-shadow 0.4s ease";
       card.style.transform = "";
-    });
+    }, { signal });
   });
 }
