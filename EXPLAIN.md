@@ -823,11 +823,11 @@ The theme system supports **dark mode** (default) and **light mode** with two in
 
 | Token | Value | Purpose |
 | :--- | :--- | :--- |
-| `--bg-primary` | `#050508` | Near-black page background |
-| `--bg-secondary` | `#0b0c10` | Card/component background |
-| `--color-primary` | `#E63946` | Crimson red accent |
-| `--text-primary` | `#ffffff` | White text |
-| `--grad-primary` | `#e50914 → #99060d` | Red gradient |
+| `--bg-primary` | `#080103` | Onyx Black with Crimson Warmth background |
+| `--bg-secondary` | `#120306` | Deep Maroon Black component background |
+| `--color-primary` | `#d00018` | Flagship Vivid Crimson Red accent |
+| `--text-primary` | `#ffffff` | Pure white text |
+| `--grad-primary` | `#d00018 → #82000f` | Crimson Red gradient |
 
 ### Light Mode
 
@@ -835,9 +835,9 @@ The theme system supports **dark mode** (default) and **light mode** with two in
 | :--- | :--- | :--- |
 | `--bg-primary` | `#f8fafc` | Off-white page background |
 | `--bg-secondary` | `#ffffff` | White component background |
-| `--color-primary` | `#0096C7` | Pacific Cyan accent |
+| `--color-primary` | `#235347` | Deep Emerald Teal accent |
 | `--text-primary` | `#0f172a` | Dark navy text |
-| `--grad-primary` | `#00b4d8 → #0077b6` | Cyan gradient |
+| `--grad-primary` | `#2e6f5f → #1c4238` | Emerald teal gradient |
 
 ### Theme Transition Mechanism
 

@@ -1,4 +1,5 @@
 import { PROJECTS_DATA, ACHIEVEMENTS_DATA } from "../data/projects-data.js";
+import { lenis } from "../app.js";
 
 // --- RENDER PORTFOLIO PROJECTS ---
 export function renderProjects(filterValue = "all") {
@@ -116,6 +117,7 @@ function setupModalOverlayListeners(modalOverlay, modalWrapper) {
     }
   }
   document.body.style.overflow = "hidden"; // Disable body scroll
+  if (lenis) lenis.stop(); // Stop Lenis smooth scroll while modal is active
   modalOverlay.classList.add("active");
   
   // Focus initial element
@@ -257,6 +259,7 @@ export function closeCaseStudy() {
   
   // Restore scroll and remove padding offsets
   document.body.style.overflow = ""; // Restore scrolling
+  if (lenis) lenis.start(); // Restore Lenis smooth scroll
   document.body.style.paddingRight = "";
   const header = document.querySelector("header");
   if (header) {

@@ -1,35 +1,39 @@
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
 
-/* --- CUSTOM PROPERTIES --- */
+/* --- CUSTOM PROPERTIES (Dark Mode Default) --- */
 :root {
   --font-heading: 'Space Grotesk', sans-serif;
   --font-body: 'Inter', sans-serif;
 
-  /* Colors */
-  --bg-primary: #050508;
-  --bg-secondary: #0b0c10;
+  /* Colors (Crimson Cinnamon Obsidian Palette - Swatches: #E12D33, #9E2029, #9C4722, #0A0404) */
+  --bg-primary: #000000;              /* Darkest Pure Pitch Black (#000000) */
+  --bg-secondary: #080404;            /* Deepest Black-Crimson (#080404) */
+  --bg-surface-tint: #100808;         /* Extremely Subtle Dark Surface Tint (#100808) */
   
-  --color-primary: #E63946;
-  --color-primary-rgb: 230, 57, 70;
+  --color-primary: #e12d33;           /* Vivid Geranium Red (#E12D33) */
+  --color-primary-rgb: 225, 45, 51;
+  --color-primary-light: #e6474c;     /* Lighter Vibrant Red (#E6474C) */
+  --color-primary-dark: #9e2029;      /* Rich Dark Burgundy Red (#9E2029) */
+  
   --color-secondary: #cbd5e1;
   --color-secondary-rgb: 203, 213, 225;
-  --color-accent: #64748b;
+  --color-accent: #9c4722;            /* Warm Cinnamon/Terracotta Accent (#9C4722) */
   
-  --text-primary: #ffffff;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
+  --text-primary: #ffffff;            /* Crisp Pure White */
+  --text-secondary: #cbd5e1;          /* Soft Silver Body Text */
+  --text-muted: #94a3b8;
   
   /* Gradients */
-  --grad-primary: linear-gradient(135deg, #e50914 0%, #99060d 100%);
+  --grad-primary: linear-gradient(135deg, #e12d33 0%, #9e2029 100%);  /* Crimson Gradient (#E12D33 → #9E2029) */
   --grad-accent: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
-  --grad-glow: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(var(--color-primary-rgb), 0.15) 0%, rgba(var(--color-secondary-rgb), 0.03) 30%, transparent 60%);
+  --grad-glow: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(225, 45, 51, 0.18) 0%, rgba(158, 32, 41, 0.05) 40%, transparent 70%);
 
   /* Border and Radius */
   --radius-sm: 8px;
   --radius-md: 16px;
   --radius-lg: 24px;
   --radius-full: 9999px;
-  --border-light: rgba(255, 255, 255, 0.05);
+  --border-light: rgba(225, 45, 51, 0.15); /* Subtle Crimson Border */
 
   /* Unified Cubic Beziers (Premium physical easing curves) */
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);       /* apple-like fluid decel */
@@ -45,35 +49,44 @@
 
 /* --- LIGHT MODE VARIABLES & STYLE OVERRIDES --- */
 body.light-mode {
-  --bg-primary: #f8fafc;
-  --bg-secondary: #ffffff;
+  /* Fresh organic background & surface tint from palette */
+  --bg-primary: #f5f9f6;             /* Fresh light mint-tinted page background (#DAF1DE warmth) */
+  --bg-secondary: #ffffff;           /* Clean white card surfaces */
+  --bg-surface-tint: #DAF1DE;        /* Soft sage surface tint (#DAF1DE) */
   
-  --color-primary: #0096C7;            /* premium Pacific Cyan */
-  --color-primary-rgb: 0, 150, 199;
+  /* Primary & Accent Color System */
+  --color-primary: #235347;            /* Medium Forest Teal primary brand accent */
+  --color-primary-rgb: 35, 83, 71;
+  --color-primary-light: #8EB69B;      /* Soft Sage Green accent */
+  --color-primary-dark: #0B2B26;       /* Deep Forest Green accent */
   
-  --color-secondary: #475569;
-  --color-secondary-rgb: 71, 85, 105;
-  --color-accent: #94a3b8;
+  --color-secondary: #163832;          /* Deep Pine Green */
+  --color-secondary-rgb: 22, 56, 50;
+  --color-accent: #8EB69B;             /* Sage accent color */
   
-  --text-primary: #0f172a;
-  --text-secondary: #334155;
-  --text-muted: #627185;
+  /* High-Contrast Readability Typography System */
+  --text-primary: #051F20;             /* Darkest Forest Ink (#051F20) for crisp typography */
+  --text-secondary: #163832;           /* Deep Pine (#163832) for secondary body copy */
+  --text-muted: #235347;               /* Muted Forest Teal for subtitles & metadata */
   
-  /* Gradients */
-  --grad-primary: linear-gradient(135deg, #00b4d8 0%, #0077b6 100%);  /* premium cyan gradient */
+  /* Harmonized Gradients */
+  --grad-primary: linear-gradient(135deg, #235347 0%, #0B2B26 100%);  /* Rich forest teal gradient */
+  --grad-accent: linear-gradient(135deg, #235347 0%, #8EB69B 100%);   /* Sage gradient */
   
-  --border-light: rgba(15, 23, 42, 0.08);
+  /* Borders & Ambient Glow */
+  --border-light: rgba(35, 83, 71, 0.12); /* Subtle green-tinted border */
   
-  --grad-glow: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(var(--color-primary-rgb), 0.07) 0%, rgba(var(--color-secondary-rgb), 0.01) 40%, transparent 75%);
+  --grad-glow: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(35, 83, 71, 0.08) 0%, rgba(218, 241, 222, 0.04) 40%, transparent 75%);
 }
 
 body.light-mode .glass-card {
-  background: rgba(255, 255, 255, 0.75);
-  box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.05);
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(35, 83, 71, 0.12);
+  box-shadow: 0 10px 30px -10px rgba(5, 31, 32, 0.06);
 }
 
 body.light-mode .glass-card::before {
-  background: linear-gradient(135deg, rgba(15, 23, 42, 0.05) 0%, rgba(15, 23, 42, 0.01) 100%);
+  background: linear-gradient(135deg, rgba(218, 241, 222, 0.4) 0%, rgba(255, 255, 255, 0.01) 100%);
 }
 
 body.light-mode .custom-cursor {
@@ -92,13 +105,13 @@ body.light-mode .custom-cursor-dot {
 
 body.light-mode .bg-grid-mesh {
   background-image: 
-    radial-gradient(rgba(15, 23, 42, 0.2) 1.25px, transparent 1.25px);
-  mask-image: radial-gradient(circle 350px at var(--global-mouse-x, 50%) var(--global-mouse-y, 50%), black 20%, rgba(15, 23, 42, 0.1) 60%, transparent 100%);
-  -webkit-mask-image: radial-gradient(circle 350px at var(--global-mouse-x, 50%) var(--global-mouse-y, 50%), black 20%, rgba(15, 23, 42, 0.1) 60%, transparent 100%);
+    radial-gradient(rgba(35, 83, 71, 0.18) 1.25px, transparent 1.25px);
+  mask-image: radial-gradient(circle 350px at var(--global-mouse-x, 50%) var(--global-mouse-y, 50%), black 20%, rgba(5, 31, 32, 0.1) 60%, transparent 100%);
+  -webkit-mask-image: radial-gradient(circle 350px at var(--global-mouse-x, 50%) var(--global-mouse-y, 50%), black 20%, rgba(5, 31, 32, 0.1) 60%, transparent 100%);
 }
 
 body.light-mode .bg-glow-orb {
-  background: radial-gradient(circle, rgba(230, 57, 70, 0.02) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(35, 83, 71, 0.06) 0%, transparent 70%);
 }
 
 /* --- RESET & BASE --- */
@@ -163,7 +176,7 @@ body {
   background: var(--bg-primary);
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--bg-secondary);
+  background: color-mix(in srgb, var(--color-primary) 35%, var(--bg-secondary));
   border: 2px solid var(--bg-primary);
   border-radius: var(--radius-full);
 }
@@ -628,7 +641,7 @@ footer,
 /* --- VIEW TRANSITION RIPPLE ANIMATION --- */
 /* Custom View Transition styles for the ripple effect */
 ::view-transition-group(root) {
-  animation-duration: 1.5s;
+  animation-duration: 0.7s;
 }
 
 ::view-transition-image-pair(root) {
@@ -653,7 +666,7 @@ footer,
 
 /* Animate the theme toggle button group independently */
 ::view-transition-group(theme-toggle-btn) {
-  animation-duration: 1.5s;
+  animation-duration: 0.7s;
   animation-timing-function: var(--ease-out-spring);
 }
 
@@ -886,6 +899,67 @@ body.light-mode .btn-secondary::after {
 
 .transition-curtain.active-out {
   clip-path: polygon(100% 0, 100% 0, 100% 100%, 100% 100%);
+}
+
+/* --- UI/UX SMOOTHNESS SYSTEM --- */
+/* Hardware-accelerated smooth transitions for theme switches & interactive micro-interactions */
+body,
+header,
+.glass-card,
+.project-card,
+.btn,
+.btn-secondary,
+.tab-btn,
+.filter-btn,
+.form-control,
+.timeline-content-inner,
+.about-resume-mockup,
+.contact-detail-card,
+.social-circle,
+.visitor-counter,
+.modal-wrapper,
+.hero-floating-badge,
+.hero-coordinate-label {
+  transition: background-color 0.45s var(--ease-out-expo),
+              color 0.45s var(--ease-out-expo),
+              border-color 0.45s var(--ease-out-expo),
+              box-shadow 0.45s var(--ease-out-expo),
+              transform 0.45s var(--ease-out-expo);
+}
+
+/* GPU composite hints for fluid 60fps card & button interactions */
+.btn,
+.btn-secondary,
+.glass-card,
+.project-card,
+.tab-btn,
+.filter-btn,
+.social-circle,
+.contact-detail-card,
+.scroll-top-btn,
+.hero-avatar-card {
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* Tactile press response (Spring-like physical feedback) */
+.btn:active,
+.btn-secondary:active,
+.tab-btn:active,
+.filter-btn:active,
+.social-circle:active,
+.scroll-top-btn:active,
+.theme-toggle-btn:active {
+  transform: scale(0.96) translateY(0) !important;
+  transition: transform 0.12s var(--ease-out-expo) !important;
+}
+
+/* Smooth glass card elevation on hover */
+.glass-card:hover,
+.project-card:hover,
+.contact-detail-card:hover {
+  transform: translateY(-5px) scale(1.01);
 }
 
 /* --- ACCESSIBILITY: REDUCED MOTION --- */

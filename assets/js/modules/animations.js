@@ -230,13 +230,13 @@ function initScrollReveals() {
     ScrollTrigger.create({
       trigger: section,
       start: "top 88%",
-      end: "top 20%",
+      once: true,
       onEnter: () => {
         gsap.to(section, {
           opacity: 1,
           y: 0,
-          duration: 1,
-          ease: "power4.out",
+          duration: 0.9,
+          ease: "power3.out",
         });
         
         // Trigger skill bars filling
@@ -253,23 +253,7 @@ function initScrollReveals() {
         if (section.id === "experience") {
           window.dispatchEvent(new CustomEvent("recalc-offsets"));
         }
-      },
-      onLeaveBack: () => {
-        gsap.to(section, {
-          opacity: 0,
-          y: 30,
-          duration: 0.6,
-          ease: "power2.in",
-        });
-        
-        // Reset animation states on exit so they replay on re-entry
-        if (section.id === "about") {
-          statsAnimated = false;
-        }
-        if (section.id === "skills") {
-          skillsAnimated = false;
-        }
-      },
+      }
     });
   });
 
@@ -285,25 +269,16 @@ function initScrollReveals() {
     ScrollTrigger.create({
       trigger: container,
       start: "top 85%",
+      once: true,
       onEnter: () => {
         gsap.to(children, {
           opacity: 1,
           y: 0,
           scale: 1,
-          duration: 0.9,
+          duration: 0.85,
           ease: "back.out(1.2)",
-          stagger: 0.1,
+          stagger: 0.08,
           clearProps: "transform",
-        });
-      },
-      onLeaveBack: () => {
-        gsap.to(children, {
-          opacity: 0,
-          y: 25,
-          scale: 0.97,
-          duration: 0.4,
-          ease: "power2.in",
-          stagger: 0.03,
         });
       }
     });
@@ -467,7 +442,46 @@ function initAvatarParallax() {
 
   gsap.set(card, { transformPerspective: 1000 });
 
+  const lensVal = { r: 0 };
+
   visual.addEventListener("mouseenter", updateRect);
+  
+  // Track cursor coordinates relative to the card for the clip-path lens
+  card.addEventListener("mousemove", (e) => {
+    const cardRect = card.getBoundingClientRect();
+    const x = e.clientX - cardRect.left;
+    const y = e.clientY - cardRect.top;
+    
+    card.style.setProperty("--mouse-x", `${x}px`);
+    card.style.setProperty("--mouse-y", `${y}px`);
+  });
+
+  // Hover animations when cursor enters the card itself
+  card.addEventListener("mouseenter", () => {
+    // Expand Magic Lens circle radius
+    const targetRadius = window.innerWidth <= 768 ? 70 : 100;
+    gsap.to(lensVal, {
+      r: targetRadius,
+      duration: 0.45,
+      ease: "power2.out",
+      onUpdate: () => {
+        card.style.setProperty("--mouse-r", `${lensVal.r}px`);
+      }
+    });
+  });
+
+  // Shrink Magic Lens when cursor leaves the card itself
+  card.addEventListener("mouseleave", () => {
+    gsap.to(lensVal, {
+      r: 0,
+      duration: 0.4,
+      ease: "power2.inOut",
+      onUpdate: () => {
+        card.style.setProperty("--mouse-r", `${lensVal.r}px`);
+      }
+    });
+  });
+
   window.addEventListener("resize", () => { if (rect) updateRect(); }, { passive: true });
   window.addEventListener("scroll", () => { if (rect) updateRect(); }, { passive: true });
 
@@ -771,8 +785,8 @@ export function triggerPageTransition(targetId, callback) {
   // Slide in
   tl.to(curtain, {
     clipPath: "polygon(0 0, 100% 0, 100% 100%, 0 100%)",
-    duration: 0.6,
-    ease: "power4.inOut",
+    duration: 0.42,
+    ease: "expo.inOut",
   });
 
   // At the midpoint, scroll to target
@@ -794,8 +808,8 @@ export function triggerPageTransition(targetId, callback) {
   // Slide out
   tl.to(curtain, {
     clipPath: "polygon(100% 0, 100% 0, 100% 100%, 100% 100%)",
-    duration: 0.6,
-    ease: "power4.inOut",
+    duration: 0.42,
+    ease: "expo.inOut",
   });
 
   // Reset

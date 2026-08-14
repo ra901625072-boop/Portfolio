@@ -194,8 +194,22 @@
             </div>
           </div>
           <div class="hero-visual">
-            <div class="hero-avatar-card">
-              <img src="assets/images/avatar.png" alt="Akshaysinh Rajput" loading="eager" width="350" height="350">
+            <div class="hero-avatar-card" id="hero-avatar-card">
+              <!-- Shake Wrapper (handles the physical impact of the slash without fighting GSAP tilt) -->
+              <div class="avatar-shake-wrapper">
+                <!-- Professional Avatar Layer -->
+                <div class="avatar-layer professional">
+                  <img src="assets/images/avatar.png" alt="Akshaysinh Rajput" loading="eager" width="350" height="350">
+                </div>
+                <!-- Deadpool Easter Egg Layer -->
+                <div class="avatar-layer deadpool">
+                  <img src="assets/images/DeadPool.png" alt="Deadpool" loading="lazy" width="350" height="350">
+                </div>
+                <!-- Magic Lens Target Border -->
+                <div class="lens-border"></div>
+                <!-- Sword Slash Sweep Line -->
+                <div class="katana-slash"></div>
+              </div>
             </div>
             
             <div class="hero-floating-badge badge-1">
@@ -727,7 +741,7 @@
 
   <!-- CASE STUDY MODAL WINDOW -->
   <div class="modal-overlay" id="case-study-modal" role="dialog" aria-modal="true" aria-label="Project case study">
-    <div class="modal-wrapper">
+    <div class="modal-wrapper" data-lenis-prevent>
       <!-- Injected Dynamically by projects.js -->
     </div>
   </div>
