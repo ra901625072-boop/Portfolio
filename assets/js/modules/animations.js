@@ -671,17 +671,34 @@ function initInfinityAnimation() {
 
     ctx.clearRect(0, 0, width, height);
 
-    // Get theme colors dynamically from cached state
-    const primaryRGB = isLight ? "35, 83, 71" : "255, 255, 255";
+    // Set theme color to black in white (light) mode, white in dark mode
+    const primaryRGB = isLight ? "0, 0, 0" : "255, 255, 255";
 
     // Center coordinates
     const cx = width / 2;
     const cy = height / 2;
 
-    // Radius of infinity loop: occupy exactly 90% of screen height and width dynamically
-    const maxRadiusW = (width * 0.90) / 2; // fits 90% of screen width
-    const maxRadiusH = (height * 0.90 * Math.SQRT2) / vertScale; // fits 90% of screen height (lemniscate height is a*vertScale/SQRT2)
-    const aRadius = Math.min(maxRadiusW, maxRadiusH);
+    const isPortrait = height > width;
+
+    // Radius of infinity loop
+    let aRadius;
+    if (isPortrait) {
+      // In portrait mode, 90% of height corresponds to 2 * aRadius
+      aRadius = height * 0.45;
+    } else {
+      const maxRadiusW = (width * 0.90) / 2; // fits 90% of screen width
+      const maxRadiusH = (height * 0.90 * Math.SQRT2) / vertScale; // fits 90% of screen height (lemniscate height is a*vertScale/SQRT2)
+      aRadius = Math.min(maxRadiusW, maxRadiusH);
+    }
+
+    ctx.save();
+    if (isPortrait) {
+      // Rotate 90 degrees and stretch vertically-oriented loops horizontally to fill mobile screens beautifully
+      ctx.translate(cx, cy);
+      ctx.rotate(Math.PI / 2);
+      ctx.scale(1.0, 1.8);
+      ctx.translate(-cx, -cy);
+    }
 
     // Breathing float
     floatTime += 0.005;
@@ -772,6 +789,7 @@ function initInfinityAnimation() {
       }
     }
 
+    ctx.restore();
     requestAnimationFrame(render);
   }
 
