@@ -111,13 +111,16 @@
             <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
           </button>
         </li>
-        <li class="nav-avatar-li">
-          <span class="menu-avatar-container">
-            <picture>
-              <source srcset="assets/images/avatar.webp" type="image/webp">
-              <img src="assets/images/avatar.png" alt="Akshay" class="menu-avatar">
-            </picture>
-          </span>
+        <li class="nav-avatar-li" id="nav-avatar-item">
+          <a href="#hero" class="nav-avatar-btn" id="nav-avatar-btn" aria-label="Akshaysinh Rajput - Back to top">
+            <span class="menu-avatar-container" id="menu-avatar-target">
+              <picture>
+                <source srcset="assets/images/avatar.webp" type="image/webp">
+                <img src="assets/images/avatar.png" alt="Akshay" class="menu-avatar">
+              </picture>
+            </span>
+            <span class="nav-avatar-tooltip" aria-hidden="true">Top ↑</span>
+          </a>
         </li>
         <li class="drawer-extra-info">
           <div class="drawer-divider"></div>
@@ -687,22 +690,22 @@
           <div class="contact-form-container glass-card">
             <form id="contact-form" class="contact-form" action="#" method="POST">
               <div class="form-group">
-                <input type="text" id="name" class="form-control" placeholder=" " required autocomplete="name">
+                <input type="text" id="name" class="form-control" placeholder=" " required autocomplete="name" enterkeyhint="next">
                 <label for="name" class="form-label">Full Name</label>
               </div>
               
               <div class="form-group">
-                <input type="email" id="email" class="form-control" placeholder=" " required autocomplete="email">
+                <input type="email" id="email" class="form-control" placeholder=" " required autocomplete="email" enterkeyhint="next">
                 <label for="email" class="form-label">Email Address</label>
               </div>
               
               <div class="form-group">
-                <input type="text" id="subject" class="form-control" placeholder=" " required>
+                <input type="text" id="subject" class="form-control" placeholder=" " required enterkeyhint="next">
                 <label for="subject" class="form-label">Project Domain</label>
               </div>
               
               <div class="form-group">
-                <textarea id="message" class="form-control" placeholder=" " required></textarea>
+                <textarea id="message" class="form-control" placeholder=" " required enterkeyhint="done"></textarea>
                 <label for="message" class="form-label">Message Details</label>
               </div>
               
@@ -762,11 +765,15 @@
   </div>
 
   <!-- Flying Avatar Clone -->
-  <div class="flying-avatar-container" id="flying-avatar">
-    <picture>
-      <source srcset="assets/images/avatar.webp" type="image/webp">
-      <img src="assets/images/avatar.png" alt="Akshay">
-    </picture>
+  <div class="flying-avatar-container" id="flying-avatar" aria-hidden="true">
+    <div class="flying-avatar-aura"></div>
+    <div class="flying-avatar-flare"></div>
+    <div class="flying-avatar-inner">
+      <picture>
+        <source srcset="assets/images/avatar.webp" type="image/webp">
+        <img src="assets/images/avatar.png" alt="Akshay" class="flying-avatar-img">
+      </picture>
+    </div>
   </div>
 
   <!-- Scripts -->

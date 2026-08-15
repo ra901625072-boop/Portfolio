@@ -12,28 +12,33 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
 
-// Initialize Lenis Smooth Scroll
-export const lenis = new Lenis({
-  duration: 1.2,
-  easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // easeOutExpo
-  smoothWheel: true,
-  wheelMultiplier: 1.0,
-  touchMultiplier: 1.5,
-});
+// Initialize Lenis Smooth Scroll only on desktop non-touch devices
+const isTouchDevice = window.matchMedia('(pointer: coarse)').matches || window.innerWidth <= 768;
 
-// Sync Lenis scroll position with GSAP's ScrollTrigger on every tick
-lenis.on('scroll', ScrollTrigger.update);
+export let lenis = null;
+if (!isTouchDevice) {
+  lenis = new Lenis({
+    duration: 1.2,
+    easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // easeOutExpo
+    smoothWheel: true,
+    wheelMultiplier: 1.0,
+    touchMultiplier: 1.5,
+  });
 
-// Use GSAP's ticker as the single RAF loop for both GSAP and Lenis
-gsap.ticker.add((time) => {
-  lenis.raf(time * 1000); // GSAP ticker passes seconds, Lenis expects ms
-});
-gsap.ticker.lagSmoothing(0);
+  // Sync Lenis scroll position with GSAP's ScrollTrigger on every tick
+  lenis.on('scroll', ScrollTrigger.update);
+
+  // Use GSAP's ticker as the single RAF loop for both GSAP and Lenis
+  gsap.ticker.add((time) => {
+    lenis.raf(time * 1000); // GSAP ticker passes seconds, Lenis expects ms
+  });
+  gsap.ticker.lagSmoothing(0);
+}
 
 // Lock scroll immediately on script execution to prevent layout jumping during loading
 document.documentElement.style.overflow = "hidden";
 document.body.style.overflow = "hidden";
-lenis.stop();
+if (lenis) lenis.stop();
 
 function safeGetItem(key, fallback = null) {
   try { return localStorage.getItem(key); } catch { return fallback; }
@@ -91,6 +96,24 @@ function initMobileMenu() {
       document.body.style.overflow = "";
     });
   });
+
+  // Swipe to close nav menu on mobile
+  let touchStartX = 0;
+  let touchEndX = 0;
+
+  navMenu.addEventListener("touchstart", (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+  }, { passive: true });
+
+  navMenu.addEventListener("touchend", (e) => {
+    touchEndX = e.changedTouches[0].screenX;
+    // Swipe right (horizontal delta > 80px) to slide closed
+    if (touchEndX - touchStartX > 80) {
+      if (hamburger.classList.contains("active")) {
+        toggleMenu();
+      }
+    }
+  }, { passive: true });
 }
 
 // --- SCROLLSPY SECTION BINDING ---
@@ -700,10 +723,21 @@ function initScrollProgress() {
   const progress = document.getElementById("scroll-progress");
   if (!progress) return;
   
-  // Bind progress bar directly to Lenis scroll event for frame-rate synchronized smooth scaling
-  lenis.on('scroll', (e) => {
-    progress.style.transform = `scaleX(${e.progress})`;
-  });
+  if (lenis) {
+    // Bind progress bar directly to Lenis scroll event for frame-rate synchronized smooth scaling
+    lenis.on('scroll', (e) => {
+      progress.style.transform = `scaleX(${e.progress})`;
+    });
+  } else {
+    // Mobile fallback: use native window scroll listener
+    window.addEventListener("scroll", () => {
+      const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+      if (scrollHeight > 0) {
+        const scrolled = window.scrollY / scrollHeight;
+        progress.style.transform = `scaleX(${scrolled})`;
+      }
+    }, { passive: true });
+  }
 }
 
 // --- MOBILE FOOTER MARQUEE EFFECT ---
@@ -902,7 +936,8 @@ function initPreloader(callback) {
   dotNode.style.transform = "scale(0)";
   preloaderLogo.appendChild(dotNode);
 
-  const duration = 1000; // Balanced 1.0s entrance reveal
+  const isMobile = window.innerWidth <= 768;
+  const duration = isMobile ? 600 : 1000; // Accelerated 600ms reveal on mobile
   const start = performance.now();
 
   function updateProgress(now) {
@@ -975,12 +1010,16 @@ function initNavTransitions() {
     });
   });
 
-  // Scroll to top button smoothly via Lenis
+  // Scroll to top button smoothly via Lenis or fallback native scroll
   const scrollTopBtn = document.getElementById("scroll-top");
   if (scrollTopBtn) {
     scrollTopBtn.addEventListener("click", (e) => {
       e.preventDefault();
-      lenis.scrollTo(0);
+      if (lenis) {
+        lenis.scrollTo(0);
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     });
   }
 }
@@ -997,112 +1036,80 @@ function initShimmerDismissal() {
   }, true); // Use capture phase
 }
 
-// --- SCROLL-DRIVEN AVATAR FLYING ANIMATION (GSAP ScrollTrigger) ---
+// --- SCROLL-DRIVEN AVATAR FLYING ANIMATION (GSAP ScrollTrigger & Curved Bezier Path) ---
 function initAvatarScrollAnimation() {
   const heroCard = document.querySelector(".hero-avatar-card");
   const logoTarget = document.querySelector(".logo-avatar-container");
-  const menuTarget = document.querySelector(".menu-avatar-container");
+  const menuTarget = document.getElementById("menu-avatar-target") || document.querySelector(".menu-avatar-container");
+  const navAvatarItem = document.getElementById("nav-avatar-item");
+  const navAvatarBtn = document.getElementById("nav-avatar-btn");
   const flyingAvatar = document.getElementById("flying-avatar");
   
   if (!heroCard || !flyingAvatar) return;
-  
-  const flyingImg = flyingAvatar.querySelector("img");
-  let heroPageRect = null;
-  let targetRect = null;
+
+  const flyingImg = flyingAvatar.querySelector(".flying-avatar-img") || flyingAvatar.querySelector("img");
+  const flyingAura = flyingAvatar.querySelector(".flying-avatar-aura");
+  const flyingFlare = flyingAvatar.querySelector(".flying-avatar-flare");
+  let heroPageCenter = null;
+  let targetViewportCenter = null;
   let activeTarget = null;
   let isMobileLayout = false;
+  let wasDocked = false;
+  let lastScrollY = window.scrollY;
+  let lastScrollTime = performance.now();
   
   function updateLayoutPositions() {
     isMobileLayout = window.innerWidth <= 1024;
     activeTarget = isMobileLayout ? logoTarget : menuTarget;
     
-    if (!activeTarget) return;
+    if (!heroCard || !activeTarget) return;
     
-    // Temporarily reset styles to measure natural dimensions
-    const originalHeroOpacity = heroCard.style.opacity;
+    // Temporarily reset styles to measure natural dimensions cleanly
     const originalHeroTransform = heroCard.style.transform;
-    heroCard.style.opacity = "";
     heroCard.style.transform = "none";
     
     const heroRect = heroCard.getBoundingClientRect();
-    
-    // Restore styling
     heroCard.style.transform = originalHeroTransform;
-    heroCard.style.opacity = originalHeroOpacity;
     
     if (heroRect.width === 0 || heroRect.height === 0) return;
     
-    heroPageRect = {
-      left: heroRect.left + window.scrollX,
-      top: heroRect.top + window.scrollY,
+    heroPageCenter = {
+      x: heroRect.left + heroRect.width / 2 + window.scrollX,
+      y: heroRect.top + heroRect.height / 2 + window.scrollY,
       width: heroRect.width,
       height: heroRect.height
     };
     
-    // Temporarily apply active sticky scrolled styles to measure final positions accurately
-    const header = document.querySelector("header");
-    const originalHeaderTransition = header ? header.style.transition : "";
-    const wasScrolled = header ? header.classList.contains("scrolled") : false;
+    // Measure destination target in viewport coordinates
+    const targetRect = activeTarget.getBoundingClientRect();
+    const tWidth = targetRect.width > 0 ? targetRect.width : (isMobileLayout ? 34 : 38);
+    const tHeight = targetRect.height > 0 ? targetRect.height : tWidth;
     
-    if (header) {
-      header.style.transition = "none";
-      header.classList.add("scrolled");
+    let tLeft = targetRect.left;
+    let tTop = targetRect.top;
+    
+    if (targetRect.width === 0) {
+      const headerContainer = document.querySelector("header .nav-container");
+      const headerRect = headerContainer ? headerContainer.getBoundingClientRect() : { right: window.innerWidth - 32, top: 18 };
+      tLeft = isMobileLayout ? 24 : (headerRect.right - tWidth);
+      tTop = headerRect.top || 18;
     }
     
-    const originalTargetStyle = activeTarget.style.cssText;
-    const targetParent = activeTarget.closest("li, a");
-    const originalParentStyle = targetParent ? targetParent.style.cssText : "";
-    
-    if (isMobileLayout) {
-      activeTarget.style.setProperty("display", "block", "important");
-      activeTarget.style.setProperty("width", "32px", "important");
-      activeTarget.style.setProperty("transform", "scale(1)", "important");
-      activeTarget.style.setProperty("margin-right", "0.25rem", "important");
-      activeTarget.style.setProperty("opacity", "0", "important");
-    } else {
-      if (targetParent) {
-        targetParent.style.setProperty("display", "flex", "important");
-        targetParent.style.setProperty("width", "36px", "important");
-        targetParent.style.setProperty("transform", "scale(1)", "important");
-        targetParent.style.setProperty("margin-left", "0", "important");
-        targetParent.style.setProperty("opacity", "0", "important");
-      }
-    }
-    
-    if (header) header.offsetHeight;
-    
-    const targetBounding = activeTarget.getBoundingClientRect();
-    
-    // Restore layout state
-    activeTarget.style.cssText = originalTargetStyle;
-    if (targetParent) {
-      targetParent.style.cssText = originalParentStyle;
-    }
-    if (header) {
-      if (!wasScrolled) {
-        header.classList.remove("scrolled");
-      }
-      header.offsetHeight;
-      header.style.transition = originalHeaderTransition;
-    }
-
-    if (targetBounding.width === 0 || targetBounding.height === 0) return;
-    
-    targetRect = {
-      left: targetBounding.left,
-      top: targetBounding.top,
-      width: targetBounding.width,
-      height: targetBounding.height
+    targetViewportCenter = {
+      x: tLeft + tWidth / 2,
+      y: tTop + tHeight / 2,
+      width: tWidth,
+      height: tHeight
     };
     
-    flyingAvatar.style.width = `${heroPageRect.width}px`;
-    flyingAvatar.style.height = `${heroPageRect.height}px`;
+    flyingAvatar.style.width = `${heroPageCenter.width}px`;
+    flyingAvatar.style.height = `${heroPageCenter.height}px`;
   }
   
   // Initial measurement
   updateLayoutPositions();
   
-  // Re-measure on layout changes (coalesced to prevent layout thrashing)
+  // Re-measure on layout changes (coalesced with rAF to prevent layout thrashing)
   const coalescedRecalcOffsets = requestAnimationFrameCoalesce(() => {
     updateLayoutPositions();
     ScrollTrigger.refresh();
@@ -1111,77 +1118,153 @@ function initAvatarScrollAnimation() {
   window.addEventListener("load", coalescedRecalcOffsets, { passive: true });
   window.addEventListener("recalc-offsets", coalescedRecalcOffsets, { passive: true });
   
-  function easeOutQuad(t) {
-    return t * (2 - t);
+  // Hook click-to-scroll-to-top on the navbar avatar button
+  if (navAvatarBtn) {
+    navAvatarBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      if (lenis) {
+        lenis.scrollTo(0, { duration: 1.2 });
+      } else {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    });
   }
   
-  // Use ScrollTrigger for the flying avatar animation (using composited transforms and class toggles)
+  // Use ScrollTrigger for the flying avatar animation along the Bezier trajectory
   ScrollTrigger.create({
     trigger: "#hero",
     start: "top top",
-    end: "300px top",
-    scrub: 0.3,
+    end: "380px top",
+    scrub: 0.25,
     onUpdate: (self) => {
       let progress = self.progress;
-      if (window.scrollY < 3) progress = 0;
+      if (window.scrollY < 4) progress = 0;
       
       const body = document.body;
       
+      // State 0: In Hero Section (Resting position)
       if (progress === 0) {
         body.classList.remove("scrolled-avatar");
-        heroCard.style.transition = "";
-        heroCard.style.opacity = "";
+        heroCard.style.transition = "opacity 0.3s ease";
+        heroCard.style.opacity = "1";
+        heroCard.style.pointerEvents = "auto";
         flyingAvatar.style.display = "none";
         flyingAvatar.style.opacity = "0";
-      } else if (progress >= 1) {
+        if (menuTarget) menuTarget.classList.remove("dock-pulse");
+        if (logoTarget) logoTarget.classList.remove("dock-pulse");
+        wasDocked = false;
+        return;
+      }
+      
+      // State 1: Docked in Navbar
+      if (progress >= 0.96) {
         body.classList.add("scrolled-avatar");
         heroCard.style.transition = "none";
         heroCard.style.opacity = "0";
+        heroCard.style.pointerEvents = "none";
         flyingAvatar.style.display = "none";
         flyingAvatar.style.opacity = "0";
+        
+        if (!wasDocked) {
+          wasDocked = true;
+          if (activeTarget) {
+            activeTarget.classList.add("dock-pulse");
+            setTimeout(() => {
+              if (activeTarget) activeTarget.classList.remove("dock-pulse");
+            }, 900);
+          }
+        }
+        return;
+      }
+      
+      // State 2: In Flight along curved Bezier trajectory (0 < progress < 0.96)
+      wasDocked = false;
+      body.classList.remove("scrolled-avatar");
+      heroCard.style.transition = "none";
+      heroCard.style.opacity = "0";
+      heroCard.style.pointerEvents = "none";
+      flyingAvatar.style.display = "block";
+      flyingAvatar.style.opacity = "1";
+      
+      if (!heroPageCenter || !targetViewportCenter) return;
+      
+      // Smooth cubic-out easing for path progression
+      const p = progress;
+      const t = p * (2 - p);
+      
+      // Calculate current hero card center in viewport coordinates
+      const x0 = heroPageCenter.x - window.scrollX;
+      const y0 = heroPageCenter.y - (window.scrollY || document.documentElement.scrollTop);
+      
+      // Target center in viewport coordinates
+      const x2 = targetViewportCenter.x;
+      const y2 = targetViewportCenter.y;
+      
+      // Quadratic Bezier Control Point P1 for aerodynamic sweeping curve
+      let x1, y1;
+      if (!isMobileLayout) {
+        // Desktop: Sweeps upward and outward to the right towards top-right navbar corner
+        const extraArcX = Math.abs(x2 - x0) * 0.18 + 40;
+        x1 = Math.min(window.innerWidth - 30, Math.max(x0, x2) + extraArcX);
+        y1 = y2 + (y0 - y2) * 0.18 - 25;
       } else {
-        if (!heroPageRect || !targetRect || !activeTarget) return;
-        
-        body.classList.add("scrolled-avatar");
-        const p = easeOutQuad(progress);
-        
-        heroCard.style.transition = "none";
-        heroCard.style.opacity = "0";
-        
-        let flyerOpacity = 1;
-        if (progress > 0.9) {
-          flyerOpacity = (1 - progress) / 0.1;
-        }
-        
-        flyingAvatar.style.display = "block";
-        flyingAvatar.style.opacity = flyerOpacity.toString();
-        
-        const currentHeroLeft = heroPageRect.left - window.scrollX;
-        const currentHeroTop = heroPageRect.top - (window.scrollY || document.documentElement.scrollTop);
-        
-        const currentLeft = currentHeroLeft + (targetRect.left - currentHeroLeft) * p;
-        const currentTop = currentHeroTop + (targetRect.top - currentHeroTop) * p;
-        
-        const currentWidth = heroPageRect.width + (targetRect.width - heroPageRect.width) * p;
-        const scale = currentWidth / heroPageRect.width;
-        
-        flyingAvatar.style.transform = `translate3d(${currentLeft}px, ${currentTop}px, 0) scale(${scale})`;
-        
-        if (isMobileLayout) {
-          flyingAvatar.style.zIndex = "2000";
-        } else {
-          flyingAvatar.style.zIndex = progress < 0.5 ? "400" : "2000";
-        }
-        
-        const startRadius = 24;
-        const endRadius = heroPageRect.width / 2;
-        flyingAvatar.style.borderRadius = `${startRadius + (endRadius - startRadius) * p}px`;
-        
-        if (flyingImg) {
-          const currentTranslateY = 10 * (1 - p);
-          const currentImgScale = 0.9 + 0.1 * p;
-          flyingImg.style.transform = `scale(${currentImgScale}) translateY(${currentTranslateY}px)`;
-        }
+        // Mobile: Smooth curve towards top-left logo
+        x1 = x2 + (x0 - x2) * 0.65;
+        y1 = y2 + (y0 - y2) * 0.2 - 20;
+      }
+      
+      // Quadratic Bezier Formula: B(t) = (1-t)^2 * P0 + 2*(1-t)*t * P1 + t^2 * P2
+      const oneMinusT = 1 - t;
+      const curCenterX = oneMinusT * oneMinusT * x0 + 2 * oneMinusT * t * x1 + t * t * x2;
+      const curCenterY = oneMinusT * oneMinusT * y0 + 2 * oneMinusT * t * y1 + t * t * y2;
+      
+      // Scale Interpolation: 1.0 down to destination scale
+      const targetScale = targetViewportCenter.width / heroPageCenter.width;
+      const scale = 1.0 + (targetScale - 1.0) * t;
+      
+      // Corner Radius Morphing: from rounded card (24px) to 50% circle (width / 2)
+      const startRadius = 24;
+      const endRadius = heroPageCenter.width / 2;
+      const curRadius = startRadius + (endRadius - startRadius) * t;
+      
+      // Dynamic 3D Banking & Roll physics during flight
+      const arcSin = Math.sin(t * Math.PI);
+      const rotZ = arcSin * (isMobileLayout ? -3.5 : 5.0);
+      const rotY = arcSin * (isMobileLayout ? -5.0 : 7.0);
+      const rotX = -arcSin * 3.5;
+      
+      // Viewport translate3d coordinates (relative to center transform-origin)
+      const curLeft = curCenterX - heroPageCenter.width / 2;
+      const curTop = curCenterY - heroPageCenter.height / 2;
+      
+      flyingAvatar.style.transform = `translate3d(${curLeft.toFixed(1)}px, ${curTop.toFixed(1)}px, 0) scale(${scale.toFixed(4)}) rotateX(${rotX.toFixed(2)}deg) rotateY(${rotY.toFixed(2)}deg) rotateZ(${rotZ.toFixed(2)}deg)`;
+      flyingAvatar.style.borderRadius = `${curRadius.toFixed(1)}px`;
+      
+      // Dynamic kinetic aura & velocity reactive stretch
+      const now = performance.now();
+      const dt = Math.max(1, now - lastScrollTime);
+      const dy = Math.abs(window.scrollY - lastScrollY);
+      const velocity = Math.min(3.0, dy / dt);
+      lastScrollY = window.scrollY;
+      lastScrollTime = now;
+      
+      if (flyingAura) {
+        const auraScale = 1.0 + Math.min(0.35, velocity * 0.15) + arcSin * 0.12;
+        const auraOpacity = Math.min(1.0, 0.7 + arcSin * 0.25 + velocity * 0.1);
+        flyingAura.style.transform = `scale(${auraScale.toFixed(3)})`;
+        flyingAura.style.opacity = auraOpacity.toFixed(2);
+      }
+      
+      if (flyingFlare) {
+        const flareOpacity = arcSin * 0.65;
+        flyingFlare.style.opacity = flareOpacity.toFixed(2);
+      }
+      
+      // Internal image centering & framing
+      if (flyingImg) {
+        const imgY = -t * 12;
+        const imgScale = 0.92 + 0.18 * t;
+        flyingImg.style.transform = `scale(${imgScale.toFixed(3)}) translateY(${imgY.toFixed(1)}px)`;
       }
     }
   });
@@ -1192,7 +1275,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initPreloader(() => {
     // Notify module scripts that site loading has concluded
     document.dispatchEvent(new CustomEvent("site-loaded"));
-    lenis.start();
+    if (lenis) lenis.start();
   });
 
   initTheme(); // Initialize theme classes early to prevent FOUC / canvas initialization conflicts

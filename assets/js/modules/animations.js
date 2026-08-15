@@ -19,7 +19,7 @@ function initCustomCursor() {
   let snappedEl = null;
   let cachedRect = null;
   let cachedBorderRadius = '';
-  
+
   // Magnetic snapping coordinate interpolation
   let targetPullX = 0, targetPullY = 0;
   let currentPullX = 0, currentPullY = 0;
@@ -46,14 +46,14 @@ function initCustomCursor() {
   window.addEventListener("mousemove", (e) => {
     mouseX = e.clientX;
     mouseY = e.clientY;
-    
+
     // Fade in cursor only on first movement to prevent ghost cursor at (0,0) on load
     if (firstMove) {
       cursor.style.opacity = '1';
       dot.style.opacity = '1';
       firstMove = false;
     }
-    
+
     startCursorLoop();
   });
 
@@ -76,7 +76,7 @@ function initCustomCursor() {
       // Proportional pull strength: smaller elements pull more, larger elements resist displacement to retain hover focus
       const maxDim = Math.max(cachedRect.width, cachedRect.height);
       const pullStrength = Math.min(0.35, 28 / maxDim);
-      
+
       targetPullX = (e.clientX - elX) * pullStrength;
       targetPullY = (e.clientY - elY) * pullStrength;
       startCursorLoop();
@@ -90,7 +90,7 @@ function initCustomCursor() {
       // Elastic release animation back to (0,0)
       function animateRelease() {
         if (snappedEl === releasingEl) return; // cancel if mouse re-enters
-        
+
         releasePullX += (0 - releasePullX) * 0.16;
         releasePullY += (0 - releasePullY) * 0.16;
 
@@ -111,7 +111,7 @@ function initCustomCursor() {
       currentPullX = 0;
       currentPullY = 0;
       cursor.classList.remove("snapped");
-      
+
       releasingEl.style.transition = 'none';
       requestAnimationFrame(animateRelease);
       startCursorLoop();
@@ -135,7 +135,7 @@ function initCustomCursor() {
 
       cursorX += (targetX - cursorX) * 0.22;
       cursorY += (targetY - cursorY) * 0.22;
-      
+
       cursor.style.width = `${targetWidth}px`;
       cursor.style.height = `${targetHeight}px`;
       cursor.style.borderRadius = cachedBorderRadius || '';
@@ -153,7 +153,7 @@ function initCustomCursor() {
       // Normal cursor behavior
       cursorX += (mouseX - cursorX) * 0.14;
       cursorY += (mouseY - cursorY) * 0.14;
-      
+
       cursor.style.width = '';
       cursor.style.height = '';
       cursor.style.borderRadius = '';
@@ -182,7 +182,7 @@ function initCustomCursor() {
   document.addEventListener("mouseover", (e) => {
     const hoverable = e.target.closest("a, button, .project-card, .achievement-card, .form-control, .visitor-counter, .tab-btn, .filter-btn");
     if (!hoverable) return;
-    
+
     const cursorText = hoverable.getAttribute("data-cursor-text");
     if (cursorText) {
       cursor.classList.add("has-text");
@@ -198,7 +198,7 @@ function initCustomCursor() {
   document.addEventListener("mouseout", (e) => {
     const hoverable = e.target.closest("a, button, .project-card, .achievement-card, .form-control, .visitor-counter, .tab-btn, .filter-btn");
     if (!hoverable) return;
-    
+
     // Ignore if transitioning internally between child elements
     const related = e.relatedTarget;
     if (related && hoverable.contains(related)) return;
@@ -207,7 +207,7 @@ function initCustomCursor() {
     const textSpan = cursor.querySelector(".custom-cursor-text");
     if (textSpan) textSpan.innerText = "";
   });
-  
+
   // Hide on mouseleave/show on mouseenter document window
   document.addEventListener("mouseleave", () => {
     cursor.style.opacity = '0';
@@ -223,11 +223,11 @@ function initCustomCursor() {
 function initScrollReveals() {
   // Section-level reveals: Each section with class "reveal" fades in
   const sections = document.querySelectorAll(".reveal");
-  
+
   sections.forEach(section => {
     // The section itself animates in
     gsap.set(section, { opacity: 0, y: 30 });
-    
+
     ScrollTrigger.create({
       trigger: section,
       start: "top 88%",
@@ -239,12 +239,12 @@ function initScrollReveals() {
           duration: DURATION.reveal,
           ease: EASE.expo,
         });
-        
+
         // Trigger skill bars filling
         if (section.id === "skills") {
           animateSkillsBars();
         }
-        
+
         // Trigger stats counters
         if (section.id === "about") {
           animateStatsCounters();
@@ -260,25 +260,26 @@ function initScrollReveals() {
 
   // Staggered children: Animate direct children of `.reveal-stagger` containers
   const staggerContainers = document.querySelectorAll(".reveal-stagger");
-  
+
   staggerContainers.forEach(container => {
     const children = container.children;
     if (children.length === 0) return;
-    
+
     gsap.set(children, { opacity: 0, y: 25, scale: 0.97 });
-    
+
     ScrollTrigger.create({
       trigger: container,
       start: "top 85%",
       once: true,
       onEnter: () => {
+        const isMobile = window.innerWidth <= 768;
         gsap.to(children, {
           opacity: 1,
           y: 0,
           scale: 1,
           duration: DURATION.reveal,
           ease: EASE.back,
-          stagger: DURATION.stagger,
+          stagger: isMobile ? DURATION.stagger * 0.4 : DURATION.stagger,
           clearProps: "transform",
         });
       }
@@ -306,26 +307,26 @@ export function animateSkillsBars() {
   skillsAnimated = true;
 
   const bars = document.querySelectorAll(".skill-bar-fill");
-  
+
   bars.forEach((bar, index) => {
     const percent = parseInt(bar.dataset.percentage, 10);
     if (isNaN(percent)) return;
-    
+
     const wrapper = bar.closest(".skill-bar-wrapper");
     const labelPct = wrapper ? wrapper.querySelector(".skill-percentage") : null;
-    
+
     let tooltip = bar.querySelector(".skill-tooltip");
     if (!tooltip) {
       tooltip = document.createElement("span");
       tooltip.className = "skill-tooltip";
       bar.appendChild(tooltip);
     }
-    
+
     // Reset width statically and animate scaleX (composited)
     gsap.set(bar, { width: `${percent}%`, transformOrigin: "left center", scaleX: 0 });
     tooltip.innerText = "0%";
     if (labelPct) labelPct.innerText = "0%";
-    
+
     // Animate scaleX with stagger using unified expo ease
     gsap.to(bar, {
       scaleX: 1,
@@ -350,7 +351,7 @@ export function animateStatsCounters() {
   stats.forEach((stat, index) => {
     const target = parseInt(stat.dataset.target, 10);
     const obj = { count: 0 };
-    
+
     gsap.to(obj, {
       count: target,
       duration: 2,
@@ -424,11 +425,17 @@ function initTypingEffect() {
   new TextTyper(target, words);
 }
 
-// --- GSAP AVATAR MOUSE PARALLAX (3D tilt) ---
+// --- GSAP AVATAR MOUSE PARALLAX (3D tilt & Floating Badges Depth) ---
 function initAvatarParallax() {
   const visual = document.querySelector(".hero-visual");
   const card = document.querySelector(".hero-avatar-card");
+  const badge1 = document.querySelector(".badge-1");
+  const badge2 = document.querySelector(".badge-2");
   if (!visual || !card) return;
+
+  // Disable mouse parallax on touch devices entirely
+  const isTouchPrimary = window.matchMedia('(pointer: coarse)').matches;
+  if (isTouchPrimary) return;
 
   let rect = null;
   function updateRect() {
@@ -441,18 +448,23 @@ function initAvatarParallax() {
   const moveX = gsap.quickTo(card, "x", { duration: 0.5, ease: EASE.expo });
   const moveY = gsap.quickTo(card, "y", { duration: 0.5, ease: EASE.expo });
 
+  const b1X = badge1 ? gsap.quickTo(badge1, "x", { duration: 0.6, ease: EASE.expo }) : null;
+  const b1Y = badge1 ? gsap.quickTo(badge1, "y", { duration: 0.6, ease: EASE.expo }) : null;
+  const b2X = badge2 ? gsap.quickTo(badge2, "x", { duration: 0.6, ease: EASE.expo }) : null;
+  const b2Y = badge2 ? gsap.quickTo(badge2, "y", { duration: 0.6, ease: EASE.expo }) : null;
+
   gsap.set(card, { transformPerspective: 1000 });
 
   const lensVal = { r: 0 };
 
   visual.addEventListener("mouseenter", updateRect);
-  
+
   // Track cursor coordinates relative to the card for the clip-path lens
   card.addEventListener("mousemove", (e) => {
     const cardRect = card.getBoundingClientRect();
     const x = e.clientX - cardRect.left;
     const y = e.clientY - cardRect.top;
-    
+
     card.style.setProperty("--mouse-x", `${x}px`);
     card.style.setProperty("--mouse-y", `${y}px`);
   });
@@ -490,11 +502,20 @@ function initAvatarParallax() {
     if (!rect) updateRect();
     const x = e.clientX - rect.left - rect.width / 2;
     const y = e.clientY - rect.top - rect.height / 2;
-    
+
     rotY(x * 0.05);
     rotX(-y * 0.05);
     moveX(x * 0.02);
     moveY(y * 0.02);
+
+    if (b1X && b1Y) {
+      b1X(-x * 0.035);
+      b1Y(-y * 0.035);
+    }
+    if (b2X && b2Y) {
+      b2X(x * 0.03);
+      b2Y(y * 0.03);
+    }
   });
 
   visual.addEventListener("mouseleave", () => {
@@ -507,6 +528,8 @@ function initAvatarParallax() {
       duration: 0.8,
       ease: EASE.spring,
     });
+    if (badge1) gsap.to(badge1, { x: 0, y: 0, duration: 0.8, ease: EASE.spring });
+    if (badge2) gsap.to(badge2, { x: 0, y: 0, duration: 0.8, ease: EASE.spring });
   });
 }
 
@@ -518,7 +541,7 @@ function initTimelineScrollHighlight() {
   if (!timeline || !progressLine) return;
 
   // Animate the progress line scaleY (composited) with ScrollTrigger scrub
-  gsap.fromTo(progressLine, 
+  gsap.fromTo(progressLine,
     { scaleY: 0 },
     {
       scaleY: 1,
@@ -536,7 +559,7 @@ function initTimelineScrollHighlight() {
   items.forEach(item => {
     const dot = item.querySelector(".timeline-dot");
     if (!dot) return;
-    
+
     ScrollTrigger.create({
       trigger: dot,
       start: "top 65%",
@@ -558,7 +581,8 @@ function initInfinityAnimation() {
 
   const ctx = canvas.getContext("2d");
   let width, height;
-  const dpr = window.devicePixelRatio || 1;
+  const isMobile = window.innerWidth <= 768;
+  const dpr = Math.min(window.devicePixelRatio || 1, isMobile ? 1.5 : 2);
 
   // Cache theme state to avoid querying DOM every frame inside the animation loop
   let isLight = document.body.classList.contains("light-mode");
@@ -569,9 +593,29 @@ function initInfinityAnimation() {
 
   // Track visibility to pause animation loop when scrolled out of view
   let isVisible = true;
+  let rafId = null;
+
+  function startLoop() {
+    if (!rafId && isVisible) {
+      rafId = requestAnimationFrame(render);
+    }
+  }
+
+  function stopLoop() {
+    if (rafId) {
+      cancelAnimationFrame(rafId);
+      rafId = null;
+    }
+  }
+
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       isVisible = entry.isIntersecting;
+      if (isVisible) {
+        startLoop();
+      } else {
+        stopLoop();
+      }
     });
   }, { threshold: 0.1 });
   observer.observe(hero);
@@ -579,12 +623,12 @@ function initInfinityAnimation() {
   // Pre-calculate the base lemniscate points (240 points) to maximize smoothness and save CPU cycles
   const segments = 240;
   const basePoints = [];
-  const vertScale = 0.54;
+  const vertScale = 0.85;
 
   for (let s = 0; s <= segments; s++) {
     const t = (s / segments) * Math.PI * 2;
     const denom = 1 + Math.sin(t) * Math.sin(t);
-    
+
     // Position ratios relative to radius
     const xRatio = Math.cos(t) / denom;
     const yRatio = (Math.sin(t) * Math.cos(t) * vertScale) / denom;
@@ -622,8 +666,8 @@ function initInfinityAnimation() {
   window.addEventListener("resize", resize, { passive: true });
   resize();
 
-  // Generate bristles once
-  const bristleCount = 38;
+  // Generate bristles once (reduced count on mobile for CPU efficiency)
+  const bristleCount = isMobile ? 18 : 38;
   const bristles = [];
   for (let i = 0; i < bristleCount; i++) {
     const angle = Math.random() * Math.PI * 2;
@@ -665,7 +709,7 @@ function initInfinityAnimation() {
   // Render loop
   function render() {
     if (!isVisible) {
-      requestAnimationFrame(render);
+      rafId = null;
       return;
     }
 
@@ -683,11 +727,11 @@ function initInfinityAnimation() {
     // Radius of infinity loop
     let aRadius;
     if (isPortrait) {
-      // In portrait mode, 90% of height corresponds to 2 * aRadius
-      aRadius = height * 0.45;
+      // In portrait mode, 98% of height corresponds to 2 * aRadius
+      aRadius = height * 0.49;
     } else {
-      const maxRadiusW = (width * 0.90) / 2; // fits 90% of screen width
-      const maxRadiusH = (height * 0.90 * Math.SQRT2) / vertScale; // fits 90% of screen height (lemniscate height is a*vertScale/SQRT2)
+      const maxRadiusW = (width * 0.98) / 2; // fits 98% of screen width
+      const maxRadiusH = (height * 0.98 * Math.SQRT2) / vertScale; // fits 98% of screen height (lemniscate height is a*vertScale/SQRT2)
       aRadius = Math.min(maxRadiusW, maxRadiusH);
     }
 
@@ -696,7 +740,7 @@ function initInfinityAnimation() {
       // Rotate 90 degrees and stretch vertically-oriented loops horizontally to fill mobile screens beautifully
       ctx.translate(cx, cy);
       ctx.rotate(Math.PI / 2);
-      ctx.scale(1.0, 1.8);
+      ctx.scale(1.0, 1.35);
       ctx.translate(-cx, -cy);
     }
 
@@ -717,7 +761,7 @@ function initInfinityAnimation() {
       for (let b = 0; b < bristles.length; b++) {
         const bristle = bristles[b];
         const bristleTaper = 1 - (b / bristleCount) * 0.6;
-        
+
         ctx.lineWidth = bristle.width;
         ctx.lineCap = "round";
         ctx.lineJoin = "round";
@@ -790,16 +834,17 @@ function initInfinityAnimation() {
     }
 
     ctx.restore();
-    requestAnimationFrame(render);
+    rafId = requestAnimationFrame(render);
   }
 
-  requestAnimationFrame(render);
+  startLoop();
 }
 
 // --- HERO DESIGNER COORDINATE CROSSHAIR ---
 function initDesignerGrid() {
   const isHoverSupported = window.matchMedia('(hover: hover)').matches;
-  if (!isHoverSupported) return;
+  const isTouchPrimary = window.matchMedia('(pointer: coarse)').matches;
+  if (!isHoverSupported || isTouchPrimary) return;
 
   const hero = document.getElementById("hero");
   const crosshairH = document.getElementById("crosshair-h");
@@ -857,11 +902,11 @@ function initDesignerGrid() {
     if (!rect) updateRect();
     let x = e.clientX - rect.left;
     let y = e.clientY - rect.top;
-    
+
     const snapRadius = 45;
     let snapped = false;
     let snapLabel = "";
-    
+
     for (let i = 0; i < cachedSnapPoints.length; i++) {
       const pt = cachedSnapPoints[i];
       const dist = Math.hypot(x - pt.x, y - pt.y);
@@ -873,14 +918,14 @@ function initDesignerGrid() {
         break;
       }
     }
-    
+
     // Position crosshairs with gsap.quickTo
     crosshairHY(y);
     crosshairVX(x);
-    
+
     // Coordinate label
     label.style.transform = `translate3d(${x + 15}px, ${y + 15}px, 0)`;
-    
+
     if (snapped) {
       if (gridContainer) gridContainer.classList.add("snapped");
       label.classList.add("snapped");
@@ -907,7 +952,7 @@ function initDesignerGrid() {
 function initWatermarkParallax() {
   const watermarks = document.querySelectorAll(".bg-text-watermark");
   if (watermarks.length === 0) return;
-  
+
   watermarks.forEach(wm => {
     gsap.to(wm, {
       y: () => 120,
@@ -1026,7 +1071,7 @@ export function triggerPageTransition(targetId, callback) {
   // Use GSAP timeline for the page transition
   const tl = gsap.timeline();
 
-  tl.set(curtain, { 
+  tl.set(curtain, {
     clipPath: "polygon(0 0, 0 0, 0 100%, 0% 100%)",
   });
 
@@ -1061,7 +1106,7 @@ export function triggerPageTransition(targetId, callback) {
   });
 
   // Reset
-  tl.set(curtain, { 
+  tl.set(curtain, {
     clipPath: "polygon(0 0, 0 0, 0 100%, 0% 100%)",
   });
 }
@@ -1071,8 +1116,8 @@ function initHeroEntrance() {
   // This is triggered by the "site-loaded" event after preloader completes
   document.addEventListener("site-loaded", () => {
     document.body.classList.add("site-loaded");
-    
-    const tl = gsap.timeline({ 
+
+    const tl = gsap.timeline({
       defaults: { ease: EASE.expo },
       onComplete: () => {
         // Fix text wrapping glitch by releasing overflow mask after entrance animations finish
@@ -1081,7 +1126,7 @@ function initHeroEntrance() {
     });
 
     // Hero badge pops in
-    tl.fromTo(".hero-badge", 
+    tl.fromTo(".hero-badge",
       { opacity: 0, y: 20, scale: 0.9 },
       { opacity: 1, y: 0, scale: 1, duration: 0.9 },
       0.1
@@ -1118,7 +1163,8 @@ function initHeroEntrance() {
     // Floating badges pop in with spring overshoot
     tl.fromTo(".hero-floating-badge",
       { opacity: 0, scale: 0, y: 20 },
-      { opacity: 1, scale: 1, y: 0, duration: 0.8, ease: EASE.spring, stagger: 0.15,
+      {
+        opacity: 1, scale: 1, y: 0, duration: 0.8, ease: EASE.spring, stagger: 0.15,
         onComplete: () => {
           // Start the infinite float animations after entrance completes
           const badge1 = document.querySelector(".badge-1");
@@ -1143,19 +1189,19 @@ function initHeroEntrance() {
 export function initAnimations() {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     document.body.classList.add("site-loaded");
-    
+
     // Force visible state for all hero elements
     gsap.set(".hero-badge, .clip-text-el, .hero-description, .hero-actions, .hero-avatar-card, .hero-floating-badge, .scroll-down", {
       opacity: 1, y: 0, scale: 1, yPercent: 0
     });
     gsap.set(".clip-text-wrapper", { overflow: "visible" });
-    
+
     animateSkillsBars();
     animateStatsCounters();
     initTypingEffect();
     return;
   }
-  
+
   initCustomCursor();
   initHeroEntrance();
   initScrollReveals();
@@ -1165,5 +1211,9 @@ export function initAnimations() {
   initDesignerGrid();
   initWatermarkParallax();
   initNavIndicator();
-  initInfinityAnimation();
+
+  // Lazy initialize infinity canvas only after preloader completes and site entrance begins
+  document.addEventListener("site-loaded", () => {
+    initInfinityAnimation();
+  });
 }
