@@ -342,16 +342,8 @@ body.light-mode {
   transform: translateZ(5px);
 }
 
-/* Deadpool Avatar Layer - Revealable on hover via GSAP lens values */
-.avatar-layer.deadpool {
-  z-index: 3;
-  transform: translateZ(10px);
-  clip-path: circle(var(--mouse-r, 0px) at var(--mouse-x, 0px) var(--mouse-y, 0px));
-  pointer-events: none;
-}
-
-/* Canvas overlay for Deadpool brush reveal */
-#avatar-canvas {
+/* Interactive Deadpool Path Reveal Canvas */
+.deadpool-reveal-canvas {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -359,8 +351,8 @@ body.light-mode {
   z-index: 3;
   pointer-events: none;
   border-radius: var(--radius-lg);
-  opacity: 0;
-  will-change: opacity;
+  transform: translateZ(8px);
+  will-change: contents;
 }
 
 /* Magic Lens Target Border styling (hidden per user request) */

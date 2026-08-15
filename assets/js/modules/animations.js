@@ -455,46 +455,7 @@ function initAvatarParallax() {
 
   gsap.set(card, { transformPerspective: 1000 });
 
-  const lensVal = { r: 0 };
-
   visual.addEventListener("mouseenter", updateRect);
-
-  // Track cursor coordinates relative to the card for the clip-path lens
-  card.addEventListener("mousemove", (e) => {
-    const cardRect = card.getBoundingClientRect();
-    const x = e.clientX - cardRect.left;
-    const y = e.clientY - cardRect.top;
-
-    card.style.setProperty("--mouse-x", `${x}px`);
-    card.style.setProperty("--mouse-y", `${y}px`);
-  });
-
-  // Hover animations when cursor enters the card itself
-  card.addEventListener("mouseenter", () => {
-    // Expand Magic Lens circle radius
-    const targetRadius = window.innerWidth <= 768 ? 70 : 100;
-    gsap.to(lensVal, {
-      r: targetRadius,
-      duration: 0.45,
-      ease: EASE.expo,
-      onUpdate: () => {
-        card.style.setProperty("--mouse-r", `${lensVal.r}px`);
-      }
-    });
-  });
-
-  // Shrink Magic Lens when cursor leaves the card itself
-  card.addEventListener("mouseleave", () => {
-    gsap.to(lensVal, {
-      r: 0,
-      duration: 0.4,
-      ease: EASE.expo,
-      onUpdate: () => {
-        card.style.setProperty("--mouse-r", `${lensVal.r}px`);
-      }
-    });
-  });
-
   window.addEventListener("resize", () => { if (rect) updateRect(); }, { passive: true });
   window.addEventListener("scroll", () => { if (rect) updateRect(); }, { passive: true });
 
@@ -531,6 +492,194 @@ function initAvatarParallax() {
     if (badge1) gsap.to(badge1, { x: 0, y: 0, duration: 0.8, ease: EASE.spring });
     if (badge2) gsap.to(badge2, { x: 0, y: 0, duration: 0.8, ease: EASE.spring });
   });
+}
+
+// --- INTERACTIVE DEADPOOL PATH REVEAL CANVAS (FIFO 5-Second Fade) ---
+function initDeadpoolScratchReveal() {
+  const card = document.querySelector(".hero-avatar-card");
+  const canvas = document.getElementById("deadpool-reveal-canvas");
+  if (!card || !canvas) return;
+
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+
+  // Pre-load Deadpool image asset
+  const deadpoolImg = new Image();
+  deadpoolImg.src = "assets/images/DeadPool.webp";
+  deadpoolImg.onerror = () => {
+    deadpoolImg.src = "assets/images/DeadPool.png";
+  };
+
+  let isImageLoaded = false;
+  deadpoolImg.onload = () => {
+    isImageLoaded = true;
+    requestRender();
+  };
+
+  let width = 0;
+  let height = 0;
+  let dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+  function resizeCanvas() {
+    const rect = card.getBoundingClientRect();
+    if (rect.width === 0 || rect.height === 0) return;
+
+    width = rect.width;
+    height = rect.height;
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+    canvas.width = Math.round(width * dpr);
+    canvas.height = Math.round(height * dpr);
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(dpr, dpr);
+
+    requestRender();
+  }
+
+  // Brush strokes buffer (FIFO chronological order)
+  const strokes = [];
+  const LIFETIME_MS = 5000; // Revealed for 5.0 seconds
+  const FADE_MS = 1000;     // Smooth 1.0s dissolve after 5s
+
+  let lastMouseX = null;
+  let lastMouseY = null;
+  let rafId = null;
+
+  function render() {
+    rafId = null;
+    const now = performance.now();
+
+    if (!isImageLoaded || width === 0 || height === 0) return;
+
+    // Prune fully expired strokes from the beginning of the FIFO array
+    const expiryThreshold = now - (LIFETIME_MS + FADE_MS);
+    while (strokes.length > 0 && strokes[0].time < expiryThreshold) {
+      strokes.shift();
+    }
+
+    if (strokes.length === 0) {
+      ctx.clearRect(0, 0, width, height);
+      return;
+    }
+
+    ctx.clearRect(0, 0, width, height);
+
+    // 1. Draw brush mask with soft radial gradients and age-based opacity
+    ctx.save();
+
+    for (let i = 0; i < strokes.length; i++) {
+      const s = strokes[i];
+      const age = now - s.time;
+      let alpha = 1.0;
+      if (age > LIFETIME_MS) {
+        alpha = Math.max(0, 1.0 - (age - LIFETIME_MS) / FADE_MS);
+      }
+
+      if (alpha <= 0) continue;
+
+      const grad = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.radius);
+      grad.addColorStop(0, `rgba(0, 0, 0, ${alpha * 0.98})`);
+      grad.addColorStop(0.65, `rgba(0, 0, 0, ${alpha * 0.85})`);
+      grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // 2. Composite Deadpool character through the drawn brush mask
+    ctx.globalCompositeOperation = 'source-in';
+
+    const imgTargetW = width * 0.9;
+    const imgAspect = (deadpoolImg.naturalHeight || 350) / (deadpoolImg.naturalWidth || 350);
+    const imgTargetH = imgTargetW * imgAspect;
+    const imgTargetX = (width - imgTargetW) / 2;
+    const imgTargetY = height - imgTargetH;
+
+    ctx.drawImage(deadpoolImg, imgTargetX, imgTargetY, imgTargetW, imgTargetH);
+
+    ctx.restore();
+
+    // Continue animation loop while active strokes are fading
+    if (strokes.length > 0) {
+      rafId = requestAnimationFrame(render);
+    }
+  }
+
+  function requestRender() {
+    if (!rafId) {
+      rafId = requestAnimationFrame(render);
+    }
+  }
+
+  function addStroke(x, y) {
+    const now = performance.now();
+    const brushRadius = window.innerWidth <= 768 ? 32 : 42;
+
+    if (lastMouseX !== null && lastMouseY !== null) {
+      const dist = Math.hypot(x - lastMouseX, y - lastMouseY);
+      const steps = Math.max(1, Math.floor(dist / 6)); // Dense 6px sub-pixel sampling
+      for (let i = 1; i <= steps; i++) {
+        const px = lastMouseX + (x - lastMouseX) * (i / steps);
+        const py = lastMouseY + (y - lastMouseY) * (i / steps);
+        strokes.push({
+          x: px,
+          y: py,
+          radius: brushRadius,
+          time: now
+        });
+      }
+    } else {
+      strokes.push({
+        x: x,
+        y: y,
+        radius: brushRadius,
+        time: now
+      });
+    }
+
+    lastMouseX = x;
+    lastMouseY = y;
+
+    requestRender();
+  }
+
+  card.addEventListener("mouseenter", (e) => {
+    const rect = card.getBoundingClientRect();
+    lastMouseX = e.clientX - rect.left;
+    lastMouseY = e.clientY - rect.top;
+    addStroke(lastMouseX, lastMouseY);
+  });
+
+  card.addEventListener("mousemove", (e) => {
+    const rect = card.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    addStroke(x, y);
+  });
+
+  card.addEventListener("mouseleave", () => {
+    lastMouseX = null;
+    lastMouseY = null;
+  });
+
+  // Touch support for mobile and tablets
+  card.addEventListener("touchmove", (e) => {
+    if (e.touches && e.touches[0]) {
+      const touch = e.touches[0];
+      const rect = card.getBoundingClientRect();
+      const x = touch.clientX - rect.left;
+      const y = touch.clientY - rect.top;
+      if (x >= 0 && x <= rect.width && y >= 0 && y <= rect.height) {
+        addStroke(x, y);
+      }
+    }
+  }, { passive: true });
+
+  window.addEventListener("resize", resizeCanvas, { passive: true });
+  window.addEventListener("recalc-offsets", resizeCanvas, { passive: true });
+  resizeCanvas();
 }
 
 // --- GSAP TIMELINE SCROLL HIGHLIGHT ---
@@ -1207,6 +1356,7 @@ export function initAnimations() {
   initScrollReveals();
   initTypingEffect();
   initAvatarParallax();
+  initDeadpoolScratchReveal();
   initTimelineScrollHighlight();
   initDesignerGrid();
   initWatermarkParallax();
