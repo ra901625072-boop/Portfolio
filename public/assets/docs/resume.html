@@ -6,84 +6,286 @@
 <meta name="robots" content="noindex, nofollow">
 <title>Akshaysinh Rajput - Resume</title>
 <style>
-  html, body { margin:0; padding:0; background:#0c0c12; height:100%; }
-  .page-wrap { display:flex; justify-content:center; align-items:flex-start; min-height:100vh; padding:16px 0; box-sizing:border-box; }
-  svg { width:210mm; max-width:95vw; height:auto; background:#fff; box-shadow:0 20px 40px rgba(0,0,0,0.5); }
+  :root {
+    --transition-timing: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  
+  html, body { 
+    margin: 0; 
+    padding: 0; 
+    background: #000000; 
+    min-height: 100%;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  }
+
+  .page-wrap { 
+    display: flex; 
+    justify-content: center; 
+    align-items: flex-start; 
+    min-height: 100vh; 
+    padding: 24px 16px; 
+    box-sizing: border-box; 
+  }
+
+  svg { 
+    width: 210mm; 
+    max-width: 95vw; 
+    height: auto; 
+    background: #ffffff; 
+    border-radius: 4px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85); 
+  }
+  
+  svg a text,
+  svg a tspan {
+    text-decoration: none !important;
+    cursor: pointer;
+  }
+
+  svg a:hover text,
+  svg a:hover tspan {
+    opacity: 0.75;
+  }
   
   @media screen {
     body, svg, svg * {
-      transition: fill 0.5s cubic-bezier(0.16, 1, 0.3, 1), 
-                  stroke 0.5s cubic-bezier(0.16, 1, 0.3, 1), 
-                  background-color 0.5s cubic-bezier(0.16, 1, 0.3, 1), 
-                  background 0.5s cubic-bezier(0.16, 1, 0.3, 1), 
-                  box-shadow 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: fill 0.4s var(--transition-timing), 
+                  stroke 0.4s var(--transition-timing), 
+                  background-color 0.4s var(--transition-timing), 
+                  background 0.4s var(--transition-timing), 
+                  box-shadow 0.4s var(--transition-timing),
+                  border-color 0.4s var(--transition-timing);
+    }
+
+    /* === LIGHT MODE: WHITE CARD + BLACK PAGE BACKGROUND === */
+    body.light-theme {
+      background: #000000 !important;
+    }
+    body.light-theme svg {
+      background: #ffffff !important;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.1) !important;
+    }
+    body.light-theme svg > rect:first-of-type {
+      fill: #ffffff !important;
+    }
+    body.light-theme svg text[fill="#0284C7" i],
+    body.light-theme svg text[fill="#1E40AF" i],
+    body.light-theme svg text[fill="#1f4e5f" i] {
+      fill: #0284C7 !important;
+    }
+    body.light-theme svg line[stroke="#0284C7" i],
+    body.light-theme svg line[stroke="#1E40AF" i],
+    body.light-theme svg line[stroke="#1f4e5f" i] {
+      stroke: #0284C7 !important;
+      stroke-width: 1.4px !important;
+    }
+    body.light-theme svg text[fill="#333333"] {
+      fill: #1E293B !important;
+    }
+    body.light-theme svg text[fill="#222222"] {
+      fill: #334155 !important;
+    }
+    body.light-theme svg text[fill="#555555"],
+    body.light-theme svg tspan[fill="#555555"] {
+      fill: #64748B !important;
+    }
+    body.light-theme svg tspan[fill="#888888"] {
+      fill: #94A3B8 !important;
+    }
+    body.light-theme svg tspan[fill="#222222"] {
+      fill: #334155 !important;
+    }
+    body.light-theme svg tspan[font-weight="bold"] {
+      fill: #0F172A !important;
+    }
+    /* Black link color without underline */
+    body.light-theme svg a text,
+    body.light-theme svg a tspan {
+      fill: #000000 !important;
+      text-decoration: none !important;
+      font-weight: 500 !important;
+    }
+    body.light-theme svg circle {
+      fill: #0284C7 !important;
+    }
+    body.light-theme svg rect[fill="#0284C7" i],
+    body.light-theme svg rect[fill="#1E40AF" i],
+    body.light-theme svg rect[fill="#1f4e5f" i] {
+      fill: #0284C7 !important;
+      stroke: #0284C7 !important;
+      stroke-width: 1px !important;
+    }
+    body.light-theme svg rect[fill="#F0F9FF" i],
+    body.light-theme svg rect[fill="#F0F7FF" i],
+    body.light-theme svg rect[fill="#f5f7f8" i] {
+      fill: #F0F9FF !important;
+    }
+    body.light-theme svg text[fill="#ffffff" i] {
+      fill: #ffffff !important;
+    }
+    body.light-theme svg rect[stroke="#BFBFBF" i] {
+      stroke: #CBD5E1 !important;
+    }
+    body.light-theme .resume-toolbar {
+      background: rgba(18, 18, 24, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+    body.light-theme .toolbar-btn {
+      color: #CBD5E1;
+    }
+    body.light-theme .toolbar-btn:hover {
+      background: rgba(2, 132, 199, 0.2);
+      color: #38BDF8;
+    }
+    body.light-theme .toolbar-divider {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* === DARK MODE: DARK CARD + WHITE PAGE BACKGROUND (RED ACCENTS) === */
+    body.dark-theme {
+      background: #F8FAFC !important;
     }
     body.dark-theme svg {
-      background: #0c0c12 !important;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.7);
+      background: #090D16 !important;
+      box-shadow: 0 24px 55px rgba(15, 23, 42, 0.22), 0 0 0 1px rgba(225, 45, 51, 0.25) !important;
     }
     body.dark-theme svg > rect:first-of-type {
-      fill: #0c0c12 !important;
+      fill: #090D16 !important;
     }
+    body.dark-theme svg text[fill="#0284C7" i],
+    body.dark-theme svg text[fill="#1E40AF" i],
     body.dark-theme svg text[fill="#1f4e5f" i] {
-      fill: #E63946 !important;
+      fill: #E12D33 !important;
+    }
+    body.dark-theme svg line[stroke="#0284C7" i],
+    body.dark-theme svg line[stroke="#1E40AF" i],
+    body.dark-theme svg line[stroke="#1f4e5f" i] {
+      stroke: #E12D33 !important;
+      stroke-width: 1.4px !important;
     }
     body.dark-theme svg text[fill="#333333"] {
-      fill: #ffffff !important;
+      fill: #F8FAFC !important;
     }
     body.dark-theme svg text[fill="#222222"] {
-      fill: #cbd5e1 !important;
+      fill: #CBD5E1 !important;
     }
-    body.dark-theme svg text[fill="#555555"] {
-      fill: #94a3b8 !important;
+    body.dark-theme svg text[fill="#555555"],
+    body.dark-theme svg tspan[fill="#555555"] {
+      fill: #94A3B8 !important;
+    }
+    body.dark-theme svg tspan[fill="#888888"] {
+      fill: #475569 !important;
     }
     body.dark-theme svg tspan[fill="#222222"] {
-      fill: #cbd5e1 !important;
+      fill: #CBD5E1 !important;
     }
     body.dark-theme svg tspan[font-weight="bold"] {
-      fill: #ffffff !important;
+      fill: #FFFFFF !important;
     }
-    body.dark-theme svg line[stroke="#1f4e5f" i] {
-      stroke: #E63946 !important;
-      stroke-width: 1px !important;
-    }
-    body.dark-theme svg a text {
-      fill: #e12d33 !important;
+    /* Red link color without underline */
+    body.dark-theme svg a text,
+    body.dark-theme svg a tspan {
+      fill: #E12D33 !important;
+      text-decoration: none !important;
+      font-weight: 500 !important;
     }
     body.dark-theme svg circle {
-      fill: #cbd5e1 !important;
+      fill: #E12D33 !important;
     }
+    body.dark-theme svg rect[fill="#0284C7" i],
+    body.dark-theme svg rect[fill="#1E40AF" i],
     body.dark-theme svg rect[fill="#1f4e5f" i] {
-      fill: #190003 !important;
-      stroke: rgba(225, 45, 51, 0.35) !important;
+      fill: #1A0406 !important;
+      stroke: #E12D33 !important;
       stroke-width: 1px !important;
     }
+    body.dark-theme svg rect[fill="#F0F9FF" i],
+    body.dark-theme svg rect[fill="#F0F7FF" i],
     body.dark-theme svg rect[fill="#f5f7f8" i] {
-      fill: #000000 !important;
+      fill: #14090B !important;
     }
     body.dark-theme svg text[fill="#ffffff" i] {
       fill: #ffffff !important;
     }
-
-    /* Light theme Cyan opposite accents */
-    body.light-theme svg {
-      background: #ffffff !important;
+    body.dark-theme svg rect[stroke="#BFBFBF" i] {
+      stroke: rgba(225, 45, 51, 0.3) !important;
     }
-    body.light-theme svg text[fill="#1f4e5f" i] {
-      fill: #235347 !important;
+    body.dark-theme .resume-toolbar {
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid rgba(15, 23, 42, 0.15);
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
     }
-    body.light-theme svg line[stroke="#1f4e5f" i] {
-      stroke: #235347 !important;
+    body.dark-theme .toolbar-btn {
+      color: #0F172A;
     }
-    body.light-theme svg rect[fill="#1f4e5f" i] {
-      fill: #e8f1ee !important;
-      stroke: rgba(35, 83, 71, 0.3) !important;
-      stroke-width: 1px !important;
+    body.dark-theme .toolbar-btn:hover {
+      background: rgba(225, 45, 51, 0.12);
+      color: #E12D33;
     }
-    body.light-theme svg rect[fill="#f5f7f8" i] {
-      fill: #f2f7f5 !important;
+    body.dark-theme .toolbar-divider {
+      background: rgba(15, 23, 42, 0.15);
     }
   }
+
+  /* === FLOATING TOOLBAR (SHOWN ONLY ON STANDALONE RESUME PAGE) === */
+  body.in-iframe .resume-toolbar {
+    display: none !important;
+  }
+
+  .resume-toolbar {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    z-index: 1000;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 9999px;
+    padding: 5px 8px;
+    transition: all 0.3s ease;
+  }
+
+  .toolbar-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    user-select: none;
+  }
+
+  .toolbar-btn:hover {
+    transform: scale(1.08);
+  }
+
+  .toolbar-btn svg {
+    width: 18px;
+    height: 18px;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+
+  .toolbar-divider {
+    width: 1px;
+    height: 18px;
+    margin: 0 2px;
+  }
+
+  /* Icons toggle */
+  .sun-icon { display: none; }
+  .moon-icon { display: block; }
+
+  body.light-theme .sun-icon { display: block; }
+  body.light-theme .moon-icon { display: none; }
 
   @media print {
     @page {
@@ -99,6 +301,9 @@
       margin: 0 !important;
       display: block !important;
     }
+    .resume-toolbar {
+      display: none !important;
+    }
     svg {
       width: 100% !important;
       max-width: 100% !important;
@@ -111,51 +316,91 @@
 </style>
 </head>
 <body>
+
+<div class="resume-toolbar" id="resume-toolbar" aria-label="Resume controls">
+  <button class="toolbar-btn" id="theme-toggle-btn" title="Toggle Theme" aria-label="Toggle theme">
+    <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+    <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+    </svg>
+  </button>
+  
+  <div class="toolbar-divider"></div>
+
+  <button class="toolbar-btn" id="print-btn" title="Print / Save as PDF" aria-label="Print / Save as PDF" onclick="window.print()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="6 9 6 2 18 2 18 9"></polyline>
+      <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+      <rect x="6" y="14" width="12" height="8"></rect>
+    </svg>
+  </button>
+</div>
+
 <div class="page-wrap">
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100%" height="100%" viewBox="0 0 794 1123" preserveAspectRatio="xMidYMid meet" font-family="Calibri, Arial, sans-serif">
 <rect x="0" y="0" width="794" height="1123" fill="#FFFFFF" />
-<text x="397" y="40" font-family="Calibri, Arial, sans-serif" font-size="25" font-weight="bold" fill="#1F4E5F" text-anchor="middle" letter-spacing="0.5">AKSHAYSINH KANAKSINH RAJPUT</text>
-<text x="397" y="62" font-family="Calibri, Arial, sans-serif" font-size="13" font-style="italic" fill="#333333" text-anchor="middle">UI/UX Designer  |  Python Developer  |  Full-Stack Developer  |  Web Developer</text>
-<text x="92.06024999999988" y="82" font-family="Calibri, Arial, sans-serif" font-size="11.5" fill="#555555" text-anchor="start">9313840278   |   ra901625072@gmail.com   |   Pali, Unjha, Mehsana, Gujarat - 384260   |   </text>
-<a href="https://github.com/ra901625072-boop"><text x="545.3212500000001" y="82" font-family="Calibri, Arial, sans-serif" font-size="11.5" fill="#1155CC" text-decoration="underline">github.com/ra901625072-boop</text></a>
-<line x1="44" y1="92" x2="750" y2="92" stroke="#1F4E5F" stroke-width="2" />
-<text x="44" y="122" font-family="Calibri, Arial, sans-serif" font-size="14" font-weight="bold" fill="#1F4E5F" text-anchor="start" letter-spacing="0.5">ABOUT ME</text>
-<line x1="44" y1="128" x2="750" y2="128" stroke="#1F4E5F" stroke-width="1.6" />
+<text x="397" y="42" font-family="Calibri, Arial, sans-serif" font-size="24" font-weight="bold" fill="#0284C7" text-anchor="middle" letter-spacing="1.0">AKSHAYSINH KANAKSINH RAJPUT</text>
+<text x="397" y="62" font-family="Calibri, Arial, sans-serif" font-size="12.5" font-weight="bold" fill="#333333" text-anchor="middle" letter-spacing="0.5">UI/UX Designer  |  Python Developer  |  Full-Stack Developer  |  Web Developer</text>
+<text x="397" y="82" font-family="Calibri, Arial, sans-serif" font-size="11" text-anchor="middle"><tspan fill="#555555">+91 9313840278</tspan><tspan fill="#888888">   •   </tspan><a href="mailto:ra901625072@gmail.com"><tspan fill="#000000">ra901625072@gmail.com</tspan></a><tspan fill="#888888">   •   </tspan><tspan fill="#555555">Pali, Mehsana, Gujarat - 384260</tspan><tspan fill="#888888">   •   </tspan><a href="https://github.com/ra901625072-boop" target="_blank"><tspan fill="#000000">github.com/ra901625072-boop</tspan></a></text>
+<line x1="44" y1="92" x2="750" y2="92" stroke="#0284C7" stroke-width="2" />
+<text x="44" y="122" font-family="Calibri, Arial, sans-serif" font-size="14" font-weight="bold" fill="#0284C7" text-anchor="start" letter-spacing="0.5">ABOUT ME</text>
+<a href="https://portfolioakshay.in" target="_blank"><text x="750" y="122" text-anchor="end" font-family="Calibri, Arial, sans-serif" font-size="13.5" font-weight="bold" fill="#000000" letter-spacing="0.3">portfolioakshay.in</text></a>
+<line x1="44" y1="128" x2="750" y2="128" stroke="#0284C7" stroke-width="1.6" />
 <text x="44" y="144" font-family="Calibri, Arial, sans-serif" font-size="12.5" fill="#222222" text-anchor="start">Currently pursuing MCA, I develop websites and software tailored to client needs and enjoy turning ideas into polished, working</text>
 <text x="44" y="160" font-family="Calibri, Arial, sans-serif" font-size="12.5" fill="#222222" text-anchor="start">products. Focused on continuously learning new technologies to keep improving my skills.</text>
-<text x="44" y="202" font-family="Calibri, Arial, sans-serif" font-size="14" font-weight="bold" fill="#1F4E5F" text-anchor="start" letter-spacing="0.5">SKILLS</text>
-<line x1="44" y1="208" x2="750" y2="208" stroke="#1F4E5F" stroke-width="1.6" />
+<text x="44" y="202" font-family="Calibri, Arial, sans-serif" font-size="14" font-weight="bold" fill="#0284C7" text-anchor="start" letter-spacing="0.5">SKILLS</text>
+<line x1="44" y1="208" x2="750" y2="208" stroke="#0284C7" stroke-width="1.6" />
 <text x="44" y="224"><tspan font-family="Calibri, Arial, sans-serif" font-size="12" font-weight="bold" fill="#222222">Programming Languages: </tspan><tspan font-family="Calibri, Arial, sans-serif" font-size="12" fill="#222222">Python, HTML, CSS, JavaScript, SQL</tspan></text>
 <text x="44" y="240"><tspan font-family="Calibri, Arial, sans-serif" font-size="12" font-weight="bold" fill="#222222">Frameworks &amp; Libraries: </tspan><tspan font-family="Calibri, Arial, sans-serif" font-size="12" fill="#222222">FastAPI, React, Tailwind CSS, Node.js</tspan></text>
 <text x="44" y="256"><tspan font-family="Calibri, Arial, sans-serif" font-size="12" font-weight="bold" fill="#222222">Tools: </tspan><tspan font-family="Calibri, Arial, sans-serif" font-size="12" fill="#222222">Git, GitHub, Docker, Vercel, Render</tspan></text>
 <text x="44" y="272"><tspan font-family="Calibri, Arial, sans-serif" font-size="12" font-weight="bold" fill="#222222">AI Tools: </tspan><tspan font-family="Calibri, Arial, sans-serif" font-size="12" fill="#222222">Antigravity, Claude, ChatGPT, Gemini, Kimi, Cursor</tspan></text>
-<text x="44" y="314" font-family="Calibri, Arial, sans-serif" font-size="14" font-weight="bold" fill="#1F4E5F" text-anchor="start" letter-spacing="0.5">PROJECTS</text>
-<line x1="44" y1="320" x2="750" y2="320" stroke="#1F4E5F" stroke-width="1.6" />
-<text x="44" y="350"><tspan font-family="Calibri, Arial, sans-serif" font-size="13" font-weight="bold" fill="#222222">Multi-Agent Automation Agent</tspan><tspan font-family="Calibri, Arial, sans-serif" font-size="11" font-style="italic" fill="#555555">   |   Tech: Python, HTML, CSS, JavaScript, open-source/free AI APIs</tspan></text>
+<text x="44" y="314" font-family="Calibri, Arial, sans-serif" font-size="14" font-weight="bold" fill="#0284C7" text-anchor="start" letter-spacing="0.5">PROJECTS</text>
+<line x1="44" y1="320" x2="750" y2="320" stroke="#0284C7" stroke-width="1.6" />
+
+<text x="44" y="350"><tspan font-family="Calibri, Arial, sans-serif" font-size="13" font-weight="bold" fill="#222222">Multi-Agent Automation Agent</tspan><tspan font-family="Calibri, Arial, sans-serif" font-size="11" font-style="italic" fill="#555555">   |   Tech: Python, WebSockets, AI APIs</tspan></text>
+<a href="https://github.com/ra901625072-boop/Jarvis-Voice-Assistant" target="_blank"><text x="750" y="350" text-anchor="end" font-family="Calibri, Arial, sans-serif" font-size="11" fill="#000000">https://github.com/ra901625072-boop/Jarvis-Voice-Assistant</text></a>
 <text x="44" y="365" font-family="Calibri, Arial, sans-serif" font-size="11.5" fill="#222222" text-anchor="start">Voice- and text-mode automation agent that completes complex goals via specialized sub-agents (coding, research, planning).</text>
-<text x="44" y="393"><tspan font-family="Calibri, Arial, sans-serif" font-size="13" font-weight="bold" fill="#222222">Pali CBDC Portal</tspan><tspan font-family="Calibri, Arial, sans-serif" font-size="11" font-style="italic" fill="#555555">   |   Tech: Python, HTML, CSS, JavaScript, SQL</tspan></text>
+
+<text x="44" y="393"><tspan font-family="Calibri, Arial, sans-serif" font-size="13" font-weight="bold" fill="#222222">Pali CBDC Portal</tspan><tspan font-family="Calibri, Arial, sans-serif" font-size="11" font-style="italic" fill="#555555">   |   Tech: Python, FastAPI, SQL</tspan></text>
+<a href="https://pali-omega.vercel.app/" target="_blank"><text x="750" y="393" text-anchor="end" font-family="Calibri, Arial, sans-serif" font-size="11" fill="#000000">https://pali-omega.vercel.app/</text></a>
 <text x="44" y="408" font-family="Calibri, Arial, sans-serif" font-size="11.5" fill="#222222" text-anchor="start">Web app tracking CBDC beneficiary data for Pali; users check beneficiary status while Talati admins view analytics, details, and reports.</text>
-<text x="44" y="436"><tspan font-family="Calibri, Arial, sans-serif" font-size="13" font-weight="bold" fill="#222222">e-Grossary Mart</tspan><tspan font-family="Calibri, Arial, sans-serif" font-size="11" font-style="italic" fill="#555555">   |   Tech: Python, HTML, CSS, JavaScript, SQL</tspan></text>
+
+<text x="44" y="436"><tspan font-family="Calibri, Arial, sans-serif" font-size="13" font-weight="bold" fill="#222222">e-Grossary Mart</tspan><tspan font-family="Calibri, Arial, sans-serif" font-size="11" font-style="italic" fill="#555555">   |   Tech: Python, FastAPI, SQL</tspan></text>
+<a href="https://glossary-mart.onrender.com/" target="_blank"><text x="750" y="436" text-anchor="end" font-family="Calibri, Arial, sans-serif" font-size="11" fill="#000000">https://glossary-mart.onrender.com/</text></a>
 <text x="44" y="451" font-family="Calibri, Arial, sans-serif" font-size="11.5" fill="#222222" text-anchor="start">E-commerce platform for a client to manage supply, stock, and suppliers, with a dashboard for revenue and business metrics.</text>
-<text x="44" y="479"><tspan font-family="Calibri, Arial, sans-serif" font-size="13" font-weight="bold" fill="#222222">FamDoc (Family Document Manager)</tspan><tspan font-family="Calibri, Arial, sans-serif" font-size="11" font-style="italic" fill="#555555">   |   Tech: Python, HTML, CSS, JavaScript, Google Drive API, MEGA, SQL</tspan></text>
+
+<text x="44" y="479"><tspan font-family="Calibri, Arial, sans-serif" font-size="13" font-weight="bold" fill="#222222">FamDoc (Family Document Manager)</tspan><tspan font-family="Calibri, Arial, sans-serif" font-size="11" font-style="italic" fill="#555555">   |   Tech: Python, Cloud Storage, SQL</tspan></text>
+<a href="https://famdoc-ten.vercel.app/" target="_blank"><text x="750" y="479" text-anchor="end" font-family="Calibri, Arial, sans-serif" font-size="11" fill="#000000">https://famdoc-ten.vercel.app/</text></a>
 <text x="44" y="494" font-family="Calibri, Arial, sans-serif" font-size="11.5" fill="#222222" text-anchor="start">Google Drive-style app where family members join via a shared code so uploaded documents become visible/downloadable to the whole</text>
 <text x="44" y="508" font-family="Calibri, Arial, sans-serif" font-size="11.5" fill="#222222" text-anchor="start">family.</text>
-<text x="44" y="536"><tspan font-family="Calibri, Arial, sans-serif" font-size="13" font-weight="bold" fill="#222222">Resume Maker</tspan><tspan font-family="Calibri, Arial, sans-serif" font-size="11" font-style="italic" fill="#555555">   |   Tech: Python, HTML, CSS, JavaScript, SQL</tspan></text>
+
+<text x="44" y="536"><tspan font-family="Calibri, Arial, sans-serif" font-size="13" font-weight="bold" fill="#222222">Resume Maker</tspan><tspan font-family="Calibri, Arial, sans-serif" font-size="11" font-style="italic" fill="#555555">   |   Tech: Python, HTML/CSS/JS, SQL</tspan></text>
+<a href="https://resume-maker-zhcq.onrender.com/" target="_blank"><text x="750" y="536" text-anchor="end" font-family="Calibri, Arial, sans-serif" font-size="11" fill="#000000">https://resume-maker-zhcq.onrender.com/</text></a>
 <text x="44" y="551" font-family="Calibri, Arial, sans-serif" font-size="11.5" fill="#222222" text-anchor="start">Web app for students to enter personal details, choose from professional templates, and download a finished resume.</text>
-<text x="44" y="591" font-family="Calibri, Arial, sans-serif" font-size="14" font-weight="bold" fill="#1F4E5F" text-anchor="start" letter-spacing="0.5">EXPERIENCE</text>
-<line x1="44" y1="597" x2="750" y2="597" stroke="#1F4E5F" stroke-width="1.6" />
+<text x="44" y="591" font-family="Calibri, Arial, sans-serif" font-size="14" font-weight="bold" fill="#0284C7" text-anchor="start" letter-spacing="0.5">EXPERIENCE</text>
+<line x1="44" y1="597" x2="750" y2="597" stroke="#0284C7" stroke-width="1.6" />
 <text x="44" y="613"><tspan font-family="Calibri, Arial, sans-serif" font-size="12.5" font-weight="bold" fill="#222222">Internship — Wixasis Pvt. Ltd., Mehsana </tspan><tspan font-family="Calibri, Arial, sans-serif" font-size="11" font-style="italic" fill="#555555">(3 Months)</tspan></text>
-<circle cx="49" cy="625" r="1.8" fill="#222222" />
+<circle cx="49" cy="625" r="1.8" fill="#0284C7" />
 <text x="66" y="629" font-family="Calibri, Arial, sans-serif" font-size="12" fill="#222222" text-anchor="start">Gained hands-on experience in real-world development practices during the internship period.</text>
 <text x="44" y="652" font-family="Calibri, Arial, sans-serif" font-size="12.5" font-weight="bold" fill="#222222" text-anchor="start">Freelance Work</text>
-<circle cx="49" cy="664" r="1.8" fill="#222222" />
+<circle cx="49" cy="664" r="1.8" fill="#0284C7" />
 <text x="66" y="668" font-family="Calibri, Arial, sans-serif" font-size="12" fill="#222222" text-anchor="start">Delivered 2 client projects — Pali CBDC Portal and e-Grossary Mart — gaining practical experience with client requirements.</text>
 <text x="44" y="691" font-family="Calibri, Arial, sans-serif" font-size="12.5" font-weight="bold" fill="#222222" text-anchor="start">Personal Projects</text>
-<circle cx="49" cy="703" r="1.8" fill="#222222" />
+<circle cx="49" cy="703" r="1.8" fill="#0284C7" />
 <text x="66" y="707" font-family="Calibri, Arial, sans-serif" font-size="12" fill="#222222" text-anchor="start">Independently built Resume Maker and a multi-agent automation system to learn new technologies and practices.</text>
-<text x="44" y="748" font-family="Calibri, Arial, sans-serif" font-size="14" font-weight="bold" fill="#1F4E5F" text-anchor="start" letter-spacing="0.5">EDUCATION</text>
-<line x1="44" y1="754" x2="750" y2="754" stroke="#1F4E5F" stroke-width="1.6" />
-<rect x="44" y="770" width="706" height="26" fill="#1F4E5F" />
+<text x="44" y="748" font-family="Calibri, Arial, sans-serif" font-size="14" font-weight="bold" fill="#0284C7" text-anchor="start" letter-spacing="0.5">EDUCATION</text>
+<line x1="44" y1="754" x2="750" y2="754" stroke="#0284C7" stroke-width="1.6" />
+<rect x="44" y="770" width="706" height="26" fill="#0284C7" />
 <text x="52" y="787" font-family="Calibri, Arial, sans-serif" font-size="11.5" font-weight="bold" fill="#FFFFFF" text-anchor="start">Course / School</text>
 <text x="162" y="787" font-family="Calibri, Arial, sans-serif" font-size="11.5" font-weight="bold" fill="#FFFFFF" text-anchor="start">Institution</text>
 <text x="512" y="787" font-family="Calibri, Arial, sans-serif" font-size="11.5" font-weight="bold" fill="#FFFFFF" text-anchor="start">Year</text>
@@ -166,7 +411,7 @@
 <text x="512" y="813" font-family="Calibri, Arial, sans-serif" font-size="11.5" fill="#222222" text-anchor="start">Pursuing</text>
 <text x="635" y="813" font-family="Calibri, Arial, sans-serif" font-size="11.5" fill="#222222" text-anchor="start">-</text>
 <rect x="44" y="796" width="706" height="26" fill="none" stroke="#BFBFBF" stroke-width="0.75" />
-<rect x="44" y="822" width="706" height="26" fill="#F5F7F8" />
+<rect x="44" y="822" width="706" height="26" fill="#F0F9FF" />
 <text x="52" y="839" font-family="Calibri, Arial, sans-serif" font-size="11.5" fill="#222222" text-anchor="start">BCA</text>
 <text x="162" y="839" font-family="Calibri, Arial, sans-serif" font-size="11.5" fill="#222222" text-anchor="start">Shri Sarvajanik / Mahesana (HNGU)</text>
 <text x="512" y="839" font-family="Calibri, Arial, sans-serif" font-size="11.5" fill="#222222" text-anchor="start">2026</text>
@@ -177,36 +422,87 @@
 <text x="512" y="865" font-family="Calibri, Arial, sans-serif" font-size="11.5" fill="#222222" text-anchor="start">2023</text>
 <text x="635" y="865" font-family="Calibri, Arial, sans-serif" font-size="11.5" fill="#222222" text-anchor="start">70%</text>
 <rect x="44" y="848" width="706" height="26" fill="none" stroke="#BFBFBF" stroke-width="0.75" />
-<rect x="44" y="874" width="706" height="26" fill="#F5F7F8" />
+<rect x="44" y="874" width="706" height="26" fill="#F0F9FF" />
 <text x="52" y="891" font-family="Calibri, Arial, sans-serif" font-size="11.5" fill="#222222" text-anchor="start">10th</text>
 <text x="162" y="891" font-family="Calibri, Arial, sans-serif" font-size="11.5" fill="#222222" text-anchor="start">Shri Miradatar Sarvoday Vidyalay</text>
 <text x="512" y="891" font-family="Calibri, Arial, sans-serif" font-size="11.5" fill="#222222" text-anchor="start">2021</text>
 <text x="635" y="891" font-family="Calibri, Arial, sans-serif" font-size="11.5" fill="#222222" text-anchor="start">72%</text>
 <rect x="44" y="874" width="706" height="26" fill="none" stroke="#BFBFBF" stroke-width="0.75" />
-<text x="44" y="928" font-family="Calibri, Arial, sans-serif" font-size="14" font-weight="bold" fill="#1F4E5F" text-anchor="start" letter-spacing="0.5">ACHIEVEMENTS</text>
-<line x1="44" y1="934" x2="750" y2="934" stroke="#1F4E5F" stroke-width="1.6" />
-<circle cx="49" cy="946" r="1.8" fill="#222222" />
+<text x="44" y="928" font-family="Calibri, Arial, sans-serif" font-size="14" font-weight="bold" fill="#0284C7" text-anchor="start" letter-spacing="0.5">ACHIEVEMENTS</text>
+<line x1="44" y1="934" x2="750" y2="934" stroke="#0284C7" stroke-width="1.6" />
+<circle cx="49" cy="946" r="1.8" fill="#0284C7" />
 <text x="66" y="950" font-family="Calibri, Arial, sans-serif" font-size="12" fill="#222222" text-anchor="start">Mastered Python programming</text>
-<circle cx="49" cy="967" r="1.8" fill="#222222" />
+<circle cx="49" cy="967" r="1.8" fill="#0284C7" />
 <text x="66" y="971" font-family="Calibri, Arial, sans-serif" font-size="12" fill="#222222" text-anchor="start">Completed internship and received a certificate</text>
-<circle cx="49" cy="988" r="1.8" fill="#222222" />
+<circle cx="49" cy="988" r="1.8" fill="#0284C7" />
 <text x="66" y="992" font-family="Calibri, Arial, sans-serif" font-size="12" fill="#222222" text-anchor="start">Certificate in Ethical Hacking, awarded by HNGU</text>
-<text x="44" y="1033" font-family="Calibri, Arial, sans-serif" font-size="14" font-weight="bold" fill="#1F4E5F" text-anchor="start" letter-spacing="0.5">ADDITIONAL INFORMATION</text>
-<line x1="44" y1="1039" x2="750" y2="1039" stroke="#1F4E5F" stroke-width="1.6" />
+<text x="44" y="1033" font-family="Calibri, Arial, sans-serif" font-size="14" font-weight="bold" fill="#0284C7" text-anchor="start" letter-spacing="0.5">ADDITIONAL INFORMATION</text>
+<line x1="44" y1="1039" x2="750" y2="1039" stroke="#0284C7" stroke-width="1.6" />
 <text x="44" y="1055"><tspan font-family="Calibri, Arial, sans-serif" font-size="12" font-weight="bold" fill="#222222">Hobbies: </tspan><tspan font-family="Calibri, Arial, sans-serif" font-size="12" fill="#222222">Watching movies, exploring new tools and technologies</tspan></text>
 <text x="44" y="1071"><tspan font-family="Calibri, Arial, sans-serif" font-size="12" font-weight="bold" fill="#222222">Languages: </tspan><tspan font-family="Calibri, Arial, sans-serif" font-size="12" fill="#222222">Gujarati, Hindi, English</tspan></text>
 </svg>
 </div>
+
 <script>
-  const urlParams = new URLSearchParams(window.location.search);
-  const theme = urlParams.get('theme');
-  if (theme === 'light') {
-    document.body.classList.add("light-theme");
-    document.body.classList.remove("dark-theme");
-  } else {
-    document.body.classList.add("dark-theme");
-    document.body.classList.remove("light-theme");
+  // Hide toolbar if embedded inside portfolio iframe
+  const isEmbedded = (window.self !== window.top) || new URLSearchParams(window.location.search).get('embedded') === 'true';
+  if (isEmbedded) {
+    document.body.classList.add('in-iframe');
+    const tb = document.getElementById('resume-toolbar');
+    if (tb) tb.style.display = 'none';
   }
+
+  function applyTheme(themeName) {
+    if (themeName === 'light') {
+      document.body.classList.add("light-theme");
+      document.body.classList.remove("dark-theme");
+    } else {
+      document.body.classList.add("dark-theme");
+      document.body.classList.remove("light-theme");
+    }
+  }
+
+  // Determine initial theme: URL param > localStorage > system preference
+  const urlParams = new URLSearchParams(window.location.search);
+  const paramTheme = urlParams.get('theme');
+  let currentTheme = 'light'; // Default to light-theme (white card with black background)
+
+  if (paramTheme === 'light' || paramTheme === 'dark') {
+    currentTheme = paramTheme;
+  } else {
+    try {
+      const saved = localStorage.getItem('portfolio-theme') || localStorage.getItem('theme');
+      if (saved === 'light' || saved === 'dark') {
+        currentTheme = saved;
+      } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        currentTheme = 'dark';
+      }
+    } catch (e) {
+      // fallback
+    }
+  }
+
+  applyTheme(currentTheme);
+
+  // Toggle button handler
+  const toggleBtn = document.getElementById("theme-toggle-btn");
+  if (toggleBtn) {
+    toggleBtn.addEventListener("click", () => {
+      const isLight = document.body.classList.contains("light-theme");
+      const nextTheme = isLight ? "dark" : "light";
+      applyTheme(nextTheme);
+      try {
+        localStorage.setItem("portfolio-theme", nextTheme);
+      } catch (e) {}
+    });
+  }
+
+  // Listen to postMessage from parent portfolio page if embedded in iframe
+  window.addEventListener("message", (event) => {
+    if (event.data && typeof event.data === 'object' && event.data.type === 'THEME_CHANGE') {
+      applyTheme(event.data.theme);
+    }
+  });
 </script>
 </body>
 </html>

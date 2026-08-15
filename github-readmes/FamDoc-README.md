@@ -3,7 +3,7 @@
 [![Python](https://img.shields.io/badge/Python-3.9%2B-blue?logo=python&logoColor=white)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.98.0%2B-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![Google Drive API](https://img.shields.io/badge/Google_Drive-API-4285F4?logo=googledrive&logoColor=white)](https://developers.google.com/drive)
-[![Render](https://img.shields.io/badge/Render-Hosted-46E3B7?logo=render&logoColor=white)](https://famdoc-b51u.onrender.com)
+[![Vercel](https://img.shields.io/badge/Vercel-Hosted-000000?logo=vercel&logoColor=white)](https://famdoc-ten.vercel.app)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 A private cloud storage sharing portal modeled after shared network directories. FamDoc allows users to create secured family spaces utilizing unique join codes. Any member of the family can securely upload, organize, search, and download critical records (tax forms, academic certificates, medical files) streamed directly to Google Drive and MEGA cloud backends.

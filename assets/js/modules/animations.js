@@ -498,21 +498,27 @@ function initAvatarParallax() {
 function initDeadpoolScratchReveal() {
   const card = document.querySelector(".hero-avatar-card");
   const canvas = document.getElementById("deadpool-reveal-canvas");
+  const professionalLayer = card ? card.querySelector(".avatar-layer.professional") : null;
   if (!card || !canvas) return;
 
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
 
-  // Pre-load Deadpool image asset
-  const deadpoolImg = new Image();
-  deadpoolImg.src = "assets/images/DeadPool.webp";
-  deadpoolImg.onerror = () => {
-    deadpoolImg.src = "assets/images/DeadPool.png";
-  };
+  const darkImg = new Image();
+  darkImg.src = "assets/images/DeadPool-Dark.png";
 
-  let isImageLoaded = false;
-  deadpoolImg.onload = () => {
-    isImageLoaded = true;
+  const lightImg = new Image();
+  lightImg.src = "assets/images/DeadPool-Light.png";
+
+  let isDarkLoaded = false;
+  let isLightLoaded = false;
+
+  darkImg.onload = () => {
+    isDarkLoaded = true;
+    requestRender();
+  };
+  lightImg.onload = () => {
+    isLightLoaded = true;
     requestRender();
   };
 
@@ -549,7 +555,11 @@ function initDeadpoolScratchReveal() {
     rafId = null;
     const now = performance.now();
 
-    if (!isImageLoaded || width === 0 || height === 0) return;
+    const isLightMode = document.body.classList.contains("light-mode");
+    const deadpoolImg = isLightMode ? (isLightLoaded ? lightImg : darkImg) : (isDarkLoaded ? darkImg : lightImg);
+    const isImageReady = isLightMode ? (isLightLoaded || isDarkLoaded) : (isDarkLoaded || isLightLoaded);
+
+    if (!isImageReady || width === 0 || height === 0) return;
 
     // Prune fully expired strokes from the beginning of the FIFO array
     const expiryThreshold = now - (LIFETIME_MS + FADE_MS);
@@ -588,14 +598,17 @@ function initDeadpoolScratchReveal() {
       ctx.fill();
     }
 
-    // 2. Composite Deadpool character through the drawn brush mask
+    // 2. Composite theme-appropriate Deadpool character cleanly centered inside the card
     ctx.globalCompositeOperation = 'source-in';
 
-    const imgTargetW = width * 0.9;
-    const imgAspect = (deadpoolImg.naturalHeight || 350) / (deadpoolImg.naturalWidth || 350);
+    const naturalW = deadpoolImg.naturalWidth || 430;
+    const naturalH = deadpoolImg.naturalHeight || 428;
+    const imgAspect = naturalH / naturalW;
+
+    const imgTargetW = width * 0.98;
     const imgTargetH = imgTargetW * imgAspect;
     const imgTargetX = (width - imgTargetW) / 2;
-    const imgTargetY = height - imgTargetH;
+    const imgTargetY = (height - imgTargetH) / 2;
 
     ctx.drawImage(deadpoolImg, imgTargetX, imgTargetY, imgTargetW, imgTargetH);
 
@@ -679,6 +692,14 @@ function initDeadpoolScratchReveal() {
 
   window.addEventListener("resize", resizeCanvas, { passive: true });
   window.addEventListener("recalc-offsets", resizeCanvas, { passive: true });
+  
+  // Observe theme toggles to swap Deadpool images immediately
+  const themeObserver = new MutationObserver(() => {
+    requestRender();
+  });
+  themeObserver.observe(document.body, { attributes: true, attributeFilter: ["class"] });
+  document.addEventListener("theme-changed", requestRender);
+
   resizeCanvas();
 }
 
