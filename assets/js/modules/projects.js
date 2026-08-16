@@ -1,7 +1,89 @@
 import { PROJECTS_DATA, ACHIEVEMENTS_DATA } from "../data/projects-data.js";
 import { lenis } from "../app.js";
 
-// --- RENDER PORTFOLIO PROJECTS ---
+// --- INFINITE MARQUEE & DRAG CAROUSEL STATE ---
+let currentPositionX = 0;
+let autoScrollSpeed = 0.65; // Left-to-right auto-scroll speed (positive = moves right)
+let isHovered = false;
+let isDragging = false;
+let isPointerDown = false;
+let startPointerX = 0;
+let lastPointerX = 0;
+let velocityX = 0;
+let totalDragDistance = 0;
+let halfTrackWidth = 0;
+let animationFrameId = null;
+let dragEngineInitialized = false;
+
+// --- RECALCULATE TRACK HALF-WIDTH ---
+function updateHalfTrackWidth() {
+  const track = document.getElementById("projects-grid");
+  if (!track) return;
+  const cards = track.children;
+  if (!cards.length) return;
+
+  // Track total scroll width; cards are duplicated into 2 identical halves
+  halfTrackWidth = track.scrollWidth / 2;
+}
+
+// --- RAF TICKER FOR FLUID AUTO-SCROLL & DRAG (Matching Milestones Speed) ---
+let lastFrameTimestamp = 0;
+// Milestones section scrolls 1116px over 30s = 37.2px/sec linear velocity
+const AUTO_SCROLL_SPEED_PX_PER_SEC = 37.2;
+
+function startCarouselTicker() {
+  if (animationFrameId) return;
+  lastFrameTimestamp = performance.now();
+
+  function tick(now) {
+    const track = document.getElementById("projects-grid");
+    if (!track) {
+      animationFrameId = null;
+      return;
+    }
+
+    const deltaTime = Math.min((now - lastFrameTimestamp) / 1000, 0.1); // in seconds, clamped for smooth resumes
+    lastFrameTimestamp = now;
+
+    if (halfTrackWidth <= 0) {
+      updateHalfTrackWidth();
+    }
+
+    if (!isPointerDown) {
+      if (Math.abs(velocityX) > 0.05) {
+        currentPositionX += velocityX;
+        velocityX *= 0.94; // Smooth momentum decay
+      } else {
+        velocityX = 0;
+        if (!isHovered) {
+          currentPositionX += AUTO_SCROLL_SPEED_SPEED_DELTA(deltaTime);
+        }
+      }
+    }
+
+    // Seamless infinite wrap in both directions (positive or negative)
+    if (halfTrackWidth > 0) {
+      while (currentPositionX > 0) {
+        currentPositionX -= halfTrackWidth;
+      }
+      while (currentPositionX < -halfTrackWidth) {
+        currentPositionX += halfTrackWidth;
+      }
+    }
+
+    track.style.transform = `translate3d(${currentPositionX}px, 0, 0)`;
+
+    animationFrameId = requestAnimationFrame(tick);
+  }
+
+  animationFrameId = requestAnimationFrame(tick);
+}
+
+function AUTO_SCROLL_SPEED_SPEED_DELTA(dt) {
+  return AUTO_SCROLL_SPEED_PX_PER_SEC * dt;
+}
+
+// --- RENDER PORTFOLIO PROJECTS (Infinite Left-to-Right Carousel) ---
 export function renderProjects(filterValue = "all") {
   const container = document.getElementById("projects-grid");
   if (!container) return;
@@ -11,16 +93,38 @@ export function renderProjects(filterValue = "all") {
   const filtered = filterValue === "all" 
     ? PROJECTS_DATA 
     : PROJECTS_DATA.filter(p => p.category === filterValue);
+
+  if (filtered.length === 0) {
+    container.innerHTML = `
+      <div style="padding: 3rem; text-align: center; color: var(--text-secondary); width: 100%;">
+        <p>No case studies found in this category.</p>
+      </div>
+    `;
+    return;
+  }
       
-  filtered.forEach((project, index) => {
+  // Clone cards to enable a completely seamless infinite loop
+  let items = [];
+  if (filtered.length >= 4) {
+    items = [...filtered, ...filtered];
+  } else if (filtered.length === 3) {
+    items = [...filtered, ...filtered, ...filtered, ...filtered];
+  } else if (filtered.length === 2) {
+    items = [...filtered, ...filtered, ...filtered, ...filtered];
+  } else {
+    // 1 item - clone 8 times to span across wide screens cleanly
+    items = [
+      filtered[0], filtered[0], filtered[0], filtered[0],
+      filtered[0], filtered[0], filtered[0], filtered[0]
+    ];
+  }
+
+  items.forEach((project) => {
     const card = document.createElement("div");
     card.className = "project-card glass-card spotlight-card";
     card.dataset.id = project.id;
     card.setAttribute("tabindex", "0");
     card.setAttribute("aria-label", `View details for project: ${project.title}`);
-    
-    // Add cascading stagger delay
-    card.style.animationDelay = `${index * 0.08}s`;
     
     const tagsHtml = project.tags
       .map(tag => `<span class="project-tag">${tag}</span>`)
@@ -48,50 +152,170 @@ export function renderProjects(filterValue = "all") {
       </div>
     `;
     
-    // Add click and keyboard triggers
-    card.addEventListener("click", () => openCaseStudy(project.id));
+    // Open case study on click only if user didn't drag
+    card.addEventListener("click", () => {
+      if (isDragging || totalDragDistance > 6) return;
+      openCaseStudy(project.id);
+    });
+
     card.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
         openCaseStudy(project.id);
       }
     });
+
+    // Keyboard focus pause
+    card.addEventListener("focus", () => {
+      isHovered = true;
+    });
+    card.addEventListener("blur", () => {
+      isHovered = false;
+    });
     
     container.appendChild(card);
   });
   
-  // Re-run spotlight init for newly added cards under projects grid
-  if (typeof initializeSpotlightEffects === "function") {
-    initializeSpotlightEffects("#projects-grid");
-  }
+  // Update measurement and spotlight effects
+  setTimeout(() => {
+    updateHalfTrackWidth();
+    if (typeof initializeSpotlightEffects === "function") {
+      initializeSpotlightEffects("#projects-grid");
+    }
+  }, 50);
+
+  // Initialize drag engine and ticker
+  initProjectsDragEngine();
+  startCarouselTicker();
+}
+
+// --- DIRECT DRAG & SWIPE ENGINE ---
+export function initProjectsDragEngine() {
+  if (dragEngineInitialized) return;
+  dragEngineInitialized = true;
+
+  const carousel = document.getElementById("projects-carousel");
+  const track = document.getElementById("projects-grid");
+  if (!carousel || !track) return;
+
+  // Hover Pause Listeners
+  carousel.addEventListener("mouseenter", () => {
+    isHovered = true;
+    velocityX = 0;
+  });
+
+  carousel.addEventListener("mouseleave", () => {
+    if (!isPointerDown) {
+      isHovered = false;
+    }
+  });
+
+  // Pointer Down (Mouse or Touch)
+  const onPointerDown = (e) => {
+    if (e.button !== undefined && e.button !== 0) return; // Only left click
+    const clientX = e.clientX ?? (e.touches && e.touches[0].clientX) ?? 0;
+    
+    isPointerDown = true;
+    isDragging = false;
+    totalDragDistance = 0;
+    startPointerX = clientX;
+    lastPointerX = clientX;
+    velocityX = 0;
+    isHovered = true;
+  };
+
+  // Pointer Move (Mouse or Touch)
+  const onPointerMove = (e) => {
+    if (!isPointerDown) return;
+    const clientX = e.clientX ?? (e.touches && e.touches[0].clientX) ?? 0;
+    const deltaX = clientX - lastPointerX;
+    
+    totalDragDistance += Math.abs(deltaX);
+
+    if (totalDragDistance > 6) {
+      isDragging = true;
+      carousel.classList.add("is-dragging");
+      track.classList.add("dragging");
+    }
+
+    // Direct movement:
+    // Dragging right (deltaX > 0) moves track right (reveals left projects)
+    // Dragging left (deltaX < 0) moves track left (reveals right projects)
+    currentPositionX += deltaX;
+    velocityX = deltaX; // Capture instantaneous velocity for smooth release momentum
+    lastPointerX = clientX;
+  };
+
+  // Pointer Up / Cancel
+  const onPointerUp = () => {
+    if (!isPointerDown) return;
+    isPointerDown = false;
+
+    carousel.classList.remove("is-dragging");
+    track.classList.remove("dragging");
+
+    // Check if pointer is still hovering over carousel
+    const isStillHovered = carousel.matches(":hover");
+    if (!isStillHovered) {
+      isHovered = false;
+    }
+
+    if (isDragging) {
+      setTimeout(() => {
+        isDragging = false;
+        totalDragDistance = 0;
+      }, 60);
+    } else {
+      isDragging = false;
+      totalDragDistance = 0;
+    }
+  };
+
+  // Mouse Listeners
+  carousel.addEventListener("mousedown", onPointerDown);
+  window.addEventListener("mousemove", onPointerMove);
+  window.addEventListener("mouseup", onPointerUp);
+
+  // Touch Listeners
+  carousel.addEventListener("touchstart", onPointerDown, { passive: true });
+  window.addEventListener("touchmove", onPointerMove, { passive: true });
+  window.addEventListener("touchend", onPointerUp, { passive: true });
+  window.addEventListener("touchcancel", onPointerUp, { passive: true });
+
+  // Window Resize
+  let resizeTimer = null;
+  window.addEventListener("resize", () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(updateHalfTrackWidth, 200);
+  }, { passive: true });
 }
 
 // --- INITIALIZE FILTER BUTTONS ---
 export function initProjectFilters() {
   const filterButtons = document.querySelectorAll(".filter-btn");
   const grid = document.getElementById("projects-grid");
+  const carousel = document.getElementById("projects-carousel");
   
   filterButtons.forEach(btn => {
-    btn.addEventListener("click", (e) => {
+    btn.addEventListener("click", () => {
       if (btn.classList.contains("active")) return;
       
       filterButtons.forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
       
       const filterValue = btn.dataset.filter;
+      const targetEl = carousel || grid;
       
-      if (grid) {
-        // Smooth fade-out and translation shift before rendering
-        grid.style.transition = "opacity 0.22s var(--ease-out-expo), transform 0.22s var(--ease-out-expo)";
-        grid.style.opacity = "0";
-        grid.style.transform = "translateY(12px)";
+      if (targetEl) {
+        // Smooth fade-out before rendering new filtered items
+        targetEl.style.transition = "opacity 0.2s var(--ease-out-expo)";
+        targetEl.style.opacity = "0.2";
         
         setTimeout(() => {
           renderProjects(filterValue);
-          grid.style.opacity = "1";
-          grid.style.transform = "translateY(0)";
+          targetEl.style.opacity = "1";
           window.dispatchEvent(new CustomEvent("recalc-offsets"));
-        }, 220);
+        }, 200);
       } else {
         renderProjects(filterValue);
         window.dispatchEvent(new CustomEvent("recalc-offsets"));
@@ -363,18 +587,23 @@ export function initializeSpotlightEffects(containerSelector = null) {
       const dx = x - w / 2;
       const dy = y - h / 2;
       
-      const rotateY = (dx / (w / 2)) * 5.5;
-      const rotateX = -(dy / (h / 2)) * 5.5;
+      const isProjectCard = card.classList.contains("project-card");
+      const elevationY = isProjectCard ? -8 : 0;
+      const elevationZ = isProjectCard ? 20 : 15;
+      const targetScale = isProjectCard ? 1.06 : 1.02;
       
-      card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translate3d(0, 0, 15px) scale(1.02)`;
+      card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translate3d(0, ${elevationY}px, ${elevationZ}px) scale(${targetScale})`;
       
       rafId = requestAnimationFrame(tick);
     }
     
     card.addEventListener("mouseenter", (e) => {
       rect = card.getBoundingClientRect();
+      if (card.classList.contains("project-card")) {
+        card.style.zIndex = "25";
+      }
       // Apply short interpolation during mouse tracking
-      card.style.transition = "transform 0.12s cubic-bezier(0.25, 0.8, 0.25, 1), border-color 0.2s ease, box-shadow 0.2s ease";
+      card.style.transition = "transform 0.15s cubic-bezier(0.25, 0.8, 0.25, 1), border-color 0.2s ease, box-shadow 0.2s ease";
       isInside = true;
       latestX = e.clientX;
       latestY = e.clientY;
@@ -394,8 +623,9 @@ export function initializeSpotlightEffects(containerSelector = null) {
       }
       rect = null;
       // Spring reset on mouse exit
-      card.style.transition = "transform 0.75s var(--ease-out-spring), border-color 0.4s ease, box-shadow 0.4s ease";
+      card.style.transition = "transform 0.65s var(--ease-out-spring), border-color 0.4s ease, box-shadow 0.4s ease";
       card.style.transform = "";
+      card.style.zIndex = "";
     }, { signal });
   });
 }

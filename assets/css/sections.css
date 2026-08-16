@@ -1180,14 +1180,42 @@ body.light-mode {
   box-shadow: 0 4px 15px rgba(var(--color-primary-rgb), 0.3);
 }
 
+.projects-carousel {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  padding: 2rem 0 2.5rem;
+  mask-image: linear-gradient(to right, transparent, black 6%, black 94%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 6%, black 94%, transparent);
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: pan-y;
+}
+
+.projects-carousel.is-dragging,
+.projects-carousel:active {
+  cursor: grabbing;
+}
+
+.projects-track,
 .projects-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  display: flex;
   gap: 2rem;
+  width: max-content;
+  will-change: transform;
+}
+
+.projects-track.dragging .project-card {
+  user-select: none;
+  pointer-events: none;
 }
 
 .project-card {
-  height: 400px;
+  width: 380px;
+  height: 410px;
+  flex-shrink: 0;
+  box-sizing: border-box;
   cursor: pointer;
   padding: 0;
   position: relative;
@@ -1197,17 +1225,63 @@ body.light-mode {
   flex-direction: column;
   background: rgba(18, 19, 28, 0.45);
   border: 1px solid var(--border-light);
-  animation: card-fade-in 0.6s var(--ease-out-expo) forwards;
+  transform-origin: center center;
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.35s ease, box-shadow 0.35s ease, opacity 0.3s ease;
 }
 
-@keyframes card-fade-in {
-  from {
-    opacity: 0;
-    transform: scale(0.96) translateY(20px);
+.project-card:hover,
+.project-card:focus-visible {
+  transform: scale(1.05) translateY(-8px);
+  z-index: 20;
+  border-color: var(--color-primary);
+  box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.8), 0 0 35px rgba(var(--color-primary-rgb), 0.35);
+}
+
+.projects-drag-hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  margin-top: 1.5rem;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  font-family: var(--font-heading);
+  letter-spacing: 0.02em;
+  padding: 0.5rem 1.25rem;
+  border-radius: var(--radius-full);
+  background: rgba(18, 19, 28, 0.4);
+  border: 1px solid var(--border-light);
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  animation: drag-hint-pulse 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.projects-drag-hint svg {
+  color: var(--color-primary);
+  animation: drag-hint-icon 2s ease-in-out infinite alternate;
+}
+
+@keyframes drag-hint-pulse {
+  0%, 100% {
+    opacity: 0.75;
+    transform: translateY(0);
   }
-  to {
+  50% {
     opacity: 1;
-    transform: scale(1) translateY(0);
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes drag-hint-icon {
+  0% {
+    transform: translateX(-3px);
+  }
+  100% {
+    transform: translateX(3px);
   }
 }
 
@@ -2486,9 +2560,9 @@ footer {
     display: none !important;
   }
   
-  .projects-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1.5rem;
+  .project-card {
+    width: 340px;
+    height: 400px;
   }
   
   /* Pause achievements infinite marquee on touch drag/press */
@@ -2719,8 +2793,16 @@ footer {
     transform: translate(-50%, -50%) !important;
   }
   
+  .projects-track,
   .projects-grid {
-    grid-template-columns: 1fr !important;
+    display: flex !important;
+    gap: 1.25rem !important;
+    grid-template-columns: none !important;
+  }
+
+  .project-card {
+    width: 295px;
+    height: 385px;
   }
 
   /* Horizontal swipe tabs for skill tags to preserve compact space */
