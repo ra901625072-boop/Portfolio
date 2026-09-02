@@ -2,56 +2,146 @@
 export const PROJECTS_DATA = [
   {
     id: 1,
-    title: "Multi-Agent Automation Agent",
+    title: "JARVIS 14-Agent Voice Assistant",
     category: "python-ai",
-    tags: ["Python", "AI", "Agentic Automation", "WebSockets"],
+    tags: ["Python", "LiveKit WebRTC", "Multi-Agent System", "ChromaDB", "FastAPI"],
     image: "assets/images/multi-agent-automation.jpg",
     client: "Personal Project / Open Source",
-    date: "July 2026",
-    role: "Lead Systems Architect",
-    demoUrl: "#",
+    date: "August 2026",
+    role: "Lead AI Systems Architect",
+    demoUrl: "https://github.com/ra901625072-boop/Jarvis-Voice-Assistant",
     githubUrl: "https://github.com/ra901625072-boop/Jarvis-Voice-Assistant",
-    description: `A voice- and text-mode automation assistant orchestrated using custom socket events and specialized AI sub-agents (Coding, Research, and Planning agents).`,
+    description: `A real-time, voice-enabled assistant powered by a 14-agent orchestration swarm, LiveKit WebRTC audio sessions, and a two-speed learning loop backed by SQLite and ChromaDB vector memory.`,
     body: `
       <div class="case-study-section">
         <h4><span class="cs-num">01</span> The Problem</h4>
-        <p>Current LLM solutions struggle with multi-step workflows, file-system operations, and dynamic searching without losing context or getting stuck in infinite execution loops. The challenge was to create an autonomous system that could plan, write, execute, test, and research concurrently under voice and text supervision.</p>
+        <p>Standard LLM assistants struggle with continuous hands-free voice interactions, multi-step system workflows, and persistent memory across execution sessions. The challenge was building an autonomous, self-healing system capable of routing commands across specialized domain agents with sub-500ms voice latency.</p>
       </div>
 
       <div class="case-study-section">
-        <h4><span class="cs-num">02</span> User Research & Requirements</h4>
-        <p>I interviewed developers and productivity power-users. They needed a hands-free assistant that could edit files, run test scripts, retrieve code documentations, and report back status via voice, without freezing the active workspace. This required high-concurrency event loops and real-time state synchronization.</p>
+        <h4><span class="cs-num">02</span> System Architecture & Swarm Design</h4>
+        <p>Engineered a <strong>14-Agent Orchestration Network</strong> where a central <strong>Supervisor Agent</strong> manages real-time session state and delegates work to 13 domain specialists on a high-throughput in-memory event bus (Coordinator, Planning, Execution, Verification, Recovery, Memory, Browser, Coding, Debugging, Integration, Vision, Interaction, and Language).</p>
       </div>
 
       <div class="case-study-section">
-        <h4><span class="cs-num">03</span> Design Decisions & Architecture</h4>
-        <p>I designed a <strong>hub-and-spoke multi-agent network</strong>. The central orchestrator (Jarvis) acts as the router, managing speech-to-text input, converting it into structured JSON tasks, and farming them out to specialized agents via custom WebSockets. High-performance asyncio loops keep the UI responsive during blocking local system executions.</p>
+        <h4><span class="cs-num">03</span> Two-Speed Real-Time Learning Loop</h4>
+        <p>Integrated a dual learning architecture:
+          <br/>• <strong>Fast Loop:</strong> Calculates instantaneous Exponential Moving Average (EMA) capability scores and tracks failure streaks immediately after each task.
+          <br/>• <strong>Slow Loop:</strong> A nightly memory consolidation pipeline (running via ChromaDB and SQLite) that cleans up stale context, decays old weights, and persists permanent behavioral lessons.
+        </p>
       </div>
 
       <div class="case-study-section">
         <h4><span class="cs-num">04</span> Technical Challenges & Solutions</h4>
-        <p><strong>Challenge (Concurrency Lock):</strong> Running terminal commands blocked the socket listener, causing voice input delays.</p>
-        <p><strong>Solution:</strong> Implemented a non-blocking subprocess runner using Python's <code>asyncio.create_subprocess_exec</code> and redirected standard outputs to a shared message queue, streaming console outputs line-by-line to the client browser in real-time.</p>
+        <p><strong>Challenge (Real-Time Audio Latency):</strong> Traditional HTTP/WebSocket audio polling introduced noticeable lags during voice command interactions.</p>
+        <p><strong>Solution:</strong> Deployed <strong>LiveKit WebRTC</strong> for bi-directional audio streaming paired with local Whisper transcription threads and FastAPI endpoints, lowering voice-to-action routing latency to under 400ms.</p>
       </div>
 
       <div class="case-study-section">
         <h4><span class="cs-num">05</span> Key Deliverables & Results</h4>
         <ul>
-          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> 3 specialized sub-agents communicating over a custom JSON-RPC websocket protocol.</li>
-          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Real-time streaming interface with markdown formatting and command execution outputs.</li>
-          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Voice command routing latency reduced to sub-500ms using local transcription threads.</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> 14 coordinated specialist agents operating over non-blocking asynchronous Python message buses.</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Persistent vector memory retrieval via ChromaDB with automated nightly consolidation.</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Self-healing recovery agent capable of diagnosing syntax/execution errors and verifying fixes automatically.</li>
         </ul>
       </div>
     `
   },
   {
     id: 2,
+    title: "FamDoc (Family Keepsake & Document Ecosystem)",
+    category: "full-stack",
+    tags: ["Android (Kotlin)", "Jetpack Compose", "FastAPI", "Google Drive API", "PostgreSQL"],
+    image: "assets/images/famdoc.png",
+    client: "Family & Personal Project",
+    date: "September 2026",
+    role: "Full-Stack & Mobile Developer",
+    demoUrl: "https://famdoc-ten.vercel.app",
+    githubUrl: "https://github.com/ra901625072-boop/FamDoc",
+    description: `Enterprise-grade resilient family document platform featuring a native Jetpack Compose Android app, FastAPI backend, multi-account Google Drive storage pooling, and dual-tier failover vault.`,
+    body: `
+      <div class="case-study-section">
+        <h4><span class="cs-num">01</span> The Problem</h4>
+        <p>Families require a secure, central location to preserve critical documents (identity records, property deeds, medical history, keepsakes). Existing cloud subscriptions are fragmented, lack family-code multi-tenancy, and pose privacy risks when unencrypted.</p>
+      </div>
+
+      <div class="case-study-section">
+        <h4><span class="cs-num">02</span> Multi-Account Storage Pooling & Dual-Tier Vault</h4>
+        <p>Architected a <strong>Multi-Account Storage Pooling Engine</strong> that connects multiple Google Drive storage quotas into a unified virtual vault. Implemented a <strong>Dual-Tier Resilient Storage Pipeline</strong>: direct streaming write to Google Drive with automatic failover to an encrypted local disk vault and a background sync worker that auto-promotes cached files once connectivity is restored.</p>
+      </div>
+
+      <div class="case-study-section">
+        <h4><span class="cs-num">03</span> Native Android App (Jetpack Compose & Kotlin)</h4>
+        <p>Built a companion native Android application following Modern Android Development (MAD) principles: Kotlin, Jetpack Compose, Material Design 3, Coroutine-based networking via Retrofit, Biometric authentication, and on-device thumbnail caching with dynamic preview loading animations.</p>
+      </div>
+
+      <div class="case-study-section">
+        <h4><span class="cs-num">04</span> Security & Encryption Architecture</h4>
+        <p>Integrated Fernet symmetric encryption for OAuth tokens and sensitive ID records. Applied single-session JWT enforcement (validating unique <code>jti</code> claims), role-based permissions (Admin vs Member), and SHA-256 vault code hashing.</p>
+      </div>
+
+      <div class="case-study-section">
+        <h4><span class="cs-num">05</span> Key Deliverables & Results</h4>
+        <ul>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Complete Native Android application with APK/AAB release build automation scripts.</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Multi-account Google Drive pooling multiplying storage capacity at zero subscription cost.</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Resilient offline-first upload queue with background failover and automatic retry sync.</li>
+        </ul>
+      </div>
+    `
+  },
+  {
+    id: 3,
+    title: "WISAXIS AI Resume Maker & ATS Optimizer",
+    category: "full-stack",
+    tags: ["Python", "Flask", "OpenRouter AI", "ATS Scorecard", "SQLAlchemy"],
+    image: "assets/images/resume-maker.png",
+    client: "SaaS Project / Internship Initiative",
+    date: "August 2026",
+    role: "Full-Stack & AI Engineer",
+    demoUrl: "https://resume-maker-zhcq.onrender.com",
+    githubUrl: "https://github.com/ra901625072-boop/Resume-Maker",
+    description: `Full-stack AI SaaS platform integrating OpenRouter AI (LLaMA 3.1 & Claude), CAR framework bullet generator, interactive career coach chat, real-time ATS scoring, and JSON extraction.`,
+    body: `
+      <div class="case-study-section">
+        <h4><span class="cs-num">01</span> The Problem</h4>
+        <p>Job seekers frequently struggle to craft resumes that pass modern Applicant Tracking Systems (ATS). Existing tools produce generic bullet points, lack real-time ATS feedback, and charge high subscriptions for basic formatting.</p>
+      </div>
+
+      <div class="case-study-section">
+        <h4><span class="cs-num">02</span> AI Integration & CAR Prompt Engineering</h4>
+        <p>Integrated <strong>OpenRouter API</strong> (supporting LLaMA 3.1, Claude 3.5, and GPT-4o models) through a modular <code>AIService</code> layer. Implemented prompt templates utilizing the <strong>CAR Framework</strong> (Challenge → Action → Result) to generate quantifiable, high-impact achievements tailored to specific job titles.</p>
+      </div>
+
+      <div class="case-study-section">
+        <h4><span class="cs-num">03</span> Real-Time ATS Scoring & AI Career Coach</h4>
+        <p>Developed an automated ATS compatibility evaluator returning structured JSON scores (0–100), key strengths, and keyword gap analysis. Built an interactive multi-turn career coach chatbot with sliding context-window management and per-user token auditing in SQLite/PostgreSQL.</p>
+      </div>
+
+      <div class="case-study-section">
+        <h4><span class="cs-num">04</span> Technical Challenges & Solutions</h4>
+        <p><strong>Challenge (Version Snapshots & PDF Fidelity):</strong> Users wanted to experiment with multiple templates without losing historical edits, while ensuring ATS-parseable vector exports.</p>
+        <p><strong>Solution:</strong> Created a <code>ResumeVersion</code> snapshot engine capturing JSON diffs on each save (up to 20 versions) and used CSS print media rules (<code>@media print</code>) for 100% vector-clean, ATS-parseable PDF downloads.</p>
+      </div>
+
+      <div class="case-study-section">
+        <h4><span class="cs-num">05</span> Key Deliverables & Results</h4>
+        <ul>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Complete SaaS suite: AI Summary Generator, CAR Bullet Creator, ATS Scorecard, and Chat Coach.</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> JSON resume parser & file extractor supporting multi-template dynamic switching.</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Mobile-first responsive UI with bottom-sheet navigation and electric sapphire theme.</li>
+        </ul>
+      </div>
+    `
+  },
+  {
+    id: 4,
     title: "Pali CBDC Portal",
     category: "full-stack",
-    tags: ["Python", "FastAPI", "SQL", "Dashboard"],
+    tags: ["Python", "FastAPI", "PostgreSQL", "Audit Logs", "Analytics"],
     image: "assets/images/cbdc-pali.png",
     client: "Panchayat Office (Pali)",
-    date: "March 2026",
+    date: "August 2026",
     role: "Full-Stack Freelance Developer",
     demoUrl: "https://pali-omega.vercel.app",
     githubUrl: "https://github.com/ra901625072-boop/pali",
@@ -64,37 +154,37 @@ export const PROJECTS_DATA = [
 
       <div class="case-study-section">
         <h4><span class="cs-num">02</span> User Research & Requirements</h4>
-        <p>Field research at the Panchayat office revealed that local staff operated on basic computing hardware with slow, unstable 3G/rural networks. The portal had to be extremely lightweight, require minimal assets to load, and feature an simple, error-resistant input interface.</p>
+        <p>Field research at the Panchayat office revealed that local staff operated on basic computing hardware with slow, unstable rural networks. The portal had to be extremely lightweight, require minimal assets to load, and feature a simple, error-resistant input interface.</p>
       </div>
 
       <div class="case-study-section">
         <h4><span class="cs-num">03</span> Design Decisions & Architecture</h4>
-        <p>I chose a <strong>FastAPI + SQLite architecture</strong> to ensure minimal memory overhead on the hosting tier, paired with raw SQL queries optimized with indexes for instant search lookups. The frontend was styled with vanilla CSS custom properties to build a highly semantic, responsive interface devoid of bloated frameworks.</p>
+        <p>Engineered a <strong>FastAPI + PostgreSQL</strong> backend architecture with automated database verification and seeding on startup. Raw SQL queries were tuned with custom composite indexes for instant search lookups. The frontend was built with responsive CSS custom properties to ensure rapid load times over mobile networks.</p>
       </div>
 
       <div class="case-study-section">
         <h4><span class="cs-num">04</span> Technical Challenges & Solutions</h4>
-        <p><strong>Challenge:</strong> Page timeouts during bulk records uploads via government CSV datasets.</p>
-        <p><strong>Solution:</strong> Developed a chunked parsing pipeline in Python that processes uploaded CSV datasets asynchronously, validates Aadhaar suffixes against hashing algorithms to prevent duplicates, and commits to the database in bulk batches of 500 rows inside a single database transaction context.</p>
+        <p><strong>Challenge:</strong> Page timeouts during bulk records uploads via government CSV datasets and duplicate entries.</p>
+        <p><strong>Solution:</strong> Developed an asynchronous chunked parsing pipeline in Python that processes uploaded CSV datasets in batches of 500 rows inside a single database transaction, validating Aadhaar suffixes against hashing algorithms to eliminate duplicates.</p>
       </div>
 
       <div class="case-study-section">
         <h4><span class="cs-num">05</span> Key Deliverables & Results</h4>
         <ul>
           <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Public search endpoint returning beneficiary status under 100ms over rural 3G networks.</li>
-          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Secure administrative authentication dashboard with role authorization layers.</li>
-          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Helped enroll over 10,000+ residents with 0 instances of duplicate entries recorded.</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Secure administrative authentication dashboard with role authorization and audit logging.</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Date-filtered export validation engine generating official compliance spreadsheets for over 10,000+ residents.</li>
         </ul>
       </div>
     `
   },
   {
-    id: 3,
-    title: "e-Grossary Mart",
+    id: 5,
+    title: "e-Grossary Mart (Inventory & Storefront)",
     category: "full-stack",
-    tags: ["Python", "FastAPI", "SQL", "E-commerce"],
+    tags: ["Python", "FastAPI", "SQLAlchemy", "E-commerce", "Chart.js"],
     image: "assets/images/e-grossary.png",
-    client: "Retail Grocery Client",
+    client: "Retail Wholesale Client",
     date: "May 2026",
     role: "Full-Stack Freelance Developer",
     demoUrl: "https://glossary-mart.onrender.com",
@@ -108,18 +198,18 @@ export const PROJECTS_DATA = [
 
       <div class="case-study-section">
         <h4><span class="cs-num">02</span> User Research & Requirements</h4>
-        <p>I mapped out the warehouse workflow. Key requirements included: real-time stock levels, automated low-stock flags triggering alerts, a simple supplier directory linked to items, and a digital storefront where retail clients could order products online.</p>
+        <p>Mapped out the warehouse workflow. Key requirements included: real-time stock levels, automated low-stock flags triggering alerts, a simple supplier directory linked to items, and a digital storefront where retail clients could order products online.</p>
       </div>
 
       <div class="case-study-section">
         <h4><span class="cs-num">03</span> Design Decisions & Architecture</h4>
-        <p>I engineered a dual-portal application. The <strong>Storefront Portal</strong> uses clean JS cart managers and session storage to provide a fast checkout. The <strong>Management Portal</strong> connects directly to the core inventory database via FastAPI routes, rendering historical sales metrics using Chart.js on a responsive admin dashboard.</p>
+        <p>Engineered a dual-portal application. The <strong>Storefront Portal</strong> uses clean JS cart managers and session storage to provide a fast checkout. The <strong>Management Portal</strong> connects directly to the core inventory database via FastAPI routes, rendering historical sales metrics using Chart.js on a responsive admin dashboard.</p>
       </div>
 
       <div class="case-study-section">
         <h4><span class="cs-num">04</span> Technical Challenges & Solutions</h4>
         <p><strong>Challenge:</strong> Inventory race conditions where multiple customers checked out the last item concurrently, causing database lock issues.</p>
-        <p><strong>Solution:</strong> Implemented database transaction locks (SELECT FOR UPDATE) using SQLAlchemy. When a customer adds items to a checkout session, the database locks the stock row, validates count availability, commits the decrement, and unlocks the row in under 5ms, avoiding overselling.</p>
+        <p><strong>Solution:</strong> Implemented database transaction locks (<code>SELECT FOR UPDATE</code>) using SQLAlchemy. When a customer adds items to a checkout session, the database locks the stock row, validates count availability, commits the decrement, and unlocks the row in under 5ms, avoiding overselling.</p>
       </div>
 
       <div class="case-study-section">
@@ -128,94 +218,6 @@ export const PROJECTS_DATA = [
           <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Automatic low-stock highlighting dashboard generating re-order spreadsheets.</li>
           <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Dynamic, interactive charts visualising daily sales revenues and product categories.</li>
           <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Reduced inventory leakage by 95% within the first month of system deployment.</li>
-        </ul>
-      </div>
-    `
-  },
-  {
-    id: 4,
-    title: "FamDoc (Family Document Manager)",
-    category: "full-stack",
-    tags: ["Python", "APIs", "SQL", "Cloud Storage"],
-    image: "assets/images/famdoc.png",
-    client: "Personal Project",
-    date: "January 2026",
-    role: "Lead Backend Developer",
-    demoUrl: "https://famdoc-ten.vercel.app",
-    githubUrl: "https://github.com/ra901625072-boop/FamDoc",
-    description: `A private document-sharing portal modeled after Google Drive. Families join using a unique family code, making uploaded documents instantly viewable and downloadable by all members.`,
-    body: `
-      <div class="case-study-section">
-        <h4><span class="cs-num">01</span> The Problem</h4>
-        <p>Family members often need to share critical documents (IDs, tax forms, certificates) but rely on unsecured messaging channels or scattered cloud storage folders, leading to constant requests and search fatigue.</p>
-      </div>
-
-      <div class="case-study-section">
-        <h4><span class="cs-num">02</span> User Research & Requirements</h4>
-        <p>Non-technical family members required an extremely simple interface. They wanted a central folder structure where uploading was a single-click action, documents could be tagged with custom labels (e.g. "Tax", "ID"), and search results were instant.</p>
-      </div>
-
-      <div class="case-study-section">
-        <h4><span class="cs-num">03</span> Design Decisions & Architecture</h4>
-        <p>To avoid hosting storage costs, I designed a <strong>hybrid backend proxy system</strong>. The FastAPI server acts as a directory index database and encryptor. The physical files are streamed directly to a private Google Drive folder and MEGA cloud vault using official REST APIs. A SQL ledger handles family membership codes, file ownership parameters, and tag indexes.</p>
-      </div>
-
-      <div class="case-study-section">
-        <h4><span class="cs-num">04</span> Technical Challenges & Solutions</h4>
-        <p><strong>Challenge:</strong> Storing sensitive documents (like Aadhaar/PAN cards) on third-party cloud directories raises critical privacy concerns.</p>
-        <p><strong>Solution:</strong> Integrated a Fernet symmetric key encryption layer. When a document is uploaded, it is encrypted in memory using a key generated from the family code before being pushed to the cloud APIs. Download requests fetch the raw payload and decrypt it on-the-fly, meaning files remain encrypted and unreadable on rest in Google/MEGA.</p>
-      </div>
-
-      <div class="case-study-section">
-        <h4><span class="cs-num">05</span> Key Deliverables & Results</h4>
-        <ul>
-          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Secure family registration system generating unique joining codes.</li>
-          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Zero-caching file streaming pipe using chunked responses for downloads.</li>
-          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Secure indexing engine allowing instant search by title, tags, or uploading date.</li>
-        </ul>
-      </div>
-    `
-  },
-  {
-    id: 5,
-    title: "Resume Maker",
-    category: "frontend",
-    tags: ["Python", "HTML/CSS/JS", "SQL", "Templates"],
-    image: "assets/images/resume-maker.png",
-    client: "Student Project",
-    date: "April 2026",
-    role: "Full-Stack Developer & Designer",
-    demoUrl: "https://resume-maker-zhcq.onrender.com",
-    githubUrl: "https://github.com/ra901625072-boop/Resume-Maker",
-    description: `A web application targeting students and design novices. Users enter their credentials and layout preferences to generate and download professional, formatted resumes.`,
-    body: `
-      <div class="case-study-section">
-        <h4><span class="cs-num">01</span> The Problem</h4>
-        <p>Many students entering the job market lack design skills or experience with formatting tools, resulting in poorly structured resumes. They need a simple, structured form that outputs a clean, ATS-friendly document.</p>
-      </div>
-
-      <div class="case-study-section">
-        <h4><span class="cs-num">02</span> User Research & Requirements</h4>
-        <p>Feedback from student groups indicated that MS Word template formatting frequently breaks when adding content. They wanted a tool where they could input raw details without worrying about spacing, columns, or pages, with real-time visual results.</p>
-      </div>
-
-      <div class="case-study-section">
-        <h4><span class="cs-num">03</span> Design Decisions & Architecture</h4>
-        <p>I built an interactive form alongside a <strong>live CSS template preview canvas</strong>. The UI is structured into modular sections (Education, Skills, Experience). I wrote vanilla CSS layouts (ATS-Classic and Modern-Grid) using print-specific stylesheets (<code>@media print</code>) to guarantee perfect pixel-to-paper alignment on export.</p>
-      </div>
-
-      <div class="case-study-section">
-        <h4><span class="cs-num">04</span> Technical Challenges & Solutions</h4>
-        <p><strong>Challenge:</strong> Dynamically converting the live HTML preview into a high-quality, selectable-text PDF without losing font weights or alignment layouts.</p>
-        <p><strong>Solution:</strong> Used browser-native print parsing rather than raster image canvas conversions (which make text non-searchable for ATS software). Configured layout templates to scale print margins dynamically, executing <code>window.print()</code> wrapped in print CSS wrappers to yield lightweight, vector-clean PDFs.</p>
-      </div>
-
-      <div class="case-study-section">
-        <h4><span class="cs-num">05</span> Key Deliverables & Results</h4>
-        <ul>
-          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Multi-step responsive wizard interface with input validations.</li>
-          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Dynamic CSS-variables customizer changing themes and sizing in real-time.</li>
-          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Vector-clean PDF exports that pass 100% of standard parser test checks.</li>
         </ul>
       </div>
     `
@@ -228,23 +230,28 @@ export const ACHIEVEMENTS_DATA = [
     id: 1,
     title: "Python Programming Mastery",
     issuer: "Independent Software Dev",
-    desc: "Demonstrated capacity to structure robust FastAPI backends, build multi-agent communication networks, and integrate complex third-party cloud storage APIs.",
+    desc: "Demonstrated capacity to structure robust FastAPI & Flask backends, orchestrate 14-agent AI communication swarms, and integrate complex cloud storage APIs.",
     icon: `<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>`
   },
   {
     id: 2,
-    title: "Web Dev Internship Certificate",
-    issuer: "Wixasis Pvt. Ltd.",
-    desc: "Earned formal certification following a 3-month intensive web engineering internship, delivering functional client-facing web application features.",
-    icon: `<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"></path></svg>`
+    title: "Native Android & Jetpack Compose",
+    issuer: "Mobile Engineering",
+    desc: "Engineered production Android apps using Kotlin, Jetpack Compose, Material Design 3, Coroutine networking, and on-device caching architectures.",
+    icon: `<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>`
   },
   {
     id: 3,
+    title: "Web Dev Internship Certificate",
+    issuer: "Wixasis Pvt. Ltd.",
+    desc: "Earned formal certification following an intensive web engineering internship, delivering functional client-facing web application features and AI integrations.",
+    icon: `<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"></path></svg>`
+  },
+  {
+    id: 4,
     title: "Ethical Hacking Certificate",
     issuer: "HNGU University",
     desc: "Awarded academic certification in security fundamentals, pen-testing techniques, network configuration, and vulnerability analysis.",
     icon: `<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.45 1-1 1H4v2h16v-2h-5c-.55 0-1-.45-1-1v-2.34"></path><path d="M12 2a4 4 0 0 1 4 4v7a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4z"></path></svg>`
   }
 ];
-
-

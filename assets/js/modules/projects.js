@@ -581,11 +581,13 @@ export function initializeSpotlightEffects(containerSelector = null) {
       card.style.setProperty("--mouse-x", `${x}px`);
       card.style.setProperty("--mouse-y", `${y}px`);
       
-      // Calculate 3D Tilt angles (maximum 5.5 degrees)
+      // Calculate 3D Tilt angles (maximum 4.5 degrees)
       const w = rect.width;
       const h = rect.height;
       const dx = x - w / 2;
       const dy = y - h / 2;
+      const rotateX = w > 0 && h > 0 ? ((-dy / (h / 2)) * 4.5).toFixed(2) : 0;
+      const rotateY = w > 0 && h > 0 ? ((dx / (w / 2)) * 4.5).toFixed(2) : 0;
       
       const isProjectCard = card.classList.contains("project-card");
       const elevationY = isProjectCard ? -8 : 0;

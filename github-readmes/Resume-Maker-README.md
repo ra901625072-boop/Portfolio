@@ -1,116 +1,61 @@
-# Resume Maker 📄🎨
+# WISAXIS AI Resume Maker & ATS Optimizer 📄⚡
 
-[![Python](https://img.shields.io/badge/Python-3.9%2B-blue?logo=python&logoColor=white)](https://python.org)
-[![SQLite](https://img.shields.io/badge/SQLite-Database-003B57?logo=sqlite&logoColor=white)](https://sqlite.org)
+[![Python](https://img.shields.io/badge/Python-3.11%2B-blue?logo=python&logoColor=white)](https://python.org)
+[![Flask](https://img.shields.io/badge/Flask-3.1-black?logo=flask&logoColor=white)](https://flask.palletsprojects.com)
+[![OpenRouter](https://img.shields.io/badge/OpenRouter-AI_LLaMA_3.1_%26_Claude-purple)](https://openrouter.ai)
+[![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-2.0-red?logo=sqlalchemy&logoColor=white)](https://www.sqlalchemy.org)
 [![Render](https://img.shields.io/badge/Render-Hosted-46E3B7?logo=render&logoColor=white)](https://resume-maker-zhcq.onrender.com)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-An interactive, responsive resume builder designed specifically for students and design novices. Users fill in structured forms with educational milestones, professional experience, and technical achievements. The system parses inputs in real-time, displaying customizable ATS-friendly layouts that can be exported directly as formatted PDF documents.
+A full-stack, AI-powered resume building and optimization platform built with **Flask 3.1**, **SQLAlchemy 2.0**, and **OpenRouter AI (LLaMA 3.1 & Claude 3.5)**. Includes automated ATS compatibility scoring, interactive AI career coach chat, CAR-framework bullet generator, and JSON Resume extraction.
 
 ---
 
-## 📸 Visuals & Screenshots
+## ✨ Features & AI Integrations
 
-*(Add screenshots of your system under `/screenshots`)*
-*   **Step-by-Step Profile Form:** `![Profile Form](./screenshots/home.png)`
-*   **Live Template Editor View:** `![Live Preview](./screenshots/dashboard.png)`
-*   **Mobile Form Layout:** `![Mobile Interface](./screenshots/mobile.png)`
-
----
-
-## ✨ Features
-
-*   **Multi-Step Data Form:** Intuitive, organized sections capturing Profile Info, Experience, Education, Projects, Skills, and Custom achievements.
-*   **Real-time Canvas Rendering:** Javascript parses form fields immediately and maps them onto design templates displayed side-by-side.
-*   **Customization Filters:** Change layout fonts (Inter, Roboto, Georgia), margins, colors, and category headers instantly.
-*   **ATS-Friendly Formats:** Pre-built templates structured according to common Applicant Tracking System (ATS) guidelines (using semantic layouts, sans tables).
-*   **PDF Export Engine:** Formats and prints cleanly via standard browser engines or backend rendering pipes.
+* **OpenRouter AI Integration:**
+  * **CAR Framework Experience Generator:** Transforms simple descriptions into quantifiable achievements using the Challenge → Action → Result methodology.
+  * **AI Professional Summary Writer:** Tailors summaries to specific target job titles and industry keywords.
+  * **AI Career Coach Chatbot:** Multi-turn interactive assistant providing personalized advice and token usage tracking.
+* **Real-Time ATS Compatibility Scorecard:**
+  * Analyzes resume text against standard ATS parsers, outputting an overall score (0–100), key strengths, and missing keyword suggestions.
+* **JSON Resume Parser & Extractor:**
+  * Upload existing PDF/DOCX resumes and extract structured JSON data using `pdfplumber` and `python-docx`.
+* **Version Snapshotting:**
+  * Automatically saves up to 20 immutable version snapshots with JSON diff rollbacks.
+* **Vector-Clean ATS PDF Export:**
+  * Uses CSS print styling rules for pure vector PDF rendering without messy HTML-to-image degradation.
 
 ---
 
 ## 🛠️ Tech Stack
 
-*   **Backend Interface:** Python 3.9+ & lightweight FastAPI
-*   **Database Schema:** SQLite (for storing user template preferences & saved resume fields)
-*   **Frontend Logic:** Vanilla CSS Custom Variables, Javascript DOM modules, HTML5
-*   **PDF Generation:** HTML Canvas printing triggers & `jsPDF` / print styling classes
-*   **Deployment:** Hosted on Render
-
----
-
-## 📂 Repository Structure
-
-```
-Resume-Maker/
-├── backend/
-│   ├── api/
-│   │   └── main.py          # Portals, routes and authentication handlers
-│   ├── database/
-│   │   ├── db.py            # SQLite connection setup
-│   │   └── models.py        # Resume data mapping tables
-├── frontend/
-│   ├── css/
-│   │   ├── forms.css        # Multi-step forms visual styling
-│   │   └── templates/
-│   │       ├── minimal.css   # ATS classic template style
-│   │       └── modern.css    # Two-column modern template style
-│   ├── js/
-│   │   ├── app.js           # Form controller and wizard navigation
-│   │   ├── templates.js     # Real-time preview canvas mapper
-│   │   └── exporter.js      # PDF compilation triggers
-│   ├── index.html           # Landing page
-│   └── builder.html         # Resume builder interface
-├── screenshots/             # Interface mockups
-├── requirements.txt         # Package dependencies list
-└── README.md                # System documentation
-```
+* **Backend:** Flask 3.1, SQLAlchemy 2.0, Werkzeug
+* **AI API Gateway:** OpenRouter API (Meta LLaMA 3.1 70B, Anthropic Claude 3.5 Sonnet)
+* **Database:** SQLite (local dev) / PostgreSQL (production)
+* **Frontend:** Modern CSS Variables (Electric Sapphire theme), Vanilla JS DOM controllers
+* **Document Extraction:** `pdfplumber`, `python-docx`
+* **Hosting:** Render PaaS
 
 ---
 
 ## 🚀 Installation & Local Setup
 
-### Prerequisites
-
-- Python 3.9+ installed.
-
-### 1. Clone the Repository
 ```bash
+# 1. Clone Repository
 git clone https://github.com/ra901625072-boop/Resume-Maker.git
 cd Resume-Maker
-```
 
-### 2. Set Up Local DB
-Create a `.env` file in the root directory:
-```env
-DATABASE_URL=sqlite:///./resumes.db
-SECRET_KEY=your_authentication_key_here
-PORT=8000
-```
-
-### 3. Install Dependencies
-```bash
+# 2. Virtual Environment
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+venv\Scripts\activate
 pip install -r requirements.txt
+
+# 3. Environment Variables (.env)
+# Create .env with:
+# OPENROUTER_API_KEY=your_key_here
+# SECRET_KEY=your_secret_key
+
+# 4. Start Server
+python app.py
 ```
-
-### 4. Run Application
-```bash
-uvicorn backend.api.main:app --reload
-```
-Navigate to `http://localhost:8000` to start building your resume.
-
----
-
-## 🗺️ Future Roadmap
-
-*   [ ] Add OpenAI integration to auto-suggest optimized bullet points for job descriptions.
-*   [ ] Introduce more resume templates (e.g., Creative, Academic CV).
-*   [ ] Support importing LinkedIn profiles to auto-fill resume fields.
-*   [ ] Provide grading metrics on resume completeness and layout health.
-
----
-
-## 📄 License
-
-Distributed under the MIT License. See [LICENSE](LICENSE) for details.

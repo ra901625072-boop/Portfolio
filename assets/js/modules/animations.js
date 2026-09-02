@@ -2,6 +2,7 @@ import { lenis } from "../app.js";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { EASE, DURATION, requestAnimationFrameCoalesce } from "./motion-tokens.js";
+import { initSpaceBackdrop } from "./space-backdrop.js";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -710,20 +711,23 @@ function initTimelineScrollHighlight() {
   const items = document.querySelectorAll(".timeline-item");
   if (!timeline || !progressLine) return;
 
-  // Animate the progress line scaleY (composited) with ScrollTrigger scrub
-  gsap.fromTo(progressLine,
-    { scaleY: 0 },
-    {
-      scaleY: 1,
-      ease: EASE.linear,
-      scrollTrigger: {
-        trigger: timeline,
-        start: "top 65%",
-        end: "bottom 65%",
-        scrub: 0.3,
-      }
+  // Set initial state with xPercent: -50 and transformOrigin: "top center" so GSAP keeps the line centered across all mobile/desktop screen sizes
+  gsap.set(progressLine, {
+    scaleY: 0,
+    xPercent: -50,
+    transformOrigin: "top center"
+  });
+
+  // Animate the progress line scaleY with ScrollTrigger scrub
+  ScrollTrigger.create({
+    trigger: timeline,
+    start: "top 75%",
+    end: "bottom 75%",
+    scrub: 0.25,
+    onUpdate: (self) => {
+      gsap.set(progressLine, { scaleY: self.progress });
     }
-  );
+  });
 
   // Animate individual timeline items
   items.forEach(item => {
@@ -731,8 +735,8 @@ function initTimelineScrollHighlight() {
     if (!dot) return;
 
     ScrollTrigger.create({
-      trigger: dot,
-      start: "top 65%",
+      trigger: item,
+      start: "top 75%",
       onEnter: () => {
         dot.classList.add("active");
         item.classList.add("illuminated");
@@ -743,6 +747,23 @@ function initTimelineScrollHighlight() {
       }
     });
   });
+
+  // Auto-refresh ScrollTrigger when section comes into view, on resize, orientation change, or site loaded
+  const experienceSection = document.getElementById("experience");
+  if (experienceSection) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          ScrollTrigger.refresh();
+        }
+      });
+    }, { threshold: [0.01, 0.2] });
+    observer.observe(experienceSection);
+  }
+
+  window.addEventListener("resize", () => ScrollTrigger.refresh(), { passive: true });
+  window.addEventListener("orientationchange", () => ScrollTrigger.refresh(), { passive: true });
+  document.addEventListener("site-loaded", () => ScrollTrigger.refresh());
 }// --- INTERACTIVE INFINITY BRUSH BACKGROUND ---
 function initInfinityAnimation() {
   const canvas = document.getElementById("hero-infinity-canvas");
@@ -1357,6 +1378,8 @@ function initHeroEntrance() {
 
 // --- INITIALIZE ALL ANIMATIONS ---
 export function initAnimations() {
+  initSpaceBackdrop();
+
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     document.body.classList.add("site-loaded");
 

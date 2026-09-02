@@ -1,42 +1,36 @@
-# FamDoc (Family Document Manager) 📂🔒
+# FamDoc (Family Keepsake & Document Management System) 📂🔒
 
-[![Python](https://img.shields.io/badge/Python-3.9%2B-blue?logo=python&logoColor=white)](https://python.org)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.98.0%2B-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
-[![Google Drive API](https://img.shields.io/badge/Google_Drive-API-4285F4?logo=googledrive&logoColor=white)](https://developers.google.com/drive)
-[![Vercel](https://img.shields.io/badge/Vercel-Hosted-000000?logo=vercel&logoColor=white)](https://famdoc-ten.vercel.app)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.0-7F52FF?logo=kotlin&logoColor=white)](https://kotlinlang.org)
+[![Android Jetpack Compose](https://img.shields.io/badge/Jetpack_Compose-Material_3-4285F4?logo=android&logoColor=white)](https://developer.android.com/jetpack/compose)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.111%2B-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![Google Drive API](https://img.shields.io/badge/Google_Drive-Multi--Account_Pooling-4285F4?logo=googledrive&logoColor=white)](https://developers.google.com/drive)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Supabase-316192?logo=postgresql&logoColor=white)](https://supabase.com)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-A private cloud storage sharing portal modeled after shared network directories. FamDoc allows users to create secured family spaces utilizing unique join codes. Any member of the family can securely upload, organize, search, and download critical records (tax forms, academic certificates, medical files) streamed directly to Google Drive and MEGA cloud backends.
+An enterprise-grade, resilient private cloud and keepsake management platform built with a companion **Native Android App (Kotlin & Jetpack Compose)** and a **FastAPI** backend with **Multi-Account Google Drive Storage Pooling** and automatic local-vault failover.
 
 ---
 
-## 📸 Visuals & Screenshots
+## ✨ System Architecture & Key Capabilities
 
-*(Add screenshots of your system under `/screenshots`)*
-*   **Family File Explorer Dashboard:** `![Dashboard View](./screenshots/home.png)`
-*   **Categorized File Search & Tags:** `![File Search](./screenshots/dashboard.png)`
-*   **Mobile view layout:** `![Mobile View](./screenshots/mobile.png)`
+1. **Native Android App (Modern Android Development - MAD):**
+   - Built entirely in **Kotlin** and **Jetpack Compose** using **Material Design 3**.
+   - Biometric fingerprint/face unlock for rapid and secure access.
+   - On-device thumbnail caching and dynamic preview loading animations.
+   - Coroutine-based networking via Retrofit with non-blocking async operations.
 
----
+2. **Multi-Account Storage Pooling Engine:**
+   - Aggregates multiple Google Drive storage account quotas into a single virtual family vault.
+   - Automatically distributes files across available pool buckets based on remaining quota.
 
-## ✨ Features
+3. **Dual-Tier Resilient Storage Pipeline:**
+   - Direct streaming write to Google Drive with automated failover to an encrypted local disk vault.
+   - Background worker auto-promotes cached files once external network connectivity is restored.
 
-*   **Secured Family Code Hub:** Create a secure family database partition. Family members join using a unique generated 8-digit alpha-numeric key.
-*   **Streamed Cloud Storage:** Uploads are streamed via chunks to external APIs (Google Drive and MEGA), saving server bandwidth and local storage footprints.
-*   **Aadhaar/Document Encryption:** Encrypts sensitive governmental IDs on rest using AES encryption protocols before transmission.
-*   **Elastic Tag-based Search:** Instant indexing allows sorting and searching documents by tags, uploader, date range, or title.
-*   **Permission Hierarchy:** Restrict delete capabilities to uploader or family creator roles.
-
----
-
-## 🛠️ Tech Stack
-
-*   **Backend framework:** FastAPI (Python 3.9+)
-*   **Storage APIs:** Google Workspace Drive API (v3), MegaPy API wrapper
-*   **Database:** SQLite & SQLAlchemy ORM
-*   **Encryption Layer:** Cryptography (Fernet symmetric key encryption)
-*   **Frontend Client:** HTML5, CSS3, ES6 Javascript
-*   **Deployment:** Render
+4. **Security & Encryption Layer:**
+   - Single-session JWT enforcement with unique `jti` validation.
+   - Fernet symmetric encryption for OAuth tokens and sensitive family records.
+   - Role-based access control (Admin vs Member) with immutable audit logs.
 
 ---
 
@@ -44,79 +38,44 @@ A private cloud storage sharing portal modeled after shared network directories.
 
 ```
 FamDoc/
-├── backend/
+├── android/                   # Native Android Jetpack Compose App
 │   ├── app/
-│   │   ├── config.py        # Environmental variables & third-party keys
-│   │   ├── database.py      # SQLite session connector
-│   │   ├── encryption.py    # AES encrypt/decrypt helpers
-│   │   ├── models.py        # SQLite User, Family, and File tables
-│   │   ├── routes/          # REST endpoints (auth, files, family code)
-│   │   └── services/        # Cloud upload engines (Google Drive & Mega)
-│   └── main.py              # Backend bootstrapper
-├── frontend/
-│   ├── css/
-│   │   └── dashboard.css    # Responsive directory grid styling
-│   ├── js/
-│   │   └── main.js          # DOM rendering, search filters, and AJAX uploads
-│   ├── dashboard.html       # Shared documents board
-│   └── index.html           # Login & Family Creation landing page
-├── docs/                    # Security configurations and API setup guide
-├── screenshots/             # Interface mockups
-├── requirements.txt         # Package dependencies list
-└── README.md                # System documentation
+│   │   ├── src/main/java/com/famdoc/
+│   │   │   ├── ui/screens/    # Compose UI (Home, Vault, Upload, Preview)
+│   │   │   ├── data/api/      # Retrofit client & API definitions
+│   │   │   └── util/          # Biometric & local caching helpers
+│   │   └── build.gradle.kts
+│   └── build_release.bat      # Automated APK/AAB release script
+├── backend/                   # FastAPI Backend
+│   ├── app/
+│   │   ├── config.py          # Multi-account Drive credentials & env
+│   │   ├── database.py        # Supabase PostgreSQL & SQLite engine
+│   │   ├── encryption.py      # Fernet AES token & file encryption
+│   │   ├── models/            # SQLAlchemy schemas (Family, User, File, Pool)
+│   │   ├── routes/            # REST API endpoints
+│   │   └── services/          # Multi-tenant Drive pooling & failover vault
+│   └── main.py                # Bootstrapper & background workers
+├── scripts/                   # Automated build & deployment batch scripts
+└── README.md
 ```
 
 ---
 
-## 🚀 Installation & Local Setup
+## 🚀 Getting Started
 
-### Prerequisites
-
-- Python 3.9+ installed.
-- Google Developer Console account with Drive API enabled & Credentials JSON downloaded.
-- MEGA account details.
-
-### 1. Clone the Repository
+### Backend Setup
 ```bash
 git clone https://github.com/ra901625072-boop/FamDoc.git
-cd FamDoc
-```
-
-### 2. Configure Environment
-Create a `.env` file in the root folder:
-```env
-DATABASE_URL=sqlite:///./famdoc.db
-FERNET_SECRET_KEY=your_generated_aes_key_here
-GOOGLE_APPLICATION_CREDENTIALS=credentials.json
-MEGA_USERNAME=your_mega_email@domain.com
-MEGA_PASSWORD=your_mega_password_here
-```
-Place your Google credentials json file in the root directory named `credentials.json`.
-
-### 3. Install Dependencies
-```bash
+cd FamDoc/backend
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+venv\Scripts\activate
 pip install -r requirements.txt
+uvicorn app.main:app --reload
 ```
 
-### 4. Run Application Server
+### Android App Build
 ```bash
-uvicorn backend.main:app --reload
+cd FamDoc/android
+./gradlew assembleRelease
+# or run scripts/build_apk.bat
 ```
-Open `http://localhost:8000` to access the application.
-
----
-
-## 🗺️ Future Roadmap
-
-*   [ ] Support file preview overlays (PDF, Images, Word files) directly in-app without downloading.
-*   [ ] Add temporary file share links with customizable expiration timers.
-*   [ ] Integrate push notifications when a family member uploads a new file.
-*   [ ] Build automated weekly file backup schedules.
-
----
-
-## 📄 License
-
-Distributed under the MIT License. See [LICENSE](LICENSE) for details.

@@ -493,22 +493,23 @@ body.light-mode {
 /* --- RESUME PREVIEW WINDOW MOCKUP --- */
 .about-resume-mockup {
   width: 100%;
-  background: rgba(10, 10, 14, 0.5);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(8, 8, 12, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-radius: var(--radius-lg);
-  border: 1px solid var(--border-light);
-  box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.8), 0 0 24px -6px rgba(225, 45, 51, 0.12);
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  transition: transform 0.6s var(--ease-out-expo), box-shadow 0.6s var(--ease-out-expo);
+  transition: transform 0.6s var(--ease-out-expo), box-shadow 0.6s var(--ease-out-expo), border-color 0.4s ease;
 }
 
 @media (hover: hover) {
   .about-image-container:hover .about-resume-mockup {
     transform: rotateY(-6deg) rotateX(6deg) scale(1.02);
-    box-shadow: -10px 25px 50px -10px rgba(0, 0, 0, 0.55);
+    box-shadow: -10px 25px 60px -10px rgba(0, 0, 0, 0.9), 0 0 35px -5px rgba(225, 45, 51, 0.2);
+    border-color: rgba(225, 45, 51, 0.4);
   }
 }
 
@@ -517,8 +518,8 @@ body.light-mode {
   align-items: center;
   padding: 0 1rem;
   height: 38px;
-  background: rgba(12, 12, 18, 0.9);
-  border-bottom: 1px solid var(--border-light);
+  background: rgba(10, 10, 14, 0.95);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .mockup-dots {
@@ -1028,10 +1029,10 @@ body.light-mode {
   content: '';
   position: absolute;
   left: 50%;
-  top: 0;
-  height: 100%;
+  top: 2rem;
+  bottom: 2rem;
   width: 2px;
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.12);
   transform: translateX(-50%);
   z-index: 1;
 }
@@ -1039,10 +1040,10 @@ body.light-mode {
 .timeline-progress-line {
   position: absolute;
   left: 50%;
-  top: 0;
+  top: 2rem;
+  bottom: 2rem;
   width: 2px;
-  height: 100%;
-  background: linear-gradient(to bottom, var(--color-primary), var(--color-secondary));
+  background: linear-gradient(to bottom, var(--color-primary), var(--color-primary-light));
   transform: translateX(-50%) scaleY(0);
   transform-origin: top center;
   z-index: 2;
@@ -1068,7 +1069,7 @@ body.light-mode {
   position: absolute;
   left: 50%;
   top: 2rem;
-  transform: translate(-50%, -20%);
+  transform: translate(-50%, -50%);
   z-index: 10;
   transition: var(--trans-normal);
 }
@@ -2766,9 +2767,27 @@ footer {
 
 /* --- MOBILE-ONLY STYLING (max-width: 768px) --- */
 @media (max-width: 768px) {
-  /* Correct mobile stacked timeline layout */
-  .timeline::before, .timeline-progress-line {
+  /* Correct mobile stacked timeline layout with aligned laser track */
+  .timeline {
+    padding: 1.5rem 0 !important;
+  }
+
+  .timeline::before {
     left: 20px !important;
+    top: 2rem !important;
+    bottom: 2rem !important;
+    width: 2px !important;
+    transform: translateX(-50%) !important;
+    height: auto !important;
+  }
+
+  .timeline-progress-line {
+    left: 20px !important;
+    top: 2rem !important;
+    bottom: 2rem !important;
+    width: 2px !important;
+    transform-origin: top center !important;
+    height: auto !important;
   }
   
   .timeline-item {
@@ -2776,6 +2795,11 @@ footer {
     left: 0 !important;
     padding-left: 3.5rem !important;
     padding-right: 0 !important;
+    margin-bottom: 3rem !important;
+  }
+
+  .timeline-item:last-child {
+    margin-bottom: 0 !important;
   }
   
   .timeline-item:nth-child(even) .timeline-content,
@@ -2783,13 +2807,14 @@ footer {
     width: 100% !important;
     text-align: left !important;
     float: none !important;
+    padding: 0 !important;
   }
   
   .timeline-item:nth-child(even) .timeline-dot,
   .timeline-item:nth-child(odd) .timeline-dot {
     left: 20px !important;
     right: auto !important;
-    top: 2.25rem !important;
+    top: 2rem !important;
     transform: translate(-50%, -50%) !important;
   }
   
