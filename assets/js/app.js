@@ -18,10 +18,10 @@ const isTouchDevice = window.matchMedia('(pointer: coarse)').matches || window.i
 export let lenis = null;
 if (!isTouchDevice) {
   lenis = new Lenis({
-    duration: 1.2,
+    duration: 0.85,
     easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // easeOutExpo
     smoothWheel: true,
-    wheelMultiplier: 1.0,
+    wheelMultiplier: 1.15,
     touchMultiplier: 1.5,
   });
 
@@ -880,13 +880,13 @@ function runLogoTakeover(preloader, preloaderLogo, callback) {
   document.documentElement.style.overflow = "";
   document.body.style.overflow = "";
 
-  // Play the takeover translation with a smooth, premium transition (Apple-style easeOutExpo but slightly slower)
-  navLogo.style.transition = "transform 1.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.9s ease-out";
+  // Play the takeover translation with a crisp, fluid Apple-style transition
+  navLogo.style.transition = "transform 0.75s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease-out";
   navLogo.style.transform = "translate3d(0, 0, 0) scale(1)";
 
   // Trigger callback (site-loaded event) early to choreograph page entrance with the logo takeover
   if (callback) {
-    setTimeout(callback, 550); // Sweet spot: page reveals smoothly mid-takeover
+    setTimeout(callback, 260); // Sweet spot: page reveals briskly mid-takeover
   }
 
   // Remove preloader curtain after it has fully faded out
@@ -899,7 +899,7 @@ function runLogoTakeover(preloader, preloaderLogo, callback) {
     navLogo.style.zIndex = "";
     // Notify all modules that layout positions have settled post-preloader
     window.dispatchEvent(new CustomEvent("recalc-offsets"));
-  }, 1400);
+  }, 800);
 }
 
 // --- INITIALIZE PRELOADER LOGIC (Logo Typing with Staggered Character Slide-Up) ---
@@ -937,7 +937,7 @@ function initPreloader(callback) {
   preloaderLogo.appendChild(dotNode);
 
   const isMobile = window.innerWidth <= 768;
-  const duration = isMobile ? 600 : 1000; // Accelerated 600ms reveal on mobile
+  const duration = isMobile ? 360 : 520; // Crisp 520ms reveal on desktop, 360ms on mobile
   const start = performance.now();
 
   function updateProgress(now) {

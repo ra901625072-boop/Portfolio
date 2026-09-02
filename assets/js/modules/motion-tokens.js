@@ -36,10 +36,10 @@ export const EASE = {
 };
 
 export const DURATION = {
-  reveal: 0.9,
-  stagger: 0.08,
-  pageTransition: 0.42,
-  themeReveal: 0.7
+  reveal: 0.65,
+  stagger: 0.06,
+  pageTransition: 0.35,
+  themeReveal: 0.45
 };
 
 // --- UTILITIES ---

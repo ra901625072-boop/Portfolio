@@ -50,11 +50,11 @@
   --ease-out-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   --ease-out-back: cubic-bezier(0.175, 0.885, 0.32, 1.1);
 
-  /* Transitions */
-  --trans-spring: 0.5s var(--ease-out-spring);
-  --trans-fast: 0.2s var(--ease-out-expo);
-  --trans-normal: 0.4s var(--ease-out-expo);
-  --trans-slow: 0.75s var(--ease-out-expo);
+  /* Transitions (Optimized for snappy, 120Hz-responsive micro-interactions) */
+  --trans-spring: 0.35s var(--ease-out-spring);
+  --trans-fast: 0.18s var(--ease-out-expo);
+  --trans-normal: 0.28s var(--ease-out-expo);
+  --trans-slow: 0.5s var(--ease-out-expo);
 }
 
 /* --- LIGHT MODE (Orbital Stratosphere Celestial Theme) --- */

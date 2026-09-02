@@ -723,7 +723,7 @@ function initTimelineScrollHighlight() {
     trigger: timeline,
     start: "top 75%",
     end: "bottom 75%",
-    scrub: 0.25,
+    scrub: 0.1,
     onUpdate: (self) => {
       gsap.set(progressLine, { scaleY: self.progress });
     }
@@ -1318,44 +1318,44 @@ function initHeroEntrance() {
 
     // Hero badge pops in
     tl.fromTo(".hero-badge",
-      { opacity: 0, y: 20, scale: 0.9 },
-      { opacity: 1, y: 0, scale: 1, duration: 0.9 },
-      0.1
+      { opacity: 0, y: 15, scale: 0.92 },
+      { opacity: 1, y: 0, scale: 1, duration: 0.55 },
+      0.05
     );
 
     // Hero title lines slide up from overflow-hidden clips
     tl.fromTo(".clip-text-el",
       { yPercent: 100, opacity: 0 },
-      { yPercent: 0, opacity: 1, duration: 1.1, stagger: 0.12, ease: EASE.expo },
-      0.2
+      { yPercent: 0, opacity: 1, duration: 0.75, stagger: 0.06, ease: EASE.expo },
+      0.12
     );
 
     // Hero description fades in
     tl.fromTo(".hero-description",
-      { opacity: 0, y: 25 },
-      { opacity: 1, y: 0, duration: 1.2 },
-      0.5
+      { opacity: 0, y: 18 },
+      { opacity: 1, y: 0, duration: 0.65 },
+      0.3
     );
 
     // Hero action buttons stagger in
     tl.fromTo(".hero-actions",
-      { opacity: 0, y: 20 },
-      { opacity: 1, y: 0, duration: 1.0 },
-      0.65
+      { opacity: 0, y: 15 },
+      { opacity: 1, y: 0, duration: 0.65 },
+      0.4
     );
 
     // Hero visual (avatar card + badges) entrance
     tl.fromTo(".hero-avatar-card",
-      { opacity: 0, scale: 0.85, y: 30 },
-      { opacity: 1, scale: 1, y: 0, duration: 1.2, ease: EASE.back },
-      0.3
+      { opacity: 0, scale: 0.9, y: 20 },
+      { opacity: 1, scale: 1, y: 0, duration: 0.75, ease: EASE.back },
+      0.2
     );
 
     // Floating badges pop in with spring overshoot
     tl.fromTo(".hero-floating-badge",
-      { opacity: 0, scale: 0, y: 20 },
+      { opacity: 0, scale: 0, y: 15 },
       {
-        opacity: 1, scale: 1, y: 0, duration: 0.8, ease: EASE.spring, stagger: 0.15,
+        opacity: 1, scale: 1, y: 0, duration: 0.55, ease: EASE.spring, stagger: 0.08,
         onComplete: () => {
           // Start the infinite float animations after entrance completes
           const badge1 = document.querySelector(".badge-1");
@@ -1364,14 +1364,14 @@ function initHeroEntrance() {
           if (badge2) badge2.classList.add("badge-float-2");
         }
       },
-      0.7
+      0.45
     );
 
     // Scroll indicator fades in last
     tl.fromTo(".scroll-down",
       { opacity: 0, y: -10 },
-      { opacity: 1, y: 0, duration: 0.8 },
-      1.0
+      { opacity: 1, y: 0, duration: 0.5 },
+      0.65
     );
   });
 }

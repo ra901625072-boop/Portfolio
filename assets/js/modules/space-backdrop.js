@@ -301,26 +301,29 @@ class SpaceBackdrop {
   }
 
   render() {
-    // Smooth lerp scroll offset
-    this.scrollY += (this.targetScrollY - this.scrollY) * 0.08;
+    const now = performance.now();
+    // Frame-rate independent delta time (clamped to prevent leap glitches)
+    const dt = Math.min((now - this.lastTime) / 1000, 0.05);
+    this.lastTime = now;
+
+    // High-refresh rate exponential decay (silky smooth at 60Hz-120Hz+ with zero trailing lag)
+    const mouseLerp = 1 - Math.exp(-14 * dt);
+    const scrollLerp = 1 - Math.exp(-22 * dt);
+
+    this.scrollY += (this.targetScrollY - this.scrollY) * scrollLerp;
     this.scrollVelocity = this.scrollY - this.lastScrollY;
     this.lastScrollY = this.scrollY;
 
-    // Smooth lerp mouse coordinates
-    this.mouse.x += (this.mouse.targetX - this.mouse.x) * 0.05;
-    this.mouse.y += (this.mouse.targetY - this.mouse.y) * 0.05;
+    this.mouse.x += (this.mouse.targetX - this.mouse.x) * mouseLerp;
+    this.mouse.y += (this.mouse.targetY - this.mouse.y) * mouseLerp;
 
     this.ctx.clearRect(0, 0, this.width, this.height);
 
     this.updateStarPositions();
 
-    const now = performance.now();
-    const timeDelta = (now - this.lastTime) / 1000;
-    this.lastTime = now;
-
-    // Cosmic speed stretch factor during rapid scrolling (Interstellar warp sensation)
+    // Cosmic speed stretch factor during rapid scrolling
     const absVelocity = Math.abs(this.scrollVelocity);
-    const stretchFactor = this.reducedMotion ? 1 : Math.min(2.5, 1 + absVelocity * 0.045);
+    const stretchFactor = this.reducedMotion ? 1 : Math.min(2.4, 1 + absVelocity * 0.045);
     const isWarping = stretchFactor > 1.08;
 
     // Update CSS custom property for subtle nebula parallax on scroll
