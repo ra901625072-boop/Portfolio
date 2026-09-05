@@ -391,7 +391,7 @@ flowchart TD
 | 2 | Pali CBDC Portal | full-stack | Panchayat Office (Pali) | [pali-omega.vercel.app](https://pali-omega.vercel.app) |
 | 3 | e-Grossary Mart | full-stack | Retail Grocery Client | [glossary-mart.onrender.com](https://glossary-mart.onrender.com) |
 | 4 | FamDoc (Family Document Manager) | full-stack | Personal Project | [famdoc-ten.vercel.app](https://famdoc-ten.vercel.app) |
-| 5 | Resume Maker | frontend | Student Project | [resume-maker-zhcq.onrender.com](https://resume-maker-zhcq.onrender.com) |
+| 5 | Resume Maker | frontend | Student Project | [resume-maker-five-bice.vercel.app](https://resume-maker-five-bice.vercel.app) |
 
 **Achievements documented:**
 1. Python Programming Mastery (Independent Software Dev)

@@ -333,94 +333,6 @@ function initSkillsTabs() {
   const tabBtns = document.querySelectorAll(".tab-btn");
   const tabPanes = document.querySelectorAll(".skills-pane");
 
-  const categoryIcons = {
-    design: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>`,
-    frontend: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M3 5V19A9 3 0 0 0 21 19V5"></path><path d="M3 12A9 3 0 0 0 21 12"></path></svg>`,
-    tools: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>`
-  };
-
-  function animateProgressRing(container) {
-    const fill = container.querySelector(".progress-ring-fill");
-    const tooltip = container.querySelector(".tab-tooltip");
-    const pct = parseInt(container.dataset.percentage, 10);
-    
-    if (fill && !isNaN(pct)) {
-      const radius = 14;
-      const circumference = 2 * Math.PI * radius; // ~88px
-      const offset = circumference - (pct / 100) * circumference;
-      
-      gsap.set(fill, { attr: { "stroke-dasharray": circumference, "stroke-dashoffset": circumference } });
-      
-      gsap.to(fill, {
-        attr: { "stroke-dashoffset": offset },
-        duration: 1.2,
-        ease: "power3.out",
-      });
-      
-      if (tooltip) {
-        animatePercentageText(tooltip, pct);
-      }
-    }
-  }
-
-  // Calculate and inject average percentage progress rings dynamically
-  tabBtns.forEach(btn => {
-    const targetTab = btn.dataset.tab;
-    const pane = document.getElementById(`${targetTab}-skills`);
-    if (pane) {
-      const fills = pane.querySelectorAll(".skill-bar-fill");
-      let total = 0;
-      let count = 0;
-      fills.forEach(f => {
-        const pct = parseInt(f.dataset.percentage, 10);
-        if (!isNaN(pct)) {
-          total += pct;
-          count++;
-        }
-      });
-      if (count > 0) {
-        const avg = Math.round(total / count);
-        
-        // Find existing svg chevron
-        const svg = btn.querySelector("svg");
-        
-        // Create side wrapper
-        const wrapper = document.createElement("span");
-        wrapper.className = "tab-side-wrapper";
-        
-        // Create progress circle container
-        const circleContainer = document.createElement("div");
-        circleContainer.className = "tab-progress-circle";
-        circleContainer.dataset.percentage = avg;
-        
-        circleContainer.innerHTML = `
-          <svg class="progress-ring" width="36" height="36">
-            <circle class="progress-ring-bg" stroke-width="2.5" fill="transparent" r="14" cx="18" cy="18" />
-            <circle class="progress-ring-fill" stroke-width="2.5" stroke-linecap="round" fill="transparent" r="14" cx="18" cy="18" />
-          </svg>
-          <div class="tab-icon">
-            ${categoryIcons[targetTab] || ""}
-          </div>
-          <span class="tab-tooltip">0%</span>
-        `;
-        
-        wrapper.appendChild(circleContainer);
-        if (svg) {
-          wrapper.appendChild(svg); // Automatically moves the SVG inside the wrapper
-        }
-        
-        btn.appendChild(wrapper);
-      }
-    }
-  });
-
-  // Trigger initial animation for all progress rings
-  setTimeout(() => {
-    document.querySelectorAll(".tab-progress-circle").forEach(container => {
-      animateProgressRing(container);
-    });
-  }, 150);
-
   function switchTab(btn) {
     if (btn.classList.contains("active")) return;
     const targetTab = btn.dataset.tab;
@@ -439,48 +351,22 @@ function initSkillsTabs() {
       if (pane.id === `${targetTab}-skills`) {
         pane.classList.add("active");
         
-        // Find skill bars in active pane
-        const fills = pane.querySelectorAll(".skill-bar-fill");
-        
-        // Reset scaleX to 0, keep target width statically (composited)
-        fills.forEach(f => {
-          const targetPct = parseInt(f.dataset.percentage, 10);
-          if (isNaN(targetPct)) return;
-          
-          gsap.set(f, { width: `${targetPct}%`, transformOrigin: "left center", scaleX: 0 });
-          
-          const wrapper = f.closest(".skill-bar-wrapper");
-          const labelPct = wrapper ? wrapper.querySelector(".skill-percentage") : null;
-          
-          let tooltip = f.querySelector(".skill-tooltip");
-          if (!tooltip) {
-            tooltip = document.createElement("span");
-            tooltip.className = "skill-tooltip";
-            f.appendChild(tooltip);
-          }
-          tooltip.innerText = "0%";
-          if (labelPct) labelPct.innerText = "0%";
-        });
-        
-        // Trigger GSAP draw-in and count-up animations with scaleX using unified expo ease
-        fills.forEach((f, idx) => {
-          const targetPct = parseInt(f.dataset.percentage, 10);
-          if (isNaN(targetPct)) return;
-          
-          gsap.to(f, {
-            scaleX: 1,
-            duration: 1.5,
-            delay: idx * 0.08,
-            ease: EASE.expo,
-            onStart: () => {
-              const wrapper = f.closest(".skill-bar-wrapper");
-              const labelPct = wrapper ? wrapper.querySelector(".skill-percentage") : null;
-              const tooltip = f.querySelector(".skill-tooltip");
-              if (tooltip) animatePercentageText(tooltip, targetPct);
-              if (labelPct) animatePercentageText(labelPct, targetPct);
+        // Stagger reveal tech cards with GSAP
+        const cards = pane.querySelectorAll(".skill-card");
+        if (cards.length > 0 && typeof gsap !== "undefined") {
+          gsap.fromTo(cards, 
+            { opacity: 0, y: 14, scale: 0.98 },
+            { 
+              opacity: 1, 
+              y: 0, 
+              scale: 1, 
+              duration: 0.4, 
+              stagger: 0.05, 
+              ease: "power2.out", 
+              clearProps: "transform" 
             }
-          });
-        });
+          );
+        }
       }
     });
   }
@@ -488,13 +374,6 @@ function initSkillsTabs() {
   tabBtns.forEach(btn => {
     btn.addEventListener("click", () => {
       switchTab(btn);
-    });
-    btn.addEventListener("mouseenter", () => {
-      switchTab(btn);
-      const container = btn.querySelector(".tab-progress-circle");
-      if (container) {
-        animateProgressRing(container);
-      }
     });
   });
 }

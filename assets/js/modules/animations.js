@@ -301,45 +301,29 @@ export function animatePercentageText(element, targetVal) {
   });
 }
 
-// --- GSAP SKILL BAR FILLING ---
+// --- GSAP SKILLS CARDS REVEAL ---
 let skillsAnimated = false;
 export function animateSkillsBars() {
   if (skillsAnimated) return;
   skillsAnimated = true;
 
-  const bars = document.querySelectorAll(".skill-bar-fill");
+  const activePane = document.querySelector(".skills-pane.active");
+  if (!activePane) return;
+  const cards = activePane.querySelectorAll(".skill-card");
+  if (cards.length === 0) return;
 
-  bars.forEach((bar, index) => {
-    const percent = parseInt(bar.dataset.percentage, 10);
-    if (isNaN(percent)) return;
-
-    const wrapper = bar.closest(".skill-bar-wrapper");
-    const labelPct = wrapper ? wrapper.querySelector(".skill-percentage") : null;
-
-    let tooltip = bar.querySelector(".skill-tooltip");
-    if (!tooltip) {
-      tooltip = document.createElement("span");
-      tooltip.className = "skill-tooltip";
-      bar.appendChild(tooltip);
-    }
-
-    // Reset width statically and animate scaleX (composited)
-    gsap.set(bar, { width: `${percent}%`, transformOrigin: "left center", scaleX: 0 });
-    tooltip.innerText = "0%";
-    if (labelPct) labelPct.innerText = "0%";
-
-    // Animate scaleX with stagger using unified expo ease
-    gsap.to(bar, {
-      scaleX: 1,
-      duration: 1.6,
-      delay: index * 0.08,
+  gsap.fromTo(cards, 
+    { opacity: 0, y: 16, scale: 0.96 },
+    {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      duration: DURATION.reveal,
+      stagger: 0.06,
       ease: EASE.expo,
-      onStart: () => {
-        if (tooltip) animatePercentageText(tooltip, percent);
-        if (labelPct) animatePercentageText(labelPct, percent);
-      }
-    });
-  });
+      clearProps: "transform"
+    }
+  );
 }
 
 // --- GSAP STATS COUNT-UP ---

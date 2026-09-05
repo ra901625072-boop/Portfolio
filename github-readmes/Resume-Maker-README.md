@@ -4,7 +4,7 @@
 [![Flask](https://img.shields.io/badge/Flask-3.1-black?logo=flask&logoColor=white)](https://flask.palletsprojects.com)
 [![OpenRouter](https://img.shields.io/badge/OpenRouter-AI_LLaMA_3.1_%26_Claude-purple)](https://openrouter.ai)
 [![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-2.0-red?logo=sqlalchemy&logoColor=white)](https://www.sqlalchemy.org)
-[![Render](https://img.shields.io/badge/Render-Hosted-46E3B7?logo=render&logoColor=white)](https://resume-maker-zhcq.onrender.com)
+[![Vercel](https://img.shields.io/badge/Vercel-Hosted-000000?logo=vercel&logoColor=white)](https://resume-maker-five-bice.vercel.app/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 A full-stack, AI-powered resume building and optimization platform built with **Flask 3.1**, **SQLAlchemy 2.0**, and **OpenRouter AI (LLaMA 3.1 & Claude 3.5)**. Includes automated ATS compatibility scoring, interactive AI career coach chat, CAR-framework bullet generator, and JSON Resume extraction.

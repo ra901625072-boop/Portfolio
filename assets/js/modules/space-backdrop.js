@@ -209,8 +209,8 @@ class SpaceBackdrop {
         depth,
         layer,
         hasFlare,
-        baseAlpha: 0.25 + depth * 0.65,
-        twinkleSpeed: 0.015 + Math.random() * 0.035,
+        baseAlpha: 0.16 + depth * 0.46, // Calmer ambient luminance so stars don't compete with text
+        twinkleSpeed: 0.008 + Math.random() * 0.018, // Slower, softer breathing twinkle (prevents eye distraction)
         twinklePhase: Math.random() * Math.PI * 2,
         parallaxFactor: (0.015 + depth * 0.04) * (this.isMobile ? 0.4 : 1.0),
         scrollFactor
@@ -359,10 +359,10 @@ class SpaceBackdrop {
         this.ctx.fill();
       }
 
-      // Draw 4-point diffraction spike flare for foreground bright stars (Layer 3)
+      // Draw subtle 4-point diffraction spike flare for foreground stars (Layer 3)
       if (star.hasFlare && star.layer === 3 && !isWarping) {
-        const flareSize = star.radius * 3.5;
-        const flareAlpha = alpha * 0.6;
+        const flareSize = star.radius * 2.0;
+        const flareAlpha = alpha * 0.28;
         this.ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${flareAlpha})`;
         this.ctx.lineWidth = 0.5;
 
@@ -378,10 +378,10 @@ class SpaceBackdrop {
         this.ctx.lineTo(star.x, star.y + flareSize);
         this.ctx.stroke();
 
-        // Soft stellar glow halo
-        this.ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${alpha * 0.15})`;
+        // Soft ambient stellar glow halo
+        this.ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${alpha * 0.08})`;
         this.ctx.beginPath();
-        this.ctx.arc(star.x, star.y, star.radius * 2.8, 0, Math.PI * 2);
+        this.ctx.arc(star.x, star.y, star.radius * 2.2, 0, Math.PI * 2);
         this.ctx.fill();
       }
     }
@@ -443,12 +443,12 @@ class SpaceBackdrop {
       const distToMouse = Math.hypot(starA.x - mouseX, starA.y - mouseY);
 
       if (distToMouse < connectDistance) {
-        const mouseAlpha = (1 - distToMouse / connectDistance) * (this.isLight ? 0.35 : 0.45);
+        const mouseAlpha = (1 - distToMouse / connectDistance) * (this.isLight ? 0.18 : 0.22);
         const { r, g, b } = starA.color;
 
         // Line to cursor
         this.ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${mouseAlpha})`;
-        this.ctx.lineWidth = 0.75;
+        this.ctx.lineWidth = 0.5;
         this.ctx.beginPath();
         this.ctx.moveTo(starA.x, starA.y);
         this.ctx.lineTo(mouseX, mouseY);

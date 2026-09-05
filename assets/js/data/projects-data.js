@@ -2,7 +2,7 @@
 export const PROJECTS_DATA = [
   {
     id: 1,
-    title: "JARVIS 14-Agent Voice Assistant",
+    title: "JARVIS 21-Agent Voice Assistant",
     category: "python-ai",
     tags: ["Python", "LiveKit WebRTC", "Multi-Agent System", "ChromaDB", "FastAPI"],
     image: "assets/images/multi-agent-automation.jpg",
@@ -11,7 +11,7 @@ export const PROJECTS_DATA = [
     role: "Lead AI Systems Architect",
     demoUrl: "https://github.com/ra901625072-boop/Jarvis-Voice-Assistant",
     githubUrl: "https://github.com/ra901625072-boop/Jarvis-Voice-Assistant",
-    description: `A real-time, voice-enabled assistant powered by a 14-agent orchestration swarm, LiveKit WebRTC audio sessions, and a two-speed learning loop backed by SQLite and ChromaDB vector memory.`,
+    description: `A real-time, voice-enabled assistant powered by a 21-agent orchestration swarm, LiveKit WebRTC audio sessions, and a two-speed learning loop backed by SQLite and ChromaDB vector memory.`,
     body: `
       <div class="case-study-section">
         <h4><span class="cs-num">01</span> The Problem</h4>
@@ -20,7 +20,7 @@ export const PROJECTS_DATA = [
 
       <div class="case-study-section">
         <h4><span class="cs-num">02</span> System Architecture & Swarm Design</h4>
-        <p>Engineered a <strong>14-Agent Orchestration Network</strong> where a central <strong>Supervisor Agent</strong> manages real-time session state and delegates work to 13 domain specialists on a high-throughput in-memory event bus (Coordinator, Planning, Execution, Verification, Recovery, Memory, Browser, Coding, Debugging, Integration, Vision, Interaction, and Language).</p>
+        <p>Engineered a <strong>21-Agent Orchestration Network</strong> where a central <strong>Supervisor Agent</strong> manages real-time session state and delegates work to 20 domain specialists on a high-throughput in-memory event bus (Coordinator, Planning, Execution, Verification, Recovery, Memory, Browser, Coding, Debugging, Integration, Vision, Interaction, and Language).</p>
       </div>
 
       <div class="case-study-section">
@@ -34,13 +34,13 @@ export const PROJECTS_DATA = [
       <div class="case-study-section">
         <h4><span class="cs-num">04</span> Technical Challenges & Solutions</h4>
         <p><strong>Challenge (Real-Time Audio Latency):</strong> Traditional HTTP/WebSocket audio polling introduced noticeable lags during voice command interactions.</p>
-        <p><strong>Solution:</strong> Deployed <strong>LiveKit WebRTC</strong> for bi-directional audio streaming paired with local Whisper transcription threads and FastAPI endpoints, lowering voice-to-action routing latency to under 400ms.</p>
+        <p><strong>Solution:</strong> Deployed <strong>LiveKit WebRTC</strong> for bi-directional audio streaming paired with Google Gemini Multimodal Live API and FastAPI endpoints, enabling low-latency real-time voice interaction.</p>
       </div>
 
       <div class="case-study-section">
         <h4><span class="cs-num">05</span> Key Deliverables & Results</h4>
         <ul>
-          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> 14 coordinated specialist agents operating over non-blocking asynchronous Python message buses.</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> 21 coordinated specialist agents operating over non-blocking asynchronous Python message buses.</li>
           <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Persistent vector memory retrieval via ChromaDB with automated nightly consolidation.</li>
           <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Self-healing recovery agent capable of diagnosing syntax/execution errors and verifying fixes automatically.</li>
         </ul>
@@ -72,7 +72,7 @@ export const PROJECTS_DATA = [
 
       <div class="case-study-section">
         <h4><span class="cs-num">03</span> Native Android App (Jetpack Compose & Kotlin)</h4>
-        <p>Built a companion native Android application following Modern Android Development (MAD) principles: Kotlin, Jetpack Compose, Material Design 3, Coroutine-based networking via Retrofit, Biometric authentication, and on-device thumbnail caching with dynamic preview loading animations.</p>
+        <p>Built a companion native Android application following Modern Android Development (MAD) principles: Kotlin, Jetpack Compose, Material Design 3, Coroutine-based networking via Retrofit, encrypted token storage, and on-device thumbnail caching with dynamic preview loading animations.</p>
       </div>
 
       <div class="case-study-section">
@@ -99,7 +99,7 @@ export const PROJECTS_DATA = [
     client: "SaaS Project / Internship Initiative",
     date: "August 2026",
     role: "Full-Stack & AI Engineer",
-    demoUrl: "https://resume-maker-zhcq.onrender.com",
+    demoUrl: "https://resume-maker-five-bice.vercel.app",
     githubUrl: "https://github.com/ra901625072-boop/Resume-Maker",
     description: `Full-stack AI SaaS platform integrating OpenRouter AI (LLaMA 3.1 & Claude), CAR framework bullet generator, interactive career coach chat, real-time ATS scoring, and JSON extraction.`,
     body: `
@@ -138,14 +138,14 @@ export const PROJECTS_DATA = [
     id: 4,
     title: "Pali CBDC Portal",
     category: "full-stack",
-    tags: ["Python", "FastAPI", "PostgreSQL", "Audit Logs", "Analytics"],
+    tags: ["Node.js", "Express", "Vercel Serverless", "Audit Logs", "Analytics"],
     image: "assets/images/cbdc-pali.png",
     client: "Panchayat Office (Pali)",
     date: "August 2026",
     role: "Full-Stack Freelance Developer",
     demoUrl: "https://pali-omega.vercel.app",
     githubUrl: "https://github.com/ra901625072-boop/pali",
-    description: `A localized web application built to track beneficiary enrollment and validation for the Central Bank Digital Currency (CBDC) rollout in Pali, featuring secure administrative analytics.`,
+    description: `A localized web application built to track beneficiary enrollment and validation for the Central Bank Digital Currency (CBDC) rollout in Pali village, featuring secure administrative analytics and date-filtered exports.`,
     body: `
       <div class="case-study-section">
         <h4><span class="cs-num">01</span> The Problem</h4>
@@ -159,13 +159,13 @@ export const PROJECTS_DATA = [
 
       <div class="case-study-section">
         <h4><span class="cs-num">03</span> Design Decisions & Architecture</h4>
-        <p>Engineered a <strong>FastAPI + PostgreSQL</strong> backend architecture with automated database verification and seeding on startup. Raw SQL queries were tuned with custom composite indexes for instant search lookups. The frontend was built with responsive CSS custom properties to ensure rapid load times over mobile networks.</p>
+        <p>Engineered a <strong>Node.js + Express</strong> backend architecture with JSON-based data persistence and automated data store initialization on startup. Search lookups were optimized for instant filtering across beneficiary records. The frontend was built with responsive CSS custom properties to ensure rapid load times over mobile networks.</p>
       </div>
 
       <div class="case-study-section">
         <h4><span class="cs-num">04</span> Technical Challenges & Solutions</h4>
-        <p><strong>Challenge:</strong> Page timeouts during bulk records uploads via government CSV datasets and duplicate entries.</p>
-        <p><strong>Solution:</strong> Developed an asynchronous chunked parsing pipeline in Python that processes uploaded CSV datasets in batches of 500 rows inside a single database transaction, validating Aadhaar suffixes against hashing algorithms to eliminate duplicates.</p>
+        <p><strong>Challenge:</strong> Ensuring accurate beneficiary tracking without duplicate enrollments across repeated manual data entry sessions.</p>
+        <p><strong>Solution:</strong> Implemented server-side validation logic with unique identifier checks and structured audit logging to prevent duplicate registrations and maintain data integrity across sessions.</p>
       </div>
 
       <div class="case-study-section">
@@ -173,7 +173,7 @@ export const PROJECTS_DATA = [
         <ul>
           <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Public search endpoint returning beneficiary status under 100ms over rural 3G networks.</li>
           <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Secure administrative authentication dashboard with role authorization and audit logging.</li>
-          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Date-filtered export validation engine generating official compliance spreadsheets for over 10,000+ residents.</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Date-filtered export validation engine generating official compliance spreadsheets for 270+ village beneficiaries.</li>
         </ul>
       </div>
     `
@@ -182,7 +182,7 @@ export const PROJECTS_DATA = [
     id: 5,
     title: "e-Grossary Mart (Inventory & Storefront)",
     category: "full-stack",
-    tags: ["Python", "FastAPI", "SQLAlchemy", "E-commerce", "Chart.js"],
+    tags: ["Python", "Flask", "SQLAlchemy", "E-commerce", "Chart.js"],
     image: "assets/images/e-grossary.png",
     client: "Retail Wholesale Client",
     date: "May 2026",
@@ -203,7 +203,7 @@ export const PROJECTS_DATA = [
 
       <div class="case-study-section">
         <h4><span class="cs-num">03</span> Design Decisions & Architecture</h4>
-        <p>Engineered a dual-portal application. The <strong>Storefront Portal</strong> uses clean JS cart managers and session storage to provide a fast checkout. The <strong>Management Portal</strong> connects directly to the core inventory database via FastAPI routes, rendering historical sales metrics using Chart.js on a responsive admin dashboard.</p>
+        <p>Engineered a dual-portal application. The <strong>Storefront Portal</strong> uses clean JS cart managers and session storage to provide a fast checkout. The <strong>Management Portal</strong> connects directly to the core inventory database via Flask routes, rendering historical sales metrics using Chart.js on a responsive admin dashboard.</p>
       </div>
 
       <div class="case-study-section">
