@@ -471,7 +471,7 @@ User fills form fields
               │
               ├── Button enters loading state ("Sending Message...")
               │
-              ├── fetch POST → https://formsubmit.co/ajax/ra901625072@gmail.com
+              ├── fetch POST → https://formsubmit.co/ajax/rajput.akshay.dev@gmail.com
               │   ├── Headers: Content-Type: application/json, Accept: application/json
               │   └── Body: { Name, Email, Subject, Message }
               │
@@ -558,7 +558,7 @@ Page loads → initVisitorCounter()
 | **Service** | FormSubmit.co |
 | **Purpose** | Serverless email delivery for contact form submissions |
 | **Integration method** | AJAX POST via `fetch()` |
-| **Endpoint** | `https://formsubmit.co/ajax/ra901625072@gmail.com` |
+| **Endpoint** | `https://formsubmit.co/ajax/rajput.akshay.dev@gmail.com` |
 | **Authentication** | None (identified by email in URL path) |
 | **Data sent** | `{ Name, Email, Subject, Message }` as JSON |
 | **Data received** | JSON response with success/error status |
@@ -687,7 +687,7 @@ Not applicable to this project. This is a static portfolio website with no user 
 
 | Concern | Severity | Details |
 | :--- | :--- | :--- |
-| **Personal information exposure** | Low | Phone number (`9313840278`), email (`ra901625072@gmail.com`), and physical address are publicly visible in HTML source and resume. This is intentional for a portfolio site but worth noting. |
+| **Personal information exposure** | Low | Phone number (`9313840278`), email (`rajput.akshay.dev@gmail.com`), and physical address are publicly visible in HTML source and resume. This is intentional for a portfolio site but worth noting. |
 | **Visitor counter manipulation** | Low | CounterAPI endpoint is publicly accessible and has no authentication — anyone can call it to inflate the count. No per-user deduplication exists. |
 | **FormSubmit email exposure** | Low | The email address is visible in the FormSubmit API URL in JavaScript source. This is by design for FormSubmit but could be a spam vector. |
 
@@ -1020,7 +1020,7 @@ No `.env` files or environment variable usage was found in the codebase. All con
 
 | Configuration | Value | Location | Notes |
 | :--- | :--- | :--- | :--- |
-| FormSubmit target email | `ra901625072@gmail.com` | `app.js` | Hardcoded in fetch URL |
+| FormSubmit target email | `rajput.akshay.dev@gmail.com` | `app.js` | Hardcoded in fetch URL |
 | CounterAPI namespace | `portfolioakshay` | `app.js` | Hardcoded in fetch URL |
 | CounterAPI key | `visitors` | `app.js` | Hardcoded in fetch URL |
 | Canonical domain | `portfolioakshay.in` | `index.html`, `sitemap.xml`, `robots.txt` | Hardcoded in meta tags |
@@ -1203,7 +1203,7 @@ User navigates to Contact section
      │   │   └── Error → "Send Failed" toast + button restored
      │   └── Toast auto-dismisses after 4.5 seconds
      │
-     └── Message delivered to ra901625072@gmail.com
+     └── Message delivered to rajput.akshay.dev@gmail.com
 ```
 
 ### Flow 4: Theme Switching
@@ -1334,7 +1334,7 @@ This is a **static single-page portfolio website**. Scalability in the tradition
 | **Severity** | Low |
 | **Current behavior** | Form submission is intercepted by JavaScript; the `action="#"` is never used |
 | **Impact** | No functional issue, but could be confusing. If JavaScript fails, form would submit to `#` (current page) |
-| **Possible solution** | Set `action="https://formsubmit.co/ra901625072@gmail.com"` as progressive enhancement fallback |
+| **Possible solution** | Set `action="https://formsubmit.co/rajput.akshay.dev@gmail.com"` as progressive enhancement fallback |
 
 ---
 

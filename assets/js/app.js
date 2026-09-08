@@ -541,7 +541,7 @@ function initContactForm() {
     if (btnText) btnText.innerText = "Sending Message...";
 
     // Real API request to FormSubmit AJAX endpoint
-    fetch("https://formsubmit.co/ajax/ra901625072@gmail.com", {
+    fetch("https://formsubmit.co/ajax/rajput.akshay.dev@gmail.com", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

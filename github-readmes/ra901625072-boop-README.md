@@ -1,4 +1,4 @@
-﻿<div align="center">
+<div align="center">
 
 # 👋 Hi, I'm Akshaysinh Rajput
 
@@ -7,7 +7,7 @@
 <p align="center">
   <a href="https://portfolioakshay.in"><img src="https://img.shields.io/badge/🌐_Live_Portfolio-portfolioakshay.in-9333ea?style=for-the-badge&logoColor=white" alt="Live Portfolio" /></a>
   <a href="https://www.linkedin.com/in/akshaysinh-rajput-8a575532b/"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn" /></a>
-  <a href="mailto:ra901625072@gmail.com"><img src="https://img.shields.io/badge/Email-ra901625072@gmail.com-EA4335?style=for-the-badge&logo=gmail&logoColor=white" alt="Email" /></a>
+  <a href="mailto:rajput.akshay.dev@gmail.com"><img src="https://img.shields.io/badge/Email-rajput.akshay.dev@gmail.com-EA4335?style=for-the-badge&logo=gmail&logoColor=white" alt="Email" /></a>
   <a href="https://wa.me/919313840278"><img src="https://img.shields.io/badge/WhatsApp-+91_9313840278-25D366?style=for-the-badge&logo=whatsapp&logoColor=white" alt="WhatsApp" /></a>
 </p>
 
@@ -147,7 +147,7 @@ I am a **Python Developer**, **Full-Stack Engineer**, and **Native Android Devel
   <p>I am open to collaborations on full-stack web/mobile engineering, agentic AI architecture, and high-impact developer tools.</p>
   <a href="https://portfolioakshay.in"><img src="https://img.shields.io/badge/Portfolio-portfolioakshay.in-9333ea?style=for-the-badge&logo=google-chrome&logoColor=white" /></a>
   <a href="https://www.linkedin.com/in/akshaysinh-rajput-8a575532b/"><img src="https://img.shields.io/badge/LinkedIn-Akshaysinh_Rajput-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" /></a>
-  <a href="mailto:ra901625072@gmail.com"><img src="https://img.shields.io/badge/Email-ra901625072@gmail.com-EA4335?style=for-the-badge&logo=gmail&logoColor=white" /></a>
+  <a href="mailto:rajput.akshay.dev@gmail.com"><img src="https://img.shields.io/badge/Email-rajput.akshay.dev@gmail.com-EA4335?style=for-the-badge&logo=gmail&logoColor=white" /></a>
   <a href="https://wa.me/919313840278"><img src="https://img.shields.io/badge/WhatsApp-+91_9313840278-25D366?style=for-the-badge&logo=whatsapp&logoColor=white" /></a>
 </div>
 
