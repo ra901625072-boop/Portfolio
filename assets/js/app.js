@@ -345,6 +345,23 @@ function initSkillsTabs() {
     btn.classList.add("active");
     btn.setAttribute("aria-selected", "true");
 
+    // Smoothly scroll active tab into view ONLY within its .skills-tabs container rail
+    const tabsContainer = btn.closest(".skills-tabs");
+    if (tabsContainer && tabsContainer.scrollWidth > tabsContainer.clientWidth) {
+      const containerWidth = tabsContainer.clientWidth;
+      const btnOffset = btn.offsetLeft;
+      const btnWidth = btn.clientWidth;
+      const targetScrollLeft = btnOffset - (containerWidth / 2) + (btnWidth / 2);
+      tabsContainer.scrollTo({
+        left: Math.max(0, targetScrollLeft),
+        behavior: "smooth"
+      });
+    }
+    // Guarantee page never shifts horizontally
+    if (window.scrollX !== 0) {
+      window.scrollTo({ left: 0, top: window.scrollY });
+    }
+
     // Show/Hide Panes
     tabPanes.forEach(pane => {
       pane.classList.remove("active");
@@ -376,6 +393,27 @@ function initSkillsTabs() {
       switchTab(btn);
     });
   });
+
+  // Arrow key navigation between tabs for accessibility
+  const tabsList = document.querySelector(".skills-tabs");
+  if (tabsList) {
+    tabsList.addEventListener("keydown", (e) => {
+      if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+      const currentTab = document.activeElement;
+      const index = Array.from(tabBtns).indexOf(currentTab);
+      if (index === -1) return;
+
+      e.preventDefault();
+      let nextIndex;
+      if (e.key === "ArrowRight") {
+        nextIndex = (index + 1) % tabBtns.length;
+      } else {
+        nextIndex = (index - 1 + tabBtns.length) % tabBtns.length;
+      }
+      tabBtns[nextIndex].focus();
+      switchTab(tabBtns[nextIndex]);
+    });
+  }
 }
 
 // --- TOAST NOTIFICATIONS SYSTEM ---

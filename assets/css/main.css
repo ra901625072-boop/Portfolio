@@ -156,7 +156,8 @@ body.light-mode .bg-glow-orb {
 html {
   scrollbar-width: thin;
   scrollbar-color: var(--color-primary) var(--bg-primary);
-  overflow-x: hidden;
+  overflow-x: clip;
+  max-width: 100%;
 }
 
 /* Lenis smooth scrolling support */
@@ -177,7 +178,8 @@ body {
   color: var(--text-primary);
   font-family: var(--font-body);
   line-height: 1.6;
-  overflow-x: hidden;
+  overflow-x: clip;
+  max-width: 100%;
 }
 
 /* Custom Scrollbar */
