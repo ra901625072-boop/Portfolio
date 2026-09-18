@@ -1,5 +1,7 @@
 import { PROJECTS_DATA, ACHIEVEMENTS_DATA } from "../data/projects-data.js";
 import { lenis } from "../app.js";
+import gsap from "gsap";
+import { EASE } from "./motion-tokens.js";
 
 // --- INFINITE MARQUEE & DRAG CAROUSEL STATE ---
 let currentPositionX = 0;
@@ -71,7 +73,9 @@ function startCarouselTicker() {
       }
     }
 
-    track.style.transform = `translate3d(${currentPositionX}px, 0, 0)`;
+    // Dynamic aerodynamic drag banking: tilt track subtly in direction of movement
+    const bankAngle = Math.max(-3.5, Math.min(3.5, velocityX * 0.18));
+    track.style.transform = `translate3d(${currentPositionX.toFixed(1)}px, 0, 0) rotateZ(${bankAngle.toFixed(2)}deg)`;
 
     animationFrameId = requestAnimationFrame(tick);
   }
@@ -307,13 +311,15 @@ export function initProjectFilters() {
       const targetEl = carousel || grid;
       
       if (targetEl) {
-        // Smooth fade-out before rendering new filtered items
-        targetEl.style.transition = "opacity 0.2s var(--ease-out-expo)";
+        // Smooth scale-fade out before rendering new filtered items
+        targetEl.style.transition = "opacity 0.2s var(--ease-out-expo), transform 0.2s var(--ease-out-expo)";
         targetEl.style.opacity = "0.2";
+        targetEl.style.transform = "scale(0.98)";
         
         setTimeout(() => {
           renderProjects(filterValue);
           targetEl.style.opacity = "1";
+          targetEl.style.transform = "scale(1)";
           window.dispatchEvent(new CustomEvent("recalc-offsets"));
         }, 200);
       } else {
@@ -345,7 +351,20 @@ function setupModalOverlayListeners(modalOverlay, modalWrapper) {
   }
   document.body.style.overflow = "hidden"; // Disable body scroll
   if (lenis) lenis.stop(); // Stop Lenis smooth scroll while modal is active
+  modalOverlay.classList.remove("is-closing");
   modalOverlay.classList.add("active");
+  
+  // Stagger modal inner elements with GSAP
+  setTimeout(() => {
+    const animEls = modalWrapper.querySelectorAll(".modal-tags, .modal-title, .modal-meta-grid, .modal-body, .modal-actions");
+    if (animEls.length > 0) {
+      gsap.fromTo(animEls, 
+        { opacity: 0, y: 16 },
+        { opacity: 1, y: 0, duration: 0.45, stagger: 0.05, ease: EASE.expo, clearProps: "transform" }
+      );
+    }
+    window.dispatchEvent(new CustomEvent("recalc-offsets"));
+  }, 40);
   
   // Focus initial element
   const closeBtn = document.getElementById("modal-close");
@@ -483,34 +502,38 @@ export function openCaseStudy(projectId) {
 
 export function closeCaseStudy() {
   const modalOverlay = document.getElementById("case-study-modal");
-  if (!modalOverlay) return;
+  if (!modalOverlay || modalOverlay.classList.contains("is-closing")) return;
   
-  modalOverlay.classList.remove("active");
+  modalOverlay.classList.add("is-closing");
   
-  // Restore scroll and remove padding offsets
-  document.body.style.overflow = ""; // Restore scrolling
-  if (lenis) lenis.start(); // Restore Lenis smooth scroll
-  document.body.style.paddingRight = "";
-  const header = document.querySelector("header");
-  if (header) {
-    header.style.paddingRight = "";
-  }
+  setTimeout(() => {
+    modalOverlay.classList.remove("active", "is-closing");
+    
+    // Restore scroll and remove padding offsets
+    document.body.style.overflow = ""; // Restore scrolling
+    if (lenis) lenis.start(); // Restore Lenis smooth scroll
+    document.body.style.paddingRight = "";
+    const header = document.querySelector("header");
+    if (header) {
+      header.style.paddingRight = "";
+    }
 
-  // Clean listeners
-  if (modalKeydownHandler) {
-    document.removeEventListener("keydown", modalKeydownHandler);
-    modalKeydownHandler = null;
-  }
-  if (modalOverlay._overlayClick) {
-    modalOverlay.removeEventListener("click", modalOverlay._overlayClick);
-    modalOverlay._overlayClick = null;
-  }
+    // Clean listeners
+    if (modalKeydownHandler) {
+      document.removeEventListener("keydown", modalKeydownHandler);
+      modalKeydownHandler = null;
+    }
+    if (modalOverlay._overlayClick) {
+      modalOverlay.removeEventListener("click", modalOverlay._overlayClick);
+      modalOverlay._overlayClick = null;
+    }
 
-  // Restore focus to grid element
-  if (previouslyFocusedElement) {
-    previouslyFocusedElement.focus();
-    previouslyFocusedElement = null;
-  }
+    // Restore focus to grid element
+    if (previouslyFocusedElement) {
+      previouslyFocusedElement.focus();
+      previouslyFocusedElement = null;
+    }
+  }, 220);
 }
 
 // --- RENDER ACHIEVEMENTS CAROUSEL (Infinite Marquee) ---
@@ -532,13 +555,13 @@ export function renderAchievements() {
     card.style.animationDelay = `${index * 0.08}s`;
     
     card.innerHTML = `
-      <div class="cert-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
-        <div class="cert-icon-wrapper" style="display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 12px; background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.2); color: var(--color-primary);">${a.icon}</div>
-        <span class="cert-badge" style="font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: 20px; background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.2); color: var(--color-primary); text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em;">Milestone</span>
+      <div class="cert-header">
+        <div class="cert-icon-wrapper">${a.icon}</div>
+        <span class="cert-badge">Milestone</span>
       </div>
-      <span class="cert-issuer" style="font-size: 0.85rem; color: var(--color-text-secondary); font-weight: 500;">${a.issuer}</span>
-      <h3 class="cert-title" style="font-size: 1.15rem; margin: 0.5rem 0; line-height: 1.4; color: var(--text-primary); font-family: var(--font-heading);">${a.title}</h3>
-      <p class="cert-desc" style="font-size: 0.9rem; color: var(--color-text-paragraph); line-height: 1.6;">${a.desc}</p>
+      <span class="cert-issuer">${a.issuer}</span>
+      <h3 class="cert-title">${a.title}</h3>
+      <p class="cert-desc">${a.desc}</p>
     `;
     
     container.appendChild(card);
@@ -604,8 +627,8 @@ export function initializeSpotlightEffects(containerSelector = null) {
       if (card.classList.contains("project-card")) {
         card.style.zIndex = "25";
       }
-      // Apply short interpolation during mouse tracking
-      card.style.transition = "transform 0.15s cubic-bezier(0.25, 0.8, 0.25, 1), border-color 0.2s ease, box-shadow 0.2s ease";
+      // Disable transform transition during live rAF mouse tracking for 60/120fps direct response
+      card.style.transition = "border-color 0.25s ease, box-shadow 0.25s ease";
       isInside = true;
       latestX = e.clientX;
       latestY = e.clientY;
@@ -624,7 +647,7 @@ export function initializeSpotlightEffects(containerSelector = null) {
         rafId = null;
       }
       rect = null;
-      // Spring reset on mouse exit
+      // Spring reset back to resting state on mouse exit
       card.style.transition = "transform 0.65s var(--ease-out-spring), border-color 0.4s ease, box-shadow 0.4s ease";
       card.style.transform = "";
       card.style.zIndex = "";

@@ -1,5 +1,5 @@
 // --- CUBIC BEZIER SOLVER ---
-function cubicBezier(x1, y1, x2, y2) {
+export function cubicBezier(x1, y1, x2, y2) {
   return function(t) {
     if (t === 0 || t === 1) return t;
     
@@ -23,23 +23,43 @@ function cubicBezier(x1, y1, x2, y2) {
   };
 }
 
+// --- NATIVE GSAP EASING TOKENS ---
+// Optimized string references that GSAP compiles directly to native C++/JS curves
+export const GSAP_EASE = {
+  expo: "expo.out",
+  spring: "back.out(1.5)",
+  back: "back.out(1.2)",
+  power: "power3.out",
+  sine: "sine.inOut",
+  linear: "none"
+};
+
 // --- MOTION TOKENS ---
 // Mirrors the CSS custom properties exactly:
 // --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 // --ease-out-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-// --ease-out-back: cubic-bezier(0.175, 0.885, 0.32, 1.1);
+// --ease-out-back: cubic-bezier(0.175, 0.885, 0.32, 1.15);
 export const EASE = {
-  expo: cubicBezier(0.16, 1, 0.3, 1),
-  spring: cubicBezier(0.34, 1.56, 0.64, 1),
-  back: cubicBezier(0.175, 0.885, 0.32, 1.1),
-  linear: (t) => t
+  expo: GSAP_EASE.expo,
+  spring: GSAP_EASE.spring,
+  back: GSAP_EASE.back,
+  power: GSAP_EASE.power,
+  sine: GSAP_EASE.sine,
+  linear: GSAP_EASE.linear,
+  // Function versions for manual canvas/RAF loops if needed
+  fnExpo: cubicBezier(0.16, 1, 0.3, 1),
+  fnSpring: cubicBezier(0.34, 1.56, 0.64, 1),
+  fnBack: cubicBezier(0.175, 0.885, 0.32, 1.15)
 };
 
 export const DURATION = {
+  instant: 0.12,
+  micro: 0.2,
+  component: 0.35,
   reveal: 0.65,
   stagger: 0.06,
-  pageTransition: 0.35,
-  themeReveal: 0.45
+  pageTransition: 0.4,
+  themeReveal: 0.5
 };
 
 // --- UTILITIES ---
@@ -53,4 +73,14 @@ export function requestAnimationFrameCoalesce(fn) {
       rafId = null;
     });
   };
+}
+
+// Smooth Linear Interpolation
+export function lerp(start, end, factor) {
+  return start + (end - start) * factor;
+}
+
+// Value clamp helper
+export function clamp(min, val, max) {
+  return Math.max(min, Math.min(val, max));
 }

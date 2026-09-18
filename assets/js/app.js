@@ -181,11 +181,24 @@ function updateIframeTheme(isLight) {
   }
 }
 
+// Updates the browser tab favicon dynamically to match the active theme
+function updateDynamicFavicon(isLight) {
+  const icon32 = document.querySelector("link[rel='icon'][sizes='32x32']");
+  const icon16 = document.querySelector("link[rel='icon'][sizes='16x16']");
+  if (icon32) {
+    icon32.href = isLight ? "assets/images/favicon-light-32x32.png" : "assets/images/favicon-32x32.png";
+  }
+  if (icon16) {
+    icon16.href = isLight ? "assets/images/favicon-light-16x16.png" : "assets/images/favicon-16x16.png";
+  }
+}
+
 // Syncs iframe, localStorage, and mockup buttons when theme changes
 function updateThemeSideEffects(isLight) {
   safeSetItem("portfolio-theme", isLight ? "light" : "dark");
   
   updateIframeTheme(isLight);
+  updateDynamicFavicon(isLight);
   
   const btnDark = document.getElementById("dot-theme-dark");
   const btnLight = document.getElementById("dot-theme-light");
@@ -233,6 +246,8 @@ function initTheme() {
       btnLight.classList.remove("active");
     }
   }
+
+  updateDynamicFavicon(savedTheme === "light");
 
   // Handle click on the main toggle button (fluid circular reveal)
   themeToggle.addEventListener("click", (event) => {
@@ -328,7 +343,39 @@ function initResumeThemeToggle() {
   });
 }
 
-// --- SKILLS TAB SWITCHING ---
+// --- SKILLS TAB SWITCHING WITH SLIDING CAPSULE INDICATOR ---
+function updateSkillsTabIndicator() {
+  const tabsList = document.querySelector(".skills-tabs");
+  if (!tabsList) return;
+  let indicator = tabsList.querySelector(".skills-tab-indicator");
+  if (!indicator) {
+    indicator = document.createElement("div");
+    indicator.className = "skills-tab-indicator";
+    tabsList.prepend(indicator);
+  }
+  const activeBtn = tabsList.querySelector(".tab-btn.active");
+  if (activeBtn) {
+    const listRect = tabsList.getBoundingClientRect();
+    const btnRect = activeBtn.getBoundingClientRect();
+    const x = btnRect.left - listRect.left + tabsList.scrollLeft;
+    const y = btnRect.top - listRect.top;
+    const w = btnRect.width;
+    const h = btnRect.height;
+    
+    gsap.to(indicator, {
+      x: x,
+      y: y,
+      width: w,
+      height: h,
+      opacity: 1,
+      duration: 0.32,
+      ease: EASE.expo
+    });
+  } else {
+    gsap.to(indicator, { opacity: 0, duration: 0.2 });
+  }
+}
+
 function initSkillsTabs() {
   const tabBtns = document.querySelectorAll(".tab-btn");
   const tabPanes = document.querySelectorAll(".skills-pane");
@@ -344,6 +391,9 @@ function initSkillsTabs() {
     });
     btn.classList.add("active");
     btn.setAttribute("aria-selected", "true");
+
+    // Animate the sliding capsule indicator
+    updateSkillsTabIndicator();
 
     // Smoothly scroll active tab into view ONLY within its .skills-tabs container rail
     const tabsContainer = btn.closest(".skills-tabs");
@@ -362,7 +412,7 @@ function initSkillsTabs() {
       window.scrollTo({ left: 0, top: window.scrollY });
     }
 
-    // Show/Hide Panes
+    // Show/Hide Panes with fluid staggered cascade
     tabPanes.forEach(pane => {
       pane.classList.remove("active");
       if (pane.id === `${targetTab}-skills`) {
@@ -372,14 +422,14 @@ function initSkillsTabs() {
         const cards = pane.querySelectorAll(".skill-card");
         if (cards.length > 0 && typeof gsap !== "undefined") {
           gsap.fromTo(cards, 
-            { opacity: 0, y: 14, scale: 0.98 },
+            { opacity: 0, y: 16, scale: 0.96 },
             { 
               opacity: 1, 
               y: 0, 
               scale: 1, 
-              duration: 0.4, 
-              stagger: 0.05, 
-              ease: "power2.out", 
+              duration: 0.45, 
+              stagger: 0.04, 
+              ease: EASE.expo, 
               clearProps: "transform" 
             }
           );
@@ -414,6 +464,10 @@ function initSkillsTabs() {
       switchTab(tabBtns[nextIndex]);
     });
   }
+
+  setTimeout(updateSkillsTabIndicator, 200);
+  window.addEventListener("resize", updateSkillsTabIndicator, { passive: true });
+  window.addEventListener("recalc-offsets", updateSkillsTabIndicator, { passive: true });
 }
 
 // --- TOAST NOTIFICATIONS SYSTEM ---
@@ -574,7 +628,7 @@ function initContactForm() {
     // Set loading state
     if (submitBtn) {
       submitBtn.style.pointerEvents = "none";
-      submitBtn.style.opacity = "0.7";
+      submitBtn.classList.add("btn-loading");
     }
     if (btnText) btnText.innerText = "Sending Message...";
 
@@ -599,12 +653,19 @@ function initContactForm() {
       return response.json();
     })
     .then(data => {
-      // Reset button
+      // Button success state morph
       if (submitBtn) {
-        submitBtn.style.pointerEvents = "auto";
-        submitBtn.style.opacity = "1";
+        submitBtn.classList.remove("btn-loading");
+        submitBtn.classList.add("btn-success-pulse");
+        setTimeout(() => {
+          submitBtn.classList.remove("btn-success-pulse");
+          submitBtn.style.pointerEvents = "auto";
+        }, 1200);
       }
-      if (btnText) btnText.innerText = "Send Message";
+      if (btnText) btnText.innerText = "Message Sent ✓";
+      setTimeout(() => {
+        if (btnText) btnText.innerText = "Send Message";
+      }, 2500);
 
       // Show Success Toast
       showToast("Message Sent!", `Thank you, ${name}. Your message has been forwarded.`);
@@ -622,10 +683,14 @@ function initContactForm() {
     .catch(error => {
       console.error("FormSubmit Error:", error);
 
-      // Reset button
+      // Reset button with tactile error shake
       if (submitBtn) {
-        submitBtn.style.pointerEvents = "auto";
-        submitBtn.style.opacity = "1";
+        submitBtn.classList.remove("btn-loading");
+        submitBtn.classList.add("btn-error-shake");
+        setTimeout(() => {
+          submitBtn.classList.remove("btn-error-shake");
+          submitBtn.style.pointerEvents = "auto";
+        }, 600);
       }
       if (btnText) btnText.innerText = "Send Message";
 
@@ -1098,10 +1163,18 @@ function initAvatarScrollAnimation() {
       wasDocked = false;
       body.classList.remove("scrolled-avatar");
       heroCard.style.transition = "none";
-      heroCard.style.opacity = "0";
       heroCard.style.pointerEvents = "none";
       flyingAvatar.style.display = "block";
-      flyingAvatar.style.opacity = "1";
+      
+      // Fluid cross-dissolve takeoff and landing to prevent any binary opacity pop
+      if (progress < 0.08) {
+        const liftFactor = progress / 0.08;
+        heroCard.style.opacity = (1 - liftFactor).toFixed(2);
+        flyingAvatar.style.opacity = liftFactor.toFixed(2);
+      } else {
+        heroCard.style.opacity = "0";
+        flyingAvatar.style.opacity = "1";
+      }
       
       if (!heroPageCenter || !targetViewportCenter) return;
       

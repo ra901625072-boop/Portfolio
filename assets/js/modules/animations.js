@@ -58,66 +58,80 @@ function initCustomCursor() {
     startCursorLoop();
   });
 
-  // Attach magnetic snap listeners directly to interactive elements
-  const magnetics = document.querySelectorAll(".social-circle, .btn, .filter-btn, .nav-link, .hamburger, .scroll-top-btn");
-  magnetics.forEach(el => {
-    el.addEventListener("mouseenter", () => {
-      cachedRect = el.getBoundingClientRect();
-      snappedEl = el;
-      cachedBorderRadius = window.getComputedStyle(el).borderRadius;
-      el.style.transition = 'none';
-      cursor.classList.add("snapped");
-      startCursorLoop();
-    });
+  // Attach magnetic snap listeners to interactive elements
+  function bindMagneticElements(scope = document) {
+    const selector = ".social-circle, .btn, .btn-secondary, .filter-btn, .nav-link, .hamburger, .scroll-top-btn, .theme-toggle-btn, .tab-btn, .modal-close-btn";
+    const magnetics = scope.querySelectorAll(selector);
 
-    el.addEventListener("mousemove", (e) => {
-      if (!cachedRect) cachedRect = el.getBoundingClientRect();
-      const elX = cachedRect.left + cachedRect.width / 2;
-      const elY = cachedRect.top + cachedRect.height / 2;
-      // Proportional pull strength: smaller elements pull more, larger elements resist displacement to retain hover focus
-      const maxDim = Math.max(cachedRect.width, cachedRect.height);
-      const pullStrength = Math.min(0.35, 28 / maxDim);
+    magnetics.forEach(el => {
+      if (el._magneticBound) return;
+      el._magneticBound = true;
 
-      targetPullX = (e.clientX - elX) * pullStrength;
-      targetPullY = (e.clientY - elY) * pullStrength;
-      startCursorLoop();
-    });
+      el.addEventListener("mouseenter", () => {
+        cachedRect = el.getBoundingClientRect();
+        snappedEl = el;
+        cachedBorderRadius = window.getComputedStyle(el).borderRadius;
+        el.style.transition = 'none';
+        cursor.classList.add("snapped");
+        startCursorLoop();
+      });
 
-    el.addEventListener("mouseleave", () => {
-      const releasingEl = snappedEl;
-      let releasePullX = currentPullX;
-      let releasePullY = currentPullY;
+      el.addEventListener("mousemove", (e) => {
+        if (!cachedRect) cachedRect = el.getBoundingClientRect();
+        const elX = cachedRect.left + cachedRect.width / 2;
+        const elY = cachedRect.top + cachedRect.height / 2;
+        // Proportional pull strength: smaller elements pull more, larger elements resist displacement to retain hover focus
+        const maxDim = Math.max(cachedRect.width, cachedRect.height);
+        const pullStrength = Math.min(0.35, 26 / maxDim);
 
-      // Elastic release animation back to (0,0)
-      function animateRelease() {
-        if (snappedEl === releasingEl) return; // cancel if mouse re-enters
+        targetPullX = (e.clientX - elX) * pullStrength;
+        targetPullY = (e.clientY - elY) * pullStrength;
+        startCursorLoop();
+      });
 
-        releasePullX += (0 - releasePullX) * 0.16;
-        releasePullY += (0 - releasePullY) * 0.16;
+      el.addEventListener("mouseleave", () => {
+        const releasingEl = snappedEl;
+        let releasePullX = currentPullX;
+        let releasePullY = currentPullY;
 
-        if (Math.abs(releasePullX) < 0.05 && Math.abs(releasePullY) < 0.05) {
-          releasingEl.style.transform = '';
-          releasingEl.style.transition = '';
-        } else {
-          releasingEl.style.transform = `translate3d(${releasePullX}px, ${releasePullY}px, 0)`;
-          requestAnimationFrame(animateRelease);
+        // Elastic release animation back to (0,0)
+        function animateRelease() {
+          if (snappedEl === releasingEl) return; // cancel if mouse re-enters
+
+          releasePullX += (0 - releasePullX) * 0.18;
+          releasePullY += (0 - releasePullY) * 0.18;
+
+          if (Math.abs(releasePullX) < 0.05 && Math.abs(releasePullY) < 0.05) {
+            releasingEl.style.transform = '';
+            releasingEl.style.transition = '';
+          } else {
+            releasingEl.style.transform = `translate3d(${releasePullX}px, ${releasePullY}px, 0)`;
+            requestAnimationFrame(animateRelease);
+          }
         }
-      }
 
-      snappedEl = null;
-      cachedRect = null;
-      cachedBorderRadius = '';
-      targetPullX = 0;
-      targetPullY = 0;
-      currentPullX = 0;
-      currentPullY = 0;
-      cursor.classList.remove("snapped");
+        snappedEl = null;
+        cachedRect = null;
+        cachedBorderRadius = '';
+        targetPullX = 0;
+        targetPullY = 0;
+        currentPullX = 0;
+        currentPullY = 0;
+        cursor.classList.remove("snapped");
 
-      releasingEl.style.transition = 'none';
-      requestAnimationFrame(animateRelease);
-      startCursorLoop();
+        releasingEl.style.transition = 'none';
+        requestAnimationFrame(animateRelease);
+        startCursorLoop();
+      });
     });
-  });
+  }
+
+  // Initial magnetic binding
+  bindMagneticElements();
+
+  // Re-bind on layout changes or dynamic injections
+  window.addEventListener("recalc-offsets", () => bindMagneticElements(), { passive: true });
+  document.addEventListener("site-loaded", () => bindMagneticElements(), { once: true });
 
   // Recalculate dimensions on scroll to prevent offset errors
   window.addEventListener("scroll", () => {
@@ -222,25 +236,55 @@ function initCustomCursor() {
 
 // --- GSAP SCROLL REVEAL ANIMATIONS ---
 function initScrollReveals() {
-  // Section-level reveals: Each section with class "reveal" fades in
   const sections = document.querySelectorAll(".reveal");
 
   sections.forEach(section => {
-    // The section itself animates in
-    gsap.set(section, { opacity: 0, y: 30 });
+    // Keep section container in normal flow
+    gsap.set(section, { opacity: 1, y: 0 });
 
+    // Choreograph section header elements if present
+    const header = section.querySelector(".section-header");
+    if (header) {
+      const subtitle = header.querySelector(".section-subtitle");
+      const title = header.querySelector(".section-title");
+      const desc = header.querySelector(".section-desc");
+
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: header,
+          start: "top 88%",
+          once: true
+        }
+      });
+
+      if (subtitle) {
+        tl.fromTo(subtitle,
+          { opacity: 0, scale: 0.92, y: 14 },
+          { opacity: 1, scale: 1, y: 0, duration: 0.5, ease: EASE.spring }
+        );
+      }
+      if (title) {
+        tl.fromTo(title,
+          { opacity: 0, y: 24 },
+          { opacity: 1, y: 0, duration: 0.65, ease: EASE.expo },
+          subtitle ? "-=0.35" : 0
+        );
+      }
+      if (desc) {
+        tl.fromTo(desc,
+          { opacity: 0, y: 16 },
+          { opacity: 1, y: 0, duration: 0.6, ease: EASE.expo },
+          "-=0.4"
+        );
+      }
+    }
+
+    // Section triggers for specific section behaviors
     ScrollTrigger.create({
       trigger: section,
-      start: "top 88%",
+      start: "top 80%",
       once: true,
       onEnter: () => {
-        gsap.to(section, {
-          opacity: 1,
-          y: 0,
-          duration: DURATION.reveal,
-          ease: EASE.expo,
-        });
-
         // Trigger skill bars filling
         if (section.id === "skills") {
           animateSkillsBars();
@@ -263,10 +307,10 @@ function initScrollReveals() {
   const staggerContainers = document.querySelectorAll(".reveal-stagger");
 
   staggerContainers.forEach(container => {
-    const children = container.children;
+    const children = Array.from(container.children).filter(c => !c.classList.contains("timeline-progress-line"));
     if (children.length === 0) return;
 
-    gsap.set(children, { opacity: 0, y: 25, scale: 0.97 });
+    gsap.set(children, { opacity: 0, y: 24, scale: 0.96 });
 
     ScrollTrigger.create({
       trigger: container,
@@ -280,12 +324,23 @@ function initScrollReveals() {
           scale: 1,
           duration: DURATION.reveal,
           ease: EASE.back,
-          stagger: isMobile ? DURATION.stagger * 0.4 : DURATION.stagger,
-          clearProps: "transform",
+          stagger: isMobile ? DURATION.stagger * 0.5 : DURATION.stagger,
+          clearProps: "transform,opacity",
         });
       }
     });
   });
+
+  // Hero scroll-down prompt opacity dissolve on scroll
+  const scrollDown = document.querySelector(".scroll-down");
+  if (scrollDown) {
+    window.addEventListener("scroll", () => {
+      const scrollY = window.scrollY;
+      const opacity = Math.max(0, 1 - scrollY / 120);
+      scrollDown.style.opacity = opacity.toFixed(2);
+      scrollDown.style.pointerEvents = opacity <= 0.05 ? "none" : "auto";
+    }, { passive: true });
+  }
 }
 
 // --- GSAP PERCENTAGE TEXT COUNT-UP ---
@@ -336,17 +391,24 @@ export function animateStatsCounters() {
   stats.forEach((stat, index) => {
     const target = parseInt(stat.dataset.target, 10);
     const obj = { count: 0 };
+    const statItem = stat.closest(".stat-item");
 
     gsap.to(obj, {
       count: target,
-      duration: 2,
-      delay: index * 0.15,
+      duration: 1.8,
+      delay: index * 0.12,
       ease: EASE.expo,
       onUpdate: () => {
         stat.innerText = Math.floor(obj.count);
       },
       onComplete: () => {
         stat.innerText = target;
+        if (statItem) {
+          gsap.fromTo(statItem,
+            { scale: 1.06 },
+            { scale: 1, duration: 0.45, ease: EASE.spring, clearProps: "transform" }
+          );
+        }
       }
     });
   });
@@ -479,215 +541,6 @@ function initAvatarParallax() {
   });
 }
 
-// --- INTERACTIVE DEADPOOL PATH REVEAL CANVAS (FIFO 5-Second Fade) ---
-function initDeadpoolScratchReveal() {
-  const card = document.querySelector(".hero-avatar-card");
-  const canvas = document.getElementById("deadpool-reveal-canvas");
-  const professionalLayer = card ? card.querySelector(".avatar-layer.professional") : null;
-  if (!card || !canvas) return;
-
-  const ctx = canvas.getContext("2d");
-  if (!ctx) return;
-
-  const darkImg = new Image();
-  darkImg.src = "assets/images/DeadPool-Dark.png";
-
-  const lightImg = new Image();
-  lightImg.src = "assets/images/DeadPool-Light.png";
-
-  let isDarkLoaded = false;
-  let isLightLoaded = false;
-
-  darkImg.onload = () => {
-    isDarkLoaded = true;
-    requestRender();
-  };
-  lightImg.onload = () => {
-    isLightLoaded = true;
-    requestRender();
-  };
-
-  let width = 0;
-  let height = 0;
-  let dpr = Math.min(window.devicePixelRatio || 1, 2);
-
-  function resizeCanvas() {
-    const rect = card.getBoundingClientRect();
-    if (rect.width === 0 || rect.height === 0) return;
-
-    width = rect.width;
-    height = rect.height;
-    dpr = Math.min(window.devicePixelRatio || 1, 2);
-
-    canvas.width = Math.round(width * dpr);
-    canvas.height = Math.round(height * dpr);
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.scale(dpr, dpr);
-
-    requestRender();
-  }
-
-  // Brush strokes buffer (FIFO chronological order)
-  const strokes = [];
-  const LIFETIME_MS = 5000; // Revealed for 5.0 seconds
-  const FADE_MS = 1000;     // Smooth 1.0s dissolve after 5s
-
-  let lastMouseX = null;
-  let lastMouseY = null;
-  let rafId = null;
-
-  function render() {
-    rafId = null;
-    const now = performance.now();
-
-    const isLightMode = document.body.classList.contains("light-mode");
-    const deadpoolImg = isLightMode ? (isLightLoaded ? lightImg : darkImg) : (isDarkLoaded ? darkImg : lightImg);
-    const isImageReady = isLightMode ? (isLightLoaded || isDarkLoaded) : (isDarkLoaded || isLightLoaded);
-
-    if (!isImageReady || width === 0 || height === 0) return;
-
-    // Prune fully expired strokes from the beginning of the FIFO array
-    const expiryThreshold = now - (LIFETIME_MS + FADE_MS);
-    while (strokes.length > 0 && strokes[0].time < expiryThreshold) {
-      strokes.shift();
-    }
-
-    if (strokes.length === 0) {
-      ctx.clearRect(0, 0, width, height);
-      return;
-    }
-
-    ctx.clearRect(0, 0, width, height);
-
-    // 1. Draw brush mask with soft radial gradients and age-based opacity
-    ctx.save();
-
-    for (let i = 0; i < strokes.length; i++) {
-      const s = strokes[i];
-      const age = now - s.time;
-      let alpha = 1.0;
-      if (age > LIFETIME_MS) {
-        alpha = Math.max(0, 1.0 - (age - LIFETIME_MS) / FADE_MS);
-      }
-
-      if (alpha <= 0) continue;
-
-      const grad = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.radius);
-      grad.addColorStop(0, `rgba(0, 0, 0, ${alpha * 0.98})`);
-      grad.addColorStop(0.65, `rgba(0, 0, 0, ${alpha * 0.85})`);
-      grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-
-      ctx.fillStyle = grad;
-      ctx.beginPath();
-      ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
-      ctx.fill();
-    }
-
-    // 2. Composite theme-appropriate Deadpool character cleanly centered inside the card
-    ctx.globalCompositeOperation = 'source-in';
-
-    const naturalW = deadpoolImg.naturalWidth || 430;
-    const naturalH = deadpoolImg.naturalHeight || 428;
-    const imgAspect = naturalH / naturalW;
-
-    const imgTargetW = width * 0.98;
-    const imgTargetH = imgTargetW * imgAspect;
-    const imgTargetX = (width - imgTargetW) / 2;
-    const imgTargetY = (height - imgTargetH) / 2;
-
-    ctx.drawImage(deadpoolImg, imgTargetX, imgTargetY, imgTargetW, imgTargetH);
-
-    ctx.restore();
-
-    // Continue animation loop while active strokes are fading
-    if (strokes.length > 0) {
-      rafId = requestAnimationFrame(render);
-    }
-  }
-
-  function requestRender() {
-    if (!rafId) {
-      rafId = requestAnimationFrame(render);
-    }
-  }
-
-  function addStroke(x, y) {
-    const now = performance.now();
-    const brushRadius = window.innerWidth <= 768 ? 32 : 42;
-
-    if (lastMouseX !== null && lastMouseY !== null) {
-      const dist = Math.hypot(x - lastMouseX, y - lastMouseY);
-      const steps = Math.max(1, Math.floor(dist / 6)); // Dense 6px sub-pixel sampling
-      for (let i = 1; i <= steps; i++) {
-        const px = lastMouseX + (x - lastMouseX) * (i / steps);
-        const py = lastMouseY + (y - lastMouseY) * (i / steps);
-        strokes.push({
-          x: px,
-          y: py,
-          radius: brushRadius,
-          time: now
-        });
-      }
-    } else {
-      strokes.push({
-        x: x,
-        y: y,
-        radius: brushRadius,
-        time: now
-      });
-    }
-
-    lastMouseX = x;
-    lastMouseY = y;
-
-    requestRender();
-  }
-
-  card.addEventListener("mouseenter", (e) => {
-    const rect = card.getBoundingClientRect();
-    lastMouseX = e.clientX - rect.left;
-    lastMouseY = e.clientY - rect.top;
-    addStroke(lastMouseX, lastMouseY);
-  });
-
-  card.addEventListener("mousemove", (e) => {
-    const rect = card.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    addStroke(x, y);
-  });
-
-  card.addEventListener("mouseleave", () => {
-    lastMouseX = null;
-    lastMouseY = null;
-  });
-
-  // Touch support for mobile and tablets
-  card.addEventListener("touchmove", (e) => {
-    if (e.touches && e.touches[0]) {
-      const touch = e.touches[0];
-      const rect = card.getBoundingClientRect();
-      const x = touch.clientX - rect.left;
-      const y = touch.clientY - rect.top;
-      if (x >= 0 && x <= rect.width && y >= 0 && y <= rect.height) {
-        addStroke(x, y);
-      }
-    }
-  }, { passive: true });
-
-  window.addEventListener("resize", resizeCanvas, { passive: true });
-  window.addEventListener("recalc-offsets", resizeCanvas, { passive: true });
-  
-  // Observe theme toggles to swap Deadpool images immediately
-  const themeObserver = new MutationObserver(() => {
-    requestRender();
-  });
-  themeObserver.observe(document.body, { attributes: true, attributeFilter: ["class"] });
-  document.addEventListener("theme-changed", requestRender);
-
-  resizeCanvas();
-}
-
 // --- GSAP TIMELINE SCROLL HIGHLIGHT ---
 function initTimelineScrollHighlight() {
   const timeline = document.querySelector(".timeline");
@@ -713,7 +566,7 @@ function initTimelineScrollHighlight() {
     }
   });
 
-  // Animate individual timeline items
+  // Animate individual timeline items with dynamic ignition pulse
   items.forEach(item => {
     const dot = item.querySelector(".timeline-dot");
     if (!dot) return;
@@ -722,11 +575,12 @@ function initTimelineScrollHighlight() {
       trigger: item,
       start: "top 75%",
       onEnter: () => {
-        dot.classList.add("active");
+        dot.classList.add("active", "dot-ignited");
+        setTimeout(() => dot.classList.remove("dot-ignited"), 700);
         item.classList.add("illuminated");
       },
       onLeaveBack: () => {
-        dot.classList.remove("active");
+        dot.classList.remove("active", "dot-ignited");
         item.classList.remove("illuminated");
       }
     });
@@ -748,7 +602,9 @@ function initTimelineScrollHighlight() {
   window.addEventListener("resize", () => ScrollTrigger.refresh(), { passive: true });
   window.addEventListener("orientationchange", () => ScrollTrigger.refresh(), { passive: true });
   document.addEventListener("site-loaded", () => ScrollTrigger.refresh());
-}// --- INTERACTIVE INFINITY BRUSH BACKGROUND ---
+}
+
+// --- INTERACTIVE INFINITY BRUSH BACKGROUND ---
 function initInfinityAnimation() {
   const canvas = document.getElementById("hero-infinity-canvas");
   const hero = document.getElementById("hero");
@@ -769,9 +625,11 @@ function initInfinityAnimation() {
   // Track visibility to pause animation loop when scrolled out of view
   let isVisible = true;
   let rafId = null;
+  let lastTime = performance.now();
 
   function startLoop() {
     if (!rafId && isVisible) {
+      lastTime = performance.now();
       rafId = requestAnimationFrame(render);
     }
   }
@@ -795,21 +653,22 @@ function initInfinityAnimation() {
   }, { threshold: 0.1 });
   observer.observe(hero);
 
-  // Pre-calculate the base lemniscate points (240 points) to maximize smoothness and save CPU cycles
-  const segments = 240;
+  // Pre-calculate base lemniscate points (360 points on desktop for silky smooth curvature)
+  const segments = isMobile ? 240 : 360;
   const basePoints = [];
   const vertScale = 0.85;
+  const stepT = (Math.PI * 2) / segments;
 
   for (let s = 0; s <= segments; s++) {
-    const t = (s / segments) * Math.PI * 2;
+    const t = s * stepT;
     const denom = 1 + Math.sin(t) * Math.sin(t);
 
     // Position ratios relative to radius
     const xRatio = Math.cos(t) / denom;
     const yRatio = (Math.sin(t) * Math.cos(t) * vertScale) / denom;
 
-    // Perpendicular normal vector computation
-    const nextT = t + 0.012;
+    // True mathematical tangent & normal computation
+    const nextT = t + 0.008;
     const nextDenom = 1 + Math.sin(nextT) * Math.sin(nextT);
     const nx = Math.cos(nextT) / nextDenom;
     const ny = (Math.sin(nextT) * Math.cos(nextT) * vertScale) / nextDenom;
@@ -841,16 +700,16 @@ function initInfinityAnimation() {
   window.addEventListener("resize", resize, { passive: true });
   resize();
 
-  // Generate bristles once (reduced count on mobile for CPU efficiency)
-  const bristleCount = isMobile ? 18 : 38;
+  // Generate bristles once (refined, gentle organic ribbon)
+  const bristleCount = isMobile ? 18 : 36;
   const bristles = [];
   for (let i = 0; i < bristleCount; i++) {
     const angle = Math.random() * Math.PI * 2;
-    const offsetMag = Math.random() * 20; // Maximum brush stroke width
+    const offsetMag = Math.random() * 16; // Refined brush spread
 
     // Core bristles vs outer spray
     const density = Math.random();
-    const bristleWidth = density < 0.25 ? 0.35 : density < 0.8 ? 0.65 : 1.3;
+    const bristleWidth = density < 0.25 ? 0.35 : density < 0.8 ? 0.65 : 1.2;
     const bristleOpacity = density < 0.25 ? 0.08 : density < 0.8 ? 0.16 : 0.04;
 
     bristles.push({
@@ -858,8 +717,8 @@ function initInfinityAnimation() {
       dy: Math.sin(angle) * offsetMag,
       width: bristleWidth,
       opacity: bristleOpacity,
-      freq: 4 + Math.random() * 6,
-      amp: 1.5 + Math.random() * 3,
+      freq: 2.5 + Math.random() * 3.5, // Wider, gentler undulating waves
+      amp: 0.8 + Math.random() * 1.8,  // Soft harmonic displacement
       phase: Math.random() * Math.PI * 2
     });
   }
@@ -869,11 +728,11 @@ function initInfinityAnimation() {
     visibleLength: 0
   };
 
-  // GSAP self-drawing grow effect on load
+  // GSAP self-drawing grow effect on load: slow, graceful reveal
   gsap.to(animState, {
-    visibleLength: 1.45 * Math.PI,
-    duration: 3.5,
-    ease: EASE.expo,
+    visibleLength: 1.5 * Math.PI,
+    duration: 4.5,
+    ease: "power2.out",
     delay: 0.4
   });
 
@@ -881,17 +740,21 @@ function initInfinityAnimation() {
   let floatTime = 0;
   let flowProgress = 0;
 
-  // Render loop
+  // Render loop with 60fps/120fps delta-time independence
   function render() {
     if (!isVisible) {
       rafId = null;
       return;
     }
 
+    const now = performance.now();
+    const dt = Math.min((now - lastTime) / 1000, 0.05); // clamped delta time
+    lastTime = now;
+
     ctx.clearRect(0, 0, width, height);
 
-    // Set theme color to black in white (light) mode, white in dark mode
-    const primaryRGB = isLight ? "0, 0, 0" : "255, 255, 255";
+    // In botanical light mode, use forest green (45, 106, 79); in dark mode, crisp starlight white (255, 255, 255)
+    const primaryRGB = isLight ? "45, 106, 79" : "255, 255, 255";
 
     // Center coordinates
     const cx = width / 2;
@@ -902,40 +765,38 @@ function initInfinityAnimation() {
     // Radius of infinity loop
     let aRadius;
     if (isPortrait) {
-      // In portrait mode, 98% of height corresponds to 2 * aRadius
       aRadius = height * 0.49;
     } else {
-      const maxRadiusW = (width * 0.98) / 2; // fits 98% of screen width
-      const maxRadiusH = (height * 0.98 * Math.SQRT2) / vertScale; // fits 98% of screen height (lemniscate height is a*vertScale/SQRT2)
+      const maxRadiusW = (width * 0.98) / 2;
+      const maxRadiusH = (height * 0.98 * Math.SQRT2) / vertScale;
       aRadius = Math.min(maxRadiusW, maxRadiusH);
     }
 
     ctx.save();
     if (isPortrait) {
-      // Rotate 90 degrees and stretch vertically-oriented loops horizontally to fill mobile screens beautifully
       ctx.translate(cx, cy);
       ctx.rotate(Math.PI / 2);
       ctx.scale(1.0, 1.35);
       ctx.translate(-cx, -cy);
     }
 
-    // Breathing float
-    floatTime += 0.005;
-    const floatOffsetX = Math.sin(floatTime) * 6;
-    const floatOffsetY = Math.cos(floatTime * 0.8) * 4;
+    // Gentle, slow breathing float (~18s cycle)
+    floatTime += 0.35 * dt;
+    const floatOffsetX = Math.sin(floatTime) * 4.5;
+    const floatOffsetY = Math.cos(floatTime * 0.75) * 3.0;
 
-    // Continuous flow progress along the curve
-    flowProgress += 0.0016;
+    // Steady, serene motion speed along the curve (~26s per complete cycle)
+    flowProgress += 0.038 * dt;
 
     const lengthT = animState.visibleLength;
 
     if (lengthT > 0.05) {
       const headT = flowProgress * Math.PI * 2;
-      const chunkSize = 12; // Group size for batched drawing (makes it buttery smooth!)
+      const chunkSize = isMobile ? 8 : 6; // Fine-grained batches for seamless tail feathering
 
       for (let b = 0; b < bristles.length; b++) {
         const bristle = bristles[b];
-        const bristleTaper = 1 - (b / bristleCount) * 0.6;
+        const bristleTaper = 1 - (b / bristleCount) * 0.55;
 
         ctx.lineWidth = bristle.width;
         ctx.lineCap = "round";
@@ -952,19 +813,18 @@ function initInfinityAnimation() {
             const pt = basePoints[idx];
             const t = pt.t;
 
-            // Normalize angles for range checking
             let normT = t;
             let normHead = headT % (Math.PI * 2);
             let normTail = (headT - lengthT) % (Math.PI * 2);
             if (normTail < 0) normTail += Math.PI * 2;
 
             let visible = false;
-            let opacityRatio = 0;
+            let linearRatio = 0;
 
             if (normTail < normHead) {
               if (normT >= normTail && normT <= normHead) {
                 visible = true;
-                opacityRatio = (normT - normTail) / lengthT;
+                linearRatio = (normT - normTail) / lengthT;
               }
             } else {
               if (normT >= normTail || normT <= normHead) {
@@ -975,16 +835,18 @@ function initInfinityAnimation() {
                 } else {
                   dist = (Math.PI * 2 - normTail) + normT;
                 }
-                opacityRatio = dist / lengthT;
+                linearRatio = dist / lengthT;
               }
             }
 
             if (visible) {
-              // Calculate points using pre-calculated ratios
+              // Smooth sinusoidal opacity curve: seamless soft tail dissolution
+              const smoothOpacity = Math.sin((linearRatio * Math.PI) / 2);
+
               const bx = cx + (aRadius * pt.xRatio) + floatOffsetX;
               const by = cy + (aRadius * pt.yRatio) + floatOffsetY;
 
-              const noise = Math.sin(t * bristle.freq + bristle.phase + floatTime * 1.2) * bristle.amp;
+              const noise = Math.sin(t * bristle.freq + bristle.phase + floatTime * 0.8) * bristle.amp;
               const finalX = bx + pt.px * (bristle.dx + noise);
               const finalY = by + pt.py * (bristle.dy + noise);
 
@@ -994,14 +856,14 @@ function initInfinityAnimation() {
               } else {
                 ctx.lineTo(finalX, finalY);
               }
-              sumOpacity += opacityRatio;
+              sumOpacity += smoothOpacity;
               count++;
             }
           }
 
           if (pathActive && count > 0) {
             const avgOpacity = sumOpacity / count;
-            ctx.strokeStyle = `rgba(${primaryRGB}, ${bristle.opacity * avgOpacity * bristleTaper * 1.6})`;
+            ctx.strokeStyle = `rgba(${primaryRGB}, ${bristle.opacity * avgOpacity * bristleTaper * 1.5})`;
             ctx.stroke();
           }
         }
@@ -1013,133 +875,6 @@ function initInfinityAnimation() {
   }
 
   startLoop();
-}
-
-// --- HERO DESIGNER COORDINATE CROSSHAIR ---
-function initDesignerGrid() {
-  const isHoverSupported = window.matchMedia('(hover: hover)').matches;
-  const isTouchPrimary = window.matchMedia('(pointer: coarse)').matches;
-  if (!isHoverSupported || isTouchPrimary) return;
-
-  const hero = document.getElementById("hero");
-  const crosshairH = document.getElementById("crosshair-h");
-  const crosshairV = document.getElementById("crosshair-v");
-  const label = document.getElementById("coordinate-label");
-  const gridContainer = document.querySelector(".hero-designer-grid");
-  if (!hero || !crosshairH || !crosshairV || !label) return;
-
-  let rect = null;
-  let cachedSnapPoints = [];
-
-  const snapTargets = [
-    { selector: ".hero-avatar-card", label: "AVATAR" },
-    { selector: ".badge-1", label: "EXP_BADGE" },
-    { selector: ".badge-2", label: "PROJECTS_BADGE" },
-    { selector: ".logo", label: "NAV_LOGO" },
-    { selector: ".hero-badge", label: "AVAILABILITY" },
-    { selector: ".hero-actions .btn-primary", label: "PROJECTS_LINK" },
-    { selector: ".hero-actions .btn-secondary", label: "CONTACT_LINK" }
-  ];
-
-  function cacheSnapPoints() {
-    if (!rect) rect = hero.getBoundingClientRect();
-    cachedSnapPoints = [];
-    snapTargets.forEach(target => {
-      const el = document.querySelector(target.selector);
-      if (el) {
-        const elRect = el.getBoundingClientRect();
-        // Compute center relative to hero wrapper bounding box
-        const px = elRect.left - rect.left + elRect.width / 2;
-        const py = elRect.top - rect.top + elRect.height / 2;
-        cachedSnapPoints.push({ x: px, y: py, label: target.label });
-      }
-    });
-  }
-
-  function updateRect() {
-    rect = hero.getBoundingClientRect();
-    cacheSnapPoints();
-  }
-
-  hero.addEventListener("mouseenter", updateRect);
-  const coalescedUpdateDesignerRect = requestAnimationFrameCoalesce(() => {
-    if (rect) updateRect();
-  });
-  window.addEventListener("resize", coalescedUpdateDesignerRect, { passive: true });
-  window.addEventListener("scroll", coalescedUpdateDesignerRect, { passive: true });
-  window.addEventListener("recalc-offsets", coalescedUpdateDesignerRect, { passive: true });
-
-  // Use gsap.quickTo for smooth crosshair tracking
-  const crosshairHY = gsap.quickTo(crosshairH, "y", { duration: 0.15, ease: EASE.expo });
-  const crosshairVX = gsap.quickTo(crosshairV, "x", { duration: 0.15, ease: EASE.expo });
-
-  hero.addEventListener("mousemove", (e) => {
-    if (!rect) updateRect();
-    let x = e.clientX - rect.left;
-    let y = e.clientY - rect.top;
-
-    const snapRadius = 45;
-    let snapped = false;
-    let snapLabel = "";
-
-    for (let i = 0; i < cachedSnapPoints.length; i++) {
-      const pt = cachedSnapPoints[i];
-      const dist = Math.hypot(x - pt.x, y - pt.y);
-      if (dist < snapRadius) {
-        x = pt.x;
-        y = pt.y;
-        snapped = true;
-        snapLabel = pt.label;
-        break;
-      }
-    }
-
-    // Position crosshairs with gsap.quickTo
-    crosshairHY(y);
-    crosshairVX(x);
-
-    // Coordinate label
-    label.style.transform = `translate3d(${x + 15}px, ${y + 15}px, 0)`;
-
-    if (snapped) {
-      if (gridContainer) gridContainer.classList.add("snapped");
-      label.classList.add("snapped");
-      label.innerText = `SNAP [${snapLabel}] X: ${Math.round(x)}px | Y: ${Math.round(y)}px`;
-    } else {
-      if (gridContainer) gridContainer.classList.remove("snapped");
-      label.classList.remove("snapped");
-      label.innerText = `X: ${Math.round(x)}px | Y: ${Math.round(y)}px`;
-    }
-
-    // Update custom properties for dynamic grid spotlight glow
-    hero.style.setProperty("--global-mouse-x", `${x}px`);
-    hero.style.setProperty("--global-mouse-y", `${y}px`);
-  });
-
-  hero.addEventListener("mouseleave", () => {
-    rect = null;
-    if (gridContainer) gridContainer.classList.remove("snapped");
-    label.classList.remove("snapped");
-  });
-}
-
-// --- GSAP WATERMARK SCROLL PARALLAX ---
-function initWatermarkParallax() {
-  const watermarks = document.querySelectorAll(".bg-text-watermark");
-  if (watermarks.length === 0) return;
-
-  watermarks.forEach(wm => {
-    gsap.to(wm, {
-      y: () => 120,
-      ease: "none",
-      scrollTrigger: {
-        trigger: wm.closest("section") || wm.parentElement,
-        start: "top bottom",
-        end: "bottom top",
-        scrub: 0.5,
-      }
-    });
-  });
 }
 
 // --- SLIDING CAPSULE NAV INDICATOR ---
@@ -1384,14 +1119,15 @@ export function initAnimations() {
   initScrollReveals();
   initTypingEffect();
   initAvatarParallax();
-  initDeadpoolScratchReveal();
   initTimelineScrollHighlight();
-  initDesignerGrid();
-  initWatermarkParallax();
   initNavIndicator();
 
-  // Lazy initialize infinity canvas only after preloader completes and site entrance begins
-  document.addEventListener("site-loaded", () => {
+  // Initialize infinity canvas after preloader completes and site entrance begins
+  if (document.body.classList.contains("site-loaded")) {
     initInfinityAnimation();
-  });
+  } else {
+    document.addEventListener("site-loaded", () => {
+      initInfinityAnimation();
+    }, { once: true });
+  }
 }

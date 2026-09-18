@@ -156,24 +156,24 @@ class SpaceBackdrop {
       ? Math.min(90, Math.floor(area / 8500))
       : Math.min(230, Math.floor(area / 6000));
 
-    // Star color palettes for dark & light mode (Pure Black OLED background)
+    // Star color palettes for dark & light mode (Architectural Obsidian & Daylight Paper)
     const darkPalette = [
-      { r: 255, g: 255, b: 255 }, // Pure Crisp Starlight White (70%)
+      { r: 255, g: 255, b: 255 }, // Crisp Starlight White (70%)
       { r: 255, g: 255, b: 255 },
       { r: 255, g: 255, b: 255 },
       { r: 255, g: 255, b: 255 },
       { r: 255, g: 255, b: 255 },
       { r: 255, g: 255, b: 255 },
-      { r: 255, g: 209, b: 102 },   // Solar Amber Gold (15%)
+      { r: 245, g: 158, b: 11 },   // Warm Amber Gold (15%)
       { r: 255, g: 255, b: 255 },
-      { r: 255, g: 77, b: 109 }     // Supernova Rose Red (15%)
+      { r: 229, g: 56, b: 59 }     // Signature Scarlet/Vermilion (15%)
     ];
 
     const lightPalette = [
-      { r: 28, g: 45, b: 84 },     // Deep Navy Platinum
-      { r: 35, g: 83, b: 71 },     // Forest Teal
-      { r: 67, g: 97, b: 238 },    // Royal Celestial Azure
-      { r: 120, g: 86, b: 222 }    // Luminous Violet
+      { r: 71, g: 107, b: 79 },    // Deep Sage (forest tint)
+      { r: 45, g: 106, b: 79 },    // Forest Green Primary
+      { r: 107, g: 142, b: 111 },  // Muted Moss
+      { r: 139, g: 119, b: 101 }   // Warm Bark (earthy neutral)
     ];
 
     const palette = this.isLight ? lightPalette : darkPalette;
@@ -228,16 +228,16 @@ class SpaceBackdrop {
       { r: 255, g: 255, b: 255 },
       { r: 255, g: 255, b: 255 },
       { r: 255, g: 255, b: 255 },
-      { r: 255, g: 209, b: 102 },
+      { r: 245, g: 158, b: 11 },
       { r: 255, g: 255, b: 255 },
-      { r: 255, g: 77, b: 109 }
+      { r: 229, g: 56, b: 59 }
     ];
 
     const lightPalette = [
-      { r: 28, g: 45, b: 84 },
-      { r: 35, g: 83, b: 71 },
-      { r: 67, g: 97, b: 238 },
-      { r: 120, g: 86, b: 222 }
+      { r: 71, g: 107, b: 79 },
+      { r: 45, g: 106, b: 79 },
+      { r: 107, g: 142, b: 111 },
+      { r: 139, g: 119, b: 101 }
     ];
 
     const palette = this.isLight ? lightPalette : darkPalette;
@@ -257,7 +257,7 @@ class SpaceBackdrop {
     const length = 120 + Math.random() * 100;
 
     const meteorColor = this.isLight
-      ? { r: 67, g: 97, b: 238 }
+      ? { r: 45, g: 106, b: 79 }
       : { r: 255, g: 255, b: 255 };
 
     this.meteors.push({
